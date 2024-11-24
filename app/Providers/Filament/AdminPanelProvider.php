@@ -1,0 +1,104 @@
+<?php
+
+namespace App\Providers\Filament;
+
+use Filament\Pages;
+use Filament\Panel;
+use App\Models\User;
+use Filament\Widgets;
+use Filament\PanelProvider;
+use Kenepa\Banner\BannerPlugin;
+use App\Settings\GeneralSetting;
+use Filament\Support\Colors\Color;
+use Illuminate\Database\Eloquent\Model;
+use Filament\Notifications\Notification;
+use Filament\Http\Middleware\Authenticate;
+use Filament\Notifications\Actions\Action;
+use App\Filament\Widgets\LatestLaporanWidget;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use App\Filament\Widgets\LatestLaporanInformasiWidget;
+use Illuminate\Session\Middleware\AuthenticateSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Http\Middleware\DisableBladeIconComponents;
+use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use App\Filament\Resources\LaporanResource\Widgets\LaporanStatusOverview;
+use App\Filament\Resources\LaporanInformasiResource\Widgets\LaporanInformasiStatusOverview;
+use Illuminate\Foundation\Auth\User as AuthUser;
+use Orion\FilamentGreeter\GreeterPlugin;
+use Illuminate\Support\Facades\Schema;
+
+class AdminPanelProvider extends PanelProvider
+{
+    public function panel(Panel $panel): Panel
+    {
+        return $panel
+            ->default()
+            ->id('admin')
+            ->path('admin')
+            ->darkMode(false)
+            ->login()
+            ->profile(isSimple:false)
+            ->colors([
+                'primary' => Color::Blue,
+            ])
+            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
+            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->pages([
+                Pages\Dashboard::class,
+            ])
+            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->widgets([
+                LaporanStatusOverview::class,
+                LaporanInformasiStatusOverview::class,
+                LatestLaporanWidget::class,
+                LatestLaporanInformasiWidget::class,
+            ])
+            ->middleware([
+                EncryptCookies::class,
+                AddQueuedCookiesToResponse::class,
+                StartSession::class,
+                AuthenticateSession::class,
+                ShareErrorsFromSession::class,
+                VerifyCsrfToken::class,
+                SubstituteBindings::class,
+                DisableBladeIconComponents::class,
+                DispatchServingFilamentEvent::class,
+            ])
+            ->authMiddleware([
+                Authenticate::class,
+            ])
+            ->plugins([
+                FilamentShieldPlugin::make(),
+            ])
+            ->maxContentWidth('full')
+            ->spa()
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('30s')
+            // ->brandLogo(asset('images/logo-siber-polri.png'))
+            ->favicon(asset('images/favicon.ico'))
+            ->brandName(function() {
+                if (Schema::hasTable('settings')) {
+                    return GeneralSetting::getBrandName() ?? 'Ditres Siber Polda Jatim';
+                }
+                return 'Ditres Siber Polda Jatim';
+            })
+            ->plugins([
+                BannerPlugin::make()
+                    ->navigationGroup('Setting')
+                    ->bannerManagerAccessPermission('super_admin'),
+                GreeterPlugin::make()
+                    ->columnSpan('full')
+                    ->message(function() {
+                        if (Schema::hasTable('users') && auth()->check()) {
+                            return 'Selamat Datang ' . auth()->user()->name . ' di Ditres Siber Polda Jatim';
+                        }
+                        return 'Selamat Datang di Ditres Siber Polda Jatim';
+                    }),
+            ]);
+    }
+}
