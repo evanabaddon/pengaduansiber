@@ -12,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->append(NgrokOverHttps::class);
+        // $middleware->append(NgrokOverHttps::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
