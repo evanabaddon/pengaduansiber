@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Filament\Infolists\Infolist;
+use Illuminate\Support\Facades\URL;
 use Filament\Forms\Components\Select;
 use Illuminate\Support\ServiceProvider;
 use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
