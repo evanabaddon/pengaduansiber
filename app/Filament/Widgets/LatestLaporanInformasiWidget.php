@@ -13,8 +13,14 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class LatestLaporanInformasiWidget extends BaseWidget
 {
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 2;
     protected int | string | array $columnSpan = 'full';
+
+    // title
+    public function getTitle(): string
+    {
+        return 'Informasi / Surat Masyarakat Terbaru (7 Hari Terakhir)';
+    }
 
     public function table(Table $table): Table
     {
