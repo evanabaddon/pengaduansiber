@@ -58,7 +58,7 @@ class LaporanInformasiResource extends Resource
     // navigation label
     public static function getNavigationLabel(): string
     {
-        return 'Informasi / Surat Masyarakat';
+        return 'Informasi / Surat Masyarakat (Dumas)';
     }
 
     // navigation group
@@ -76,7 +76,7 @@ class LaporanInformasiResource extends Resource
     // judul form
     public static function getLabel(): string
     {
-        return 'Informasi / Surat Masyarakat';
+        return 'Informasi / Surat Masyarakat (Dumas)';
     }
 
     // widget

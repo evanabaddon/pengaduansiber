@@ -76,7 +76,7 @@ class LaporanResource extends Resource
     // navigation label
     public static function getNavigationLabel(): string
     {
-        return 'Laporan Masyarakat';
+        return 'Laporan / Pengaduan Masyarakat (LPM)';
     }
 
     // navigation group
@@ -94,7 +94,7 @@ class LaporanResource extends Resource
     // judul form
     public static function getLabel(): string
     {
-        return 'Laporan Masyarakat';
+        return 'Laporan / Pengaduan Masyarakat (LPM)';
     }
 
     // widget
