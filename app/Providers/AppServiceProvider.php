@@ -58,7 +58,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // ngrok https localhost
-        if (config('app.env') === 'local') {
+        if (config('app.env') === 'local' && !str_contains(request()->getHost(), 'localhost') && !str_contains(request()->getHost(), '127.0.0.1')) {
             URL::forceScheme('https');
         }
 
