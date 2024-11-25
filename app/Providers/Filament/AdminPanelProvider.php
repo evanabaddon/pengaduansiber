@@ -39,7 +39,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('/admin/login')
             ->darkMode(false)
             ->login()
             ->profile(isSimple:false)
@@ -53,8 +53,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                LaporanStatusOverview::class,
                 LaporanInformasiStatusOverview::class,
+                LaporanStatusOverview::class,
                 LatestLaporanWidget::class,
                 LatestLaporanInformasiWidget::class,
             ])
