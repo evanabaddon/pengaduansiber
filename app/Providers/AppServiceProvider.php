@@ -56,6 +56,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // ngrok https localhost
+        if (config('app.env') === 'local') {
+            URL::forceScheme('https');
+        }
+
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $switch
                 ->locales(['id','en'])->circular(); // also accepts a closure
