@@ -24,6 +24,8 @@ return [
     'field.permissions' => 'Izin',
     'field.select_all.name' => 'Pilih Semua',
     'field.select_all.message' => 'Aktifkan semua izin yang <span class="text-primary font-medium">Tersedia</span> untuk Peran ini.',
+    'field.team' => 'Tim',
+    'field.team.placeholder' => 'Pilih Tim',
 
     /*
     |--------------------------------------------------------------------------
