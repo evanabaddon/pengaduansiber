@@ -33,6 +33,9 @@ class Subdit extends Model
         static::deleting(function ($subdit) {
             $subdit->units()->delete();
             $subdit->penyidiks()->delete();
+
+            // set user subdit_id to null
+            $subdit->user()->update(['subdit_id' => null]);
         });
     }
 }

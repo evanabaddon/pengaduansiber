@@ -32,6 +32,9 @@ class Unit extends Model
         parent::boot();
         static::deleting(function ($unit) {
             $unit->penyidiks()->delete();
+
+            // set user unit_id to null
+            $unit->user()->update(['unit_id' => null]);
         });
     }
 }
