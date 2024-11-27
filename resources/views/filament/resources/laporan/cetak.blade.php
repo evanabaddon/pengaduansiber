@@ -37,7 +37,7 @@
                 </div>
                 <!-- Judul dan Alamat -->
                 <div class="text-center">
-                    <h2 class="text-lg font-bold mt-1">DIREKTORAT SIBER POLDA JAWA TIMUR</h2>
+                    <h2 class="text-lg font-bold mt-1">DIREKTORAT RESERSE SIBER POLDA JAWA TIMUR</h2>
                     <p class="text-sm mt-2">Jl. Ahmad Yani No. 116, Surabaya - 60235</p>
                     {{-- <p class="text-sm">Telp: 031-xxxxxxx, Email: siber@jatim.polri.go.id</p> --}}
                 </div>
