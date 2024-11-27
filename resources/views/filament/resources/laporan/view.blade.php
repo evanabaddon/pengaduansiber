@@ -24,7 +24,7 @@
     $kelurahanTkp = app('wilayah')->getKelurahan($record->district_id)[$record->subdistrict_id] ?? '-';
 @endphp
 <x-filament-panels::page>
-    <div class="bg-white">
+    <div class="bg-white dark:bg-gray-800">
         <div class="p-6">
             <!-- Header Surat dengan Logo -->
             <div class="text-center mb-8 border-b-2 pb-4">
@@ -52,7 +52,7 @@
                 <div class="flex gap-8">
                     <!-- Informasi Pelapor -->
                     <div class="w-1/2">
-                        <h3 class="text-base font-semibold bg-gray-100 p-2 mb-3">A. IDENTITAS PELAPOR</h3>
+                        <h3 class="text-base font-semibold bg-gray-100 dark:bg-gray-700 p-2 mb-3">A. IDENTITAS PELAPOR</h3>
                         <div class="space-y-2 pl-4 text-sm">
                             <div class="flex gap-2">
                                 <p class="w-32">Nama</p>
@@ -99,7 +99,7 @@
 
                     <!-- Informasi Korban -->
                     <div class="w-1/2">
-                        <h3 class="text-base font-semibold bg-gray-100 p-2 mb-3">B. IDENTITAS KORBAN</h3>
+                        <h3 class="text-base font-semibold bg-gray-100 dark:bg-gray-700 p-2 mb-3">B. IDENTITAS KORBAN</h3>
                         <div class="space-y-2 pl-4 text-sm">
                             <div class="flex gap-2">
                                 <p class="w-32">Nama</p>
@@ -147,7 +147,7 @@
 
                 <!-- Informasi Terlapor (Full Width) -->
                 <div class="mb-6">
-                    <h3 class="text-base font-semibold bg-gray-100 p-2 mb-3">C. IDENTITAS TERLAPOR</h3>
+                    <h3 class="text-base font-semibold bg-gray-100 dark:bg-gray-700 p-2 mb-3">C. IDENTITAS TERLAPOR</h3>
                     <div class="space-y-2 pl-4 text-sm">
                         <div class="flex gap-2">
                             <p class="w-32">Nama</p>
@@ -190,7 +190,7 @@
 
                 <!-- Informasi Perkara (Full Width) -->
                 <div class="mb-6">
-                    <h3 class="text-base font-semibold bg-gray-100 p-2 mb-3">D. INFORMASI PERKARA</h3>
+                    <h3 class="text-base font-semibold bg-gray-100 dark:bg-gray-700 p-2 mb-3">D. INFORMASI PERKARA</h3>
                     <div class="space-y-2 pl-4 text-sm">
                         <div class="flex gap-2">
                             <p class="w-32">TKP</p>
@@ -221,7 +221,7 @@
 
                 <!-- Status Laporan -->
                 <div class="mb-6">
-                    <h3 class="text-base font-semibold bg-gray-100 p-2 mb-3">E. YANG MENANGANI</h3>
+                    <h3 class="text-base font-semibold bg-gray-100 dark:bg-gray-700 p-2 mb-3">E. YANG MENANGANI</h3>
                     <div class="space-y-2 pl-4 text-sm">
                         <div class="flex gap-2">
                             <p class="w-32">Subdit</p>
@@ -256,10 +256,10 @@
                 <div class="flex gap-8">
                     <!-- Barang Bukti -->
                     <div class="w-1/2">
-                        <h3 class="text-base font-semibold bg-gray-100 p-2 mb-3">F. BARANG BUKTI</h3>
+                        <h3 class="text-base font-semibold bg-gray-100 dark:bg-gray-700 p-2 mb-3">F. BARANG BUKTI</h3>
                         @if ($record->barangBuktis && count($record->barangBuktis) > 0)
                             @foreach ($record->barangBuktis as $barangBukti)
-                                <div class="bg-white rounded-lg shadow-md overflow-hidden mb-4">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mb-4">
                                     <div class="space-y-2 text-sm flex justify-between items-start p-4">
                                         <div class="space-y-2 flex-1">
                                             <div class="flex gap-2">
@@ -314,10 +314,10 @@
 
                     <!-- Dokumen Pendukung -->
                     <div class="w-1/2">
-                        <h3 class="text-base font-semibold bg-gray-100 p-2 mb-3">G. DOKUMEN PENDUKUNG</h3>
+                        <h3 class="text-base font-semibold bg-gray-100 dark:bg-gray-700 p-2 mb-3">G. DOKUMEN PENDUKUNG</h3>
                         @if ($record->media && count($record->media) > 0)
                             @foreach ($record->media as $media)
-                                <div class="bg-white rounded-lg shadow-md overflow-hidden mb-4">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mb-4">
                                     <div class="space-y-2 text-sm flex justify-start items-center p-4">
                                         <p class="w-full">{{ basename($media) }}</p>
                                         <a href="{{ Storage::url($media) }}" 

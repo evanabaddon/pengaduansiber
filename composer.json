@@ -12,6 +12,7 @@
         "filament/infolists": "^3.2",
         "filament/notifications": "^3.2",
         "filament/spatie-laravel-settings-plugin": "^3.2",
+        "hasnayeen/themes": "^3.0",
         "joaopaulolndev/filament-edit-profile": "^1.0",
         "kenepa/banner": "^0.0.9",
         "laravel/framework": "^11.9",
