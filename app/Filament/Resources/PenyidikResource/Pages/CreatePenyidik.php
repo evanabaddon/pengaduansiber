@@ -12,12 +12,18 @@ class CreatePenyidik extends CreateRecord
     protected static string $resource = PenyidikResource::class;
 
     // fungsi handle record creation
-    public function handleRecordCreation(array $data): Penyidik
+    // public function handleRecordCreation(array $data): Penyidik
+    // {
+    //     $data['unit_id'] = auth()->user()->unit_id;
+
+    //     $data['subdit_id'] = auth()->user()->subdit_id;
+
+    //     return parent::handleRecordCreation($data);
+    // }
+
+    // redirect ke halaman list setelah create
+    protected function getRedirectUrl(): string
     {
-        $data['unit_id'] = auth()->user()->unit_id;
-
-        $data['subdit_id'] = auth()->user()->subdit_id;
-
-        return parent::handleRecordCreation($data);
+        return $this->getResource()::getUrl('index');
     }
 }
