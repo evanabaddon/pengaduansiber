@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Unit extends Model
 {
-    protected $fillable = ['name', 'subdit_id', 'nama_pimpinan'];
+    protected $fillable = ['name', 'subdit_id', 'nama_pimpinan', 'pangkat_pimpinan', 'nrp_pimpinan', 'kontak_pimpinan'];
 
     public function subdit()
     {

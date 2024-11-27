@@ -2,21 +2,26 @@
 
 namespace App\Providers\Filament;
 
+
 use Filament\Pages;
 use Filament\Panel;
 use App\Models\User;
 use Filament\Widgets;
+use Pages\ComingSoon;
 use Filament\PanelProvider;
 use Kenepa\Banner\BannerPlugin;
 use App\Settings\GeneralSetting;
 use Filament\Support\Colors\Color;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Notifications\Notification;
+use Orion\FilamentGreeter\GreeterPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Notifications\Actions\Action;
 use App\Filament\Widgets\LatestLaporanWidget;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Auth\User as AuthUser;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use App\Filament\Widgets\LatestLaporanInformasiWidget;
@@ -28,9 +33,6 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Filament\Resources\LaporanResource\Widgets\LaporanStatusOverview;
 use App\Filament\Resources\LaporanInformasiResource\Widgets\LaporanInformasiStatusOverview;
-use Illuminate\Foundation\Auth\User as AuthUser;
-use Orion\FilamentGreeter\GreeterPlugin;
-use Illuminate\Support\Facades\Schema;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -79,7 +81,12 @@ class AdminPanelProvider extends PanelProvider
             ->spa()
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
-            // ->brandLogo(asset('images/logo-siber-polri.png'))
+            // ->brandLogo(function() {
+            //     if (Schema::hasTable('settings')) {
+            //         return GeneralSetting::getBrandLogo() ?? asset('images/logo-siber-polri.png');
+            //     }
+            //     return asset('images/logo-siber-polri.png');
+            // })
             ->sidebarWidth('25rem')
             ->sidebarCollapsibleOnDesktop()
             ->favicon(asset('images/favicon.ico'))

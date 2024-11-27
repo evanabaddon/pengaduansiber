@@ -40,6 +40,10 @@ class GeneralSetting extends Settings
         return $name->payload;
     }
 
-    
+    public static function getBrandLogo(): string
+    {
+        $logo = self::getDatabase()->where('name', 'app_brand_logo')->first();
+        return str_replace('"', '', $logo->payload);
+    }
 
 }
