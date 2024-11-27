@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Subdit extends Model
 {
-    protected $fillable = ['name', 'nama_pimpinan'];
+    protected $fillable = ['name', 'nama_pimpinan', 'subdit_id'];
 
     public function units()
     {
@@ -31,10 +31,13 @@ class Subdit extends Model
     {
         parent::boot();
         static::deleting(function ($subdit) {
-            $subdit->units()->delete();
-            $subdit->penyidiks()->delete();
+            // Hapus penyidik yang terkait dengan subdit ini terlebih dahulu
+            $subdit->penyidiks()->where('subdit_id', $subdit->id)->delete();
 
-            // set user subdit_id to null
+            // Kemudian hapus unit yang terkait
+            $subdit->units()->delete();
+
+            // Set user subdit_id to null
             $subdit->user()->update(['subdit_id' => null]);
         });
     }

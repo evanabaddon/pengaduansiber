@@ -13,13 +13,18 @@ class CreateUnit extends CreateRecord
     protected static string $resource = UnitResource::class;
 
     // fungsi handle record creation
-    public function handleRecordCreation(array $data): Unit
+    // public function handleRecordCreation(array $data): Unit
+    // {
+    //     $data['subdit_id'] = auth()->user()->subdit_id;
+
+    //     // dd($data);
+
+    //     return parent::handleRecordCreation($data);
+    // }
+
+    // redirect ke halaman list setelah create
+    protected function getRedirectUrl(): string
     {
-        $data['subdit_id'] = auth()->user()->subdit_id;
-
-        // dd($data);
-
-        return parent::handleRecordCreation($data);
+        return $this->getResource()::getUrl('index');
     }
-
 }
