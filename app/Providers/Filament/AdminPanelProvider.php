@@ -83,9 +83,9 @@ class AdminPanelProvider extends PanelProvider
             ->favicon(asset('images/favicon.ico'))
             ->brandName(function() {
                 if (Schema::hasTable('settings')) {
-                    return GeneralSetting::getBrandName() ?? 'Ditres Siber Polda Jatim';
+                    return GeneralSetting::getBrandName() ?? 'Ditressiber Polda Jatim';
                 }
-                return 'Ditres Siber Polda Jatim';
+                return 'Ditressiber Polda Jatim';
             })
             ->plugins([
                 BannerPlugin::make()
@@ -95,9 +95,9 @@ class AdminPanelProvider extends PanelProvider
                     ->columnSpan('full')
                     ->message(function() {
                         if (Schema::hasTable('users') && auth()->check()) {
-                            return 'Selamat Datang ' . auth()->user()->name . ' di Ditres Siber Polda Jatim';
+                            return 'Selamat Datang ' . auth()->user()->name . ' di Ditressiber Polda Jatim';
                         }
-                        return 'Selamat Datang di Ditres Siber Polda Jatim';
+                        return 'Selamat Datang di Ditressiber Polda Jatim';
                     }),
             ]);
     }
