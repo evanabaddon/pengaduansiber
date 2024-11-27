@@ -81,6 +81,7 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotificationsPolling('30s')
             // ->brandLogo(asset('images/logo-siber-polri.png'))
             ->sidebarWidth('25rem')
+            ->sidebarCollapsibleOnDesktop()
             ->favicon(asset('images/favicon.ico'))
             ->brandName(function() {
                 if (Schema::hasTable('settings')) {
