@@ -14,25 +14,28 @@ class ListLaporans extends ListRecords
 {
     protected static string $resource = LaporanResource::class;
 
-    protected function getHeaderWidgets(): array
-    {
-        if (auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('subdit')) {
-            return [
-                LaporanStatusOverview::class,
-            ];
-        } else {
-            return [];
-        }
-    }
+    // buat view coming soon
+    protected static string $view = 'filament.pages.coming-soon';
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Action::make('create')
-                ->label('Buat Laporan')
-                ->url(self::$resource::getUrl('create'))
-                ->button(),
-        ];
-    }
+    // protected function getHeaderWidgets(): array
+    // {
+    //     if (auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('subdit')) {
+    //         return [
+    //             LaporanStatusOverview::class,
+    //         ];
+    //     } else {
+    //         return [];
+    //     }
+    // }
+
+    // protected function getHeaderActions(): array
+    // {
+    //     return [
+    //         Action::make('create')
+    //             ->label('Buat Laporan')
+    //             ->url(self::$resource::getUrl('create'))
+    //             ->button(),
+    //     ];
+    // }
 
 }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Penyidik extends Model
 {
-    protected $fillable = ['name', 'unit_id', 'kontak', 'subdit_id'];
+    protected $fillable = ['name', 'unit_id', 'kontak', 'subdit_id', 'pangkat_penyidik', 'nrp_penyidik'];
 
     public function unit()
     {

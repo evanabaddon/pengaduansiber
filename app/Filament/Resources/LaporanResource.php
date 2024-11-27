@@ -7,6 +7,7 @@ use Filament\Forms;
 use App\Models\Unit;
 use App\Models\User;
 use Filament\Tables;
+use Pages\ComingSoon;
 use App\Models\Subdit;
 use App\Models\Laporan;
 use Filament\Forms\Get;
@@ -679,6 +680,10 @@ class LaporanResource extends Resource
 
     public static function getPages(): array
     {
+        // sedang pengembangan
+        // return [
+        //     'index' => \App\Filament\Pages\ComingSoon::route('/'),
+        // ];
         return [
             'index' => Pages\ListLaporans::route('/'),
             'create' => Pages\CreateLaporan::route('/create'),
@@ -686,73 +691,6 @@ class LaporanResource extends Resource
             'edit' => Pages\EditLaporan::route('/{record}/edit'),
         ];
     }
-
-    // public static function infolist(Infolist $infolist): Infolist
-    // {
-    //     return $infolist
-    //         ->schema([
-    //             Section::make('Pelapor')
-    //                 ->description('Identitas Pelapor')
-    //                 ->columnSpan(1)
-    //                 ->schema([
-    //                     TextEntry::make('pelapors.identity_no')->label('NIK / PASSPORT'),
-    //                     TextEntry::make('pelapors.nama')->label('NAMA'),
-    //                     TextEntry::make('pelapors.tempat_lahir')->label('TEMPAT LAHIR'),
-    //                     TextEntry::make('pelapors.tanggal_lahir')->dateTime('d F Y')->label('TGL LAHIR'),
-    //                     TextEntry::make('pelapors.jenis_kelamin')->label('JENIS KELAMIN'),
-    //                     TextEntry::make('pelapors.alamat')->label('ALAMAT'),
-    //             ]),
-    //             Section::make('Korban')
-    //                 ->description('Identitas Korban')
-    //                 ->columnSpan(1)
-    //                 ->schema([
-    //                     TextEntry::make('korbans.identity_no')->label('NIK / PASSPORT'),
-    //                     TextEntry::make('korbans.nama')->label('NAMA'),
-    //                     TextEntry::make('korbans.tempat_lahir')->label('TEMPAT LAHIR'),
-    //                     TextEntry::make('korbans.tanggal_lahir')->dateTime('d F Y')->label('TGL LAHIR'),
-    //                     TextEntry::make('korbans.jenis_kelamin')->label('JENIS KELAMIN'),
-    //                     TextEntry::make('korbans.alamat')->label('ALAMAT'),
-    //             ]),
-    //             Section::make('Terlapor')
-    //                 ->description('Identitas Terlapor')
-    //                 ->columnSpan(1)
-    //                 ->schema([
-    //                     TextEntry::make('terlapors.identity_no')->label('NIK / PASSPORT'),
-    //                     TextEntry::make('terlapors.nama')->label('NAMA'),
-    //                     TextEntry::make('terlapors.jenis_kelamin')->label('JENIS KELAMIN'),
-    //                     TextEntry::make('terlapors.alamat')->label('ALAMAT'),
-    //                     TextEntry::make('terlapors.usia')->label('USIA'),
-    //                 ]),
-    //             Section::make('Perkara')
-    //                 ->description('Informasi Perkara')
-    //                 ->columnSpan(1)
-    //                 ->schema([
-    //                     TextEntry::make('tkp')->label('TKP'),
-    //                     TextEntry::make('tanggal_lapor')->dateTime('d F Y')->label('TGL. LAPOR'),
-    //                     TextEntry::make('tanggal_kejadian')->dateTime('d F Y')->label('TGL. KEJADIAN'),
-    //                     TextEntry::make('perkara')->label('PERKARA'),
-    //                     TextEntry::make('uraian_peristiwa')->label('URAIAN PERISTIWA'),
-    //                     TextEntry::make('kerugian')->label('KERUGIAN')->money('IDR'),
-    //             ]),
-    //             Section::make('Status')
-    //                 ->description('Status Laporan')
-    //                 ->columnSpan(1)
-    //                 ->schema([
-    //                     // media
-    //                     TextEntry::make('subdit_id')->label('SUBDIT'),
-    //                     TextEntry::make('unit_id')->label('UNIT'),
-    //                     TextEntry::make('penyidik_id')->label('PENYIDIK'),
-    //                     TextEntry::make('status')->label('STATUS')
-    //                     ->badge()
-    //                     ->color(fn (string $state): string => match ($state) {
-    //                         'Terlapor' => 'gray',
-    //                         'Proses' => 'warning',
-    //                         'Selesai' => 'success',
-    //                         'Terkendala' => 'danger',
-    //                 }),
-    //             ]),
-    //         ]);
-    // }
 
     // Untuk form edit
     protected function mutateFormDataBeforeFill(array $data): array

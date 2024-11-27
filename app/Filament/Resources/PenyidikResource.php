@@ -48,6 +48,25 @@ class PenyidikResource extends Resource
         return $form
             ->schema([
                 TextInput::make('name')->label('NAMA PENYIDIK'),
+                // select pangkat
+                Select::make('pangkat_penyidik')
+                    ->label('PANGKAT PENYIDIK')
+                    ->options([
+                        1 => 'KOMBESPOL',
+                        2 => 'AKBP',
+                        3 => 'KOMPOL',
+                        4 => 'AKP',
+                        5 => 'IPTU',
+                        6 => 'IPDA',
+                        7 => 'AIPTU',
+                        8 => 'AIPDA',
+                        9 => 'BRIPKA',
+                        10 => 'BRIGPOL',
+                        11 => 'BRIPTU',
+                        12 => 'BRIPDA',
+                    ])
+                    ->searchable(),
+                TextInput::make('nrp_penyidik')->label('NRP'),
                 PhoneInput::make('kontak')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->required()->label('KONTAK'),
                 // select subdit dan unit
                 Select::make('subdit_id')
@@ -71,12 +90,32 @@ class PenyidikResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->label('NAMA PENYIDIK'),
-                // subdit
-                TextColumn::make('subdit.name')->label('SUBDIT'),
                 TextColumn::make('unit.name')->label('UNIT'),
+                TextColumn::make('subdit.name')->label('SUBDIT'),
+                TextColumn::make('name')->label('NAMA PENYIDIK'),
+                // pangkat
+                TextColumn::make('pangkat_penyidik')
+                    ->label('PANGKAT')
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        '1' => 'KOMBESPOL',
+                        '2' => 'AKBP', 
+                        '3' => 'KOMPOL',
+                        '4' => 'AKP',
+                        '5' => 'IPTU',
+                        '6' => 'IPDA',
+                        '7' => 'AIPTU',
+                        '8' => 'AIPDA',
+                        '9' => 'BRIPKA',
+                        '10' => 'BRIGPOL',
+                        '11' => 'BRIPTU',
+                        '12' => 'BRIPDA',
+                        default => $state,
+                    })
+                    ->sortable(),
+                TextColumn::make('nrp_penyidik')->label('NRP'),
                 TextColumn::make('kontak')->label('KONTAK'),
             ])
+            ->defaultSort('pangkat_penyidik')
             ->filters([
                 //
             ])

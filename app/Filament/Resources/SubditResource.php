@@ -7,12 +7,16 @@ use Filament\Tables;
 use App\Models\Subdit;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Services\PangkatService;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\SubditResource\Pages;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 use App\Filament\Resources\SubditResource\RelationManagers;
 
 class SubditResource extends Resource
@@ -40,8 +44,29 @@ class SubditResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')->label('NAMA SUBDIT'),
-                TextInput::make('nama_pimpinan')->label('NAMA PIMPINAN'),
+                TextInput::make('name')->label('NAMA SUBDIT')->columnSpanFull(),
+                TextInput::make('nama_pimpinan')->label('NAMA KASUBDIT'),
+                // select pangkat pimpinan
+                Select::make('pangkat_pimpinan')
+                    ->label('PANGKAT PIMPINAN')
+                    ->options([
+                        1 => 'KOMBESPOL',
+                        2 => 'AKBP',
+                        3 => 'KOMPOL',
+                        4 => 'AKP',
+                        5 => 'IPTU',
+                        6 => 'IPDA',
+                        7 => 'AIPTU',
+                        8 => 'AIPDA',
+                        9 => 'BRIPKA',
+                        10 => 'BRIGPOL',
+                        11 => 'BRIPTU',
+                        12 => 'BRIPDA',
+                    ])
+                    ->searchable(),
+                TextInput::make('nrp_pimpinan')->label('NRP'),
+                // kontak pimpinan
+                PhoneInput::make('kontak_pimpinan')->label('KONTAK')->inputNumberFormat(PhoneInputNumberType::NATIONAL),
             ]);
     }
 
@@ -49,9 +74,30 @@ class SubditResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->label('NAMA SUBDIT'),
-                TextColumn::make('nama_pimpinan')->label('NAMA PIMPINAN'),
+                TextColumn::make('name')->label('SUBDIT')->sortable(),
+                TextColumn::make('nama_pimpinan')->label('NAMA KASUBDIT')->sortable(),
+                TextColumn::make('pangkat_pimpinan')
+                    ->label('PANGKAT')
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        '1' => 'KOMBESPOL',
+                        '2' => 'AKBP', 
+                        '3' => 'KOMPOL',
+                        '4' => 'AKP',
+                        '5' => 'IPTU',
+                        '6' => 'IPDA',
+                        '7' => 'AIPTU',
+                        '8' => 'AIPDA',
+                        '9' => 'BRIPKA',
+                        '10' => 'BRIGPOL',
+                        '11' => 'BRIPTU',
+                        '12' => 'BRIPDA',
+                        default => $state,
+                    })
+                    ->sortable(),
+                TextColumn::make('nrp_pimpinan')->label('NRP')->sortable(),
+                TextColumn::make('kontak_pimpinan')->label('KONTAK')->sortable(),
             ])
+            ->defaultSort('name')
             ->filters([
                 //
             ])
