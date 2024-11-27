@@ -8,4 +8,10 @@ use App\Filament\Resources\PenyidikResource;
 class EditPenyidik extends EditRecord
 {
     protected static string $resource = PenyidikResource::class;
+
+    // redirect ke halaman list setelah edit
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

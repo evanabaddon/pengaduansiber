@@ -12,6 +12,12 @@ class EditLaporanInformasi extends EditRecord
     
     protected static string $resource = LaporanInformasiResource::class;
 
+    // redirect ke halaman list setelah edit
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
