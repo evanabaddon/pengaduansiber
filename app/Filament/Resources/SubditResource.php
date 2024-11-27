@@ -45,7 +45,7 @@ class SubditResource extends Resource
         return $form
             ->schema([
                 TextInput::make('name')->label('NAMA SUBDIT')->columnSpanFull(),
-                TextInput::make('nama_pimpinan')->label('NAMA KASUBDIT'),
+                TextInput::make('nama_pimpinan')->label('KASUBDIT'),
                 // select pangkat pimpinan
                 Select::make('pangkat_pimpinan')
                     ->label('PANGKAT PIMPINAN')
@@ -75,7 +75,7 @@ class SubditResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')->label('SUBDIT')->sortable(),
-                TextColumn::make('nama_pimpinan')->label('NAMA KASUBDIT')->sortable(),
+                TextColumn::make('nama_pimpinan')->label('KASUBDIT')->sortable(),
                 TextColumn::make('pangkat_pimpinan')
                     ->label('PANGKAT')
                     ->formatStateUsing(fn (string $state): string => match ($state) {

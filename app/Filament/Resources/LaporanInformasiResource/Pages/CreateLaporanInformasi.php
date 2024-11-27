@@ -14,6 +14,12 @@ class CreateLaporanInformasi extends CreateRecord
 {
     protected static string $resource = LaporanInformasiResource::class;
 
+    // redirect ke halaman list setelah create
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
     public function handleRecordCreation(array $data): LaporanInformasi
     {
         // dd($data);
