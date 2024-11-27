@@ -25,4 +25,14 @@ class Subdit extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    // fungsi ketika subdit dihapus, maka units dan penyidiks juga akan dihapus
+    public static function boot()
+    {
+        parent::boot();
+        static::deleting(function ($subdit) {
+            $subdit->units()->delete();
+            $subdit->penyidiks()->delete();
+        });
+    }
 }

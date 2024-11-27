@@ -25,4 +25,13 @@ class Unit extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    // fungsi ketika unit dihapus, maka penyidiks juga akan dihapus
+    public static function boot()
+    {
+        parent::boot();
+        static::deleting(function ($unit) {
+            $unit->penyidiks()->delete();
+        });
+    }
 }
