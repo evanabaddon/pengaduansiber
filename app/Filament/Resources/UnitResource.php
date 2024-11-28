@@ -81,10 +81,10 @@ class UnitResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->label('UNIT')->sortable(),
+                TextColumn::make('name')->label('UNIT')->sortable()->searchable(),
                 // tampilkan nama subdit
-                TextColumn::make('subdit.name')->label('SUBDIT')->sortable(),
-                TextColumn::make('nama_pimpinan')->label('KANIT')->sortable(),
+                TextColumn::make('subdit.name')->label('SUBDIT')->sortable()->searchable(),
+                TextColumn::make('nama_pimpinan')->label('KANIT')->sortable()->searchable(),
                 TextColumn::make('pangkat_pimpinan')
                     ->label('PANGKAT')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
@@ -102,9 +102,38 @@ class UnitResource extends Resource
                         '12' => 'BRIPDA',
                         default => $state,
                     })
-                    ->sortable(),
-                TextColumn::make('nrp_pimpinan')->label('NRP')->sortable(),
-                TextColumn::make('kontak_pimpinan')->label('KONTAK')->sortable(),
+                    ->sortable()
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->where(function ($query) use ($search) {
+                            // Pencarian berdasarkan nilai asli
+                            $query->where('pangkat_pimpinan', 'like', "%{$search}%")
+                                // Pencarian berdasarkan nilai yang diformat
+                                ->orWhere(function ($query) use ($search) {
+                                    $pangkatMap = [
+                                        'KOMBESPOL' => '1',
+                                        'AKBP' => '2',
+                                        'KOMPOL' => '3',
+                                        'AKP' => '4',
+                                        'IPTU' => '5',
+                                        'IPDA' => '6',
+                                        'AIPTU' => '7',
+                                        'AIPDA' => '8',
+                                        'BRIPKA' => '9',
+                                        'BRIGPOL' => '10',
+                                        'BRIPTU' => '11',
+                                        'BRIPDA' => '12',
+                                    ];
+                                    
+                                    foreach ($pangkatMap as $pangkat => $value) {
+                                        if (stripos($pangkat, $search) !== false) {
+                                            $query->orWhere('pangkat_pimpinan', $value);
+                                        }
+                                    }
+                                });
+                        });
+                    }),
+                TextColumn::make('nrp_pimpinan')->label('NRP')->sortable()->searchable(),
+                TextColumn::make('kontak_pimpinan')->label('KONTAK')->sortable()->searchable(),
             ])
             ->defaultSort('name')
             ->filters([

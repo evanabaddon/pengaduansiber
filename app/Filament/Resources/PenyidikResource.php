@@ -15,6 +15,7 @@ use Illuminate\Support\Collection;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use App\Filament\Resources\PenyidikResource\Pages;
@@ -91,9 +92,9 @@ class PenyidikResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('unit.name')->label('UNIT'),
-                TextColumn::make('subdit.name')->label('SUBDIT'),
-                TextColumn::make('name')->label('PENYIDIK/PENYIDIK PEMBANTU'),
+                TextColumn::make('unit.name')->label('UNIT')->sortable()->searchable(),
+                TextColumn::make('subdit.name')->label('SUBDIT')->sortable()->searchable(),
+                TextColumn::make('name')->label('PENYIDIK/PENYIDIK PEMBANTU')->sortable()->searchable(),
                 // pangkat
                 TextColumn::make('pangkat_penyidik')
                     ->label('PANGKAT')
@@ -112,13 +113,58 @@ class PenyidikResource extends Resource
                         '12' => 'BRIPDA',
                         default => $state,
                     })
-                    ->sortable(),
-                TextColumn::make('nrp_penyidik')->label('NRP'),
-                TextColumn::make('kontak')->label('KONTAK'),
+                    ->sortable()
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->where(function ($query) use ($search) {
+                        // Pencarian berdasarkan nilai asli
+                        $query->where('pangkat_penyidik', 'like', "%{$search}%")
+                            // Pencarian berdasarkan nilai yang diformat
+                            ->orWhere(function ($query) use ($search) {
+                                $pangkatMap = [
+                                    'KOMBESPOL' => '1',
+                                    'AKBP' => '2',
+                                    'KOMPOL' => '3',
+                                    'AKP' => '4',
+                                    'IPTU' => '5',
+                                    'IPDA' => '6',
+                                    'AIPTU' => '7',
+                                    'AIPDA' => '8',
+                                    'BRIPKA' => '9',
+                                    'BRIGPOL' => '10',
+                                    'BRIPTU' => '11',
+                                    'BRIPDA' => '12',
+                                ];
+                                
+                                foreach ($pangkatMap as $pangkat => $value) {
+                                    if (stripos($pangkat, $search) !== false) {
+                                        $query->orWhere('pangkat_pimpinan', $value);
+                                    }
+                                }
+                            });
+                    });
+                }),
+                TextColumn::make('nrp_penyidik')->label('NRP')->sortable()->searchable(),
+                TextColumn::make('kontak')->label('KONTAK')->sortable()->searchable(),
             ])
             ->defaultSort('pangkat_penyidik')
             ->filters([
-                //
+                // filter by pangkat
+                SelectFilter::make('pangkat_penyidik')
+                    ->label('PANGKAT')
+                    ->options([
+                        1 => 'KOMBESPOL',
+                        2 => 'AKBP',
+                        3 => 'KOMPOL',
+                        4 => 'AKP',
+                        5 => 'IPTU',
+                        6 => 'IPDA',
+                        7 => 'AIPTU',
+                        8 => 'AIPDA',
+                        9 => 'BRIPKA',
+                        10 => 'BRIGPOL',
+                        11 => 'BRIPTU',
+                        12 => 'BRIPDA',
+                    ])
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
