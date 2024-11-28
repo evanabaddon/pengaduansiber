@@ -111,13 +111,13 @@ class AdminPanelProvider extends PanelProvider
                         return 'Selamat Datang di Ditressiber Polda Jatim';
                     }),
                     \Hasnayeen\Themes\ThemesPlugin::make()
-            ])
-            ->renderHook(
-                // custom footer
-                PanelsRenderHook::FOOTER,
-                function () {
-                    return view('customFooter');
-                }
-            );
+                ]);
+            // ->renderHook(
+            //     // custom footer
+            //     PanelsRenderHook::FOOTER,
+            //     function () {
+            //         return view('customFooter');
+            //     }
+            // );
     }
 }
