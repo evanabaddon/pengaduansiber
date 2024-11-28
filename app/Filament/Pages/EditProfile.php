@@ -84,6 +84,16 @@ class EditProfile extends Page
         $user = auth()->user();
         
         if (!empty($state['password'])) {
+            // Cek apakah password_confirmation ada dan tidak kosong
+            if (empty($state['password_confirmation'])) {
+                Notification::make()
+                    ->title('Konfirmasi password harus diisi')
+                    ->danger()
+                    ->send();
+                return;
+            }
+            
+            // Cek kecocokan password
             if ($state['password'] !== $state['password_confirmation']) {
                 Notification::make()
                     ->title('Password dan konfirmasi password tidak sama')
@@ -92,7 +102,11 @@ class EditProfile extends Page
                 return;
             }
             
+            // Update password
             $user->password = Hash::make($state['password']);
+            $user->save(); // Simpan password baru ke database
+            
+            // Logout dan invalidate session
             auth()->logout();
             session()->invalidate();
             session()->regenerateToken();
@@ -105,12 +119,12 @@ class EditProfile extends Page
             return redirect(route('filament.admin.auth.login'));
         }
         
+        // Update data lain jika user adalah super_admin
         if ($user->hasRole('super_admin')) {
             $user->name = $state['name'];
             $user->email = $state['email'];
+            $user->save();
         }
-        
-        $user->save();
         
         Notification::make()
             ->title('Profil berhasil diperbarui')

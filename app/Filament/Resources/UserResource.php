@@ -61,11 +61,20 @@ class UserResource extends Resource implements HasShieldPermissions
                 Forms\Components\Select::make('subdit_id')
                     ->relationship('subdit', 'name')
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->live(),
                 Forms\Components\Select::make('unit_id')
-                    ->relationship('unit', 'name')
+                    ->relationship('unit', 'name', fn (Builder $query, Get $get) => 
+                        $query->when(
+                            $get('subdit_id'),
+                            fn (Builder $query, $subdit_id) => 
+                                $query->where('subdit_id', $subdit_id)
+                        )
+                    )
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->disabled(fn (Get $get): bool => ! $get('subdit_id'))
+                    ->dehydrated(fn ($state) => filled($state)),
                 TextInput::make('name'),
                 TextInput::make('email')
                     ->email(),
