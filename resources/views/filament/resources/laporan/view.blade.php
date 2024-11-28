@@ -293,7 +293,12 @@
                             <div class="pl-8">
                                 <ol class="list-decimal space-y-2">
                                     @foreach ($record->barangBuktis as $index => $barangBukti)
-                                        <li class="text-sm">{{ $barangBukti->jumlah }} {{ $barangBukti->satuan }} {{ $barangBukti->nama_barang }}</li>
+                                        <li class="text-sm">
+                                            <div class="flex">
+                                                <div class="w-8">•</div>
+                                                <div class="flex-1">{{ $barangBukti->jumlah }} {{ $barangBukti->satuan }} {{ $barangBukti->nama_barang }}</div>
+                                            </div>
+                                        </li>
                                     @endforeach
                                 </ol>
                             </div>
