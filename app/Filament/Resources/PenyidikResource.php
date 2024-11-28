@@ -34,7 +34,7 @@ class PenyidikResource extends Resource
     // navigation label
     public static function getNavigationLabel(): string
     {
-        return 'Data Penyidik';
+        return 'Data Penyidik/Penyidik Pembantu';
     }
 
     // navigation group
@@ -47,7 +47,7 @@ class PenyidikResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')->label('NAMA PENYIDIK'),
+                TextInput::make('name')->label('NAMA PENYIDIK/PENYIDIK PEMBANTU'),
                 // select pangkat
                 Select::make('pangkat_penyidik')
                     ->label('PANGKAT PENYIDIK')
@@ -92,7 +92,7 @@ class PenyidikResource extends Resource
             ->columns([
                 TextColumn::make('unit.name')->label('UNIT'),
                 TextColumn::make('subdit.name')->label('SUBDIT'),
-                TextColumn::make('name')->label('NAMA PENYIDIK'),
+                TextColumn::make('name')->label('PENYIDIK/PENYIDIK PEMBANTU'),
                 // pangkat
                 TextColumn::make('pangkat_penyidik')
                     ->label('PANGKAT')

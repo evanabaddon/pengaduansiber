@@ -12,6 +12,7 @@ use Filament\PanelProvider;
 use Kenepa\Banner\BannerPlugin;
 use App\Settings\GeneralSetting;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Notifications\Notification;
@@ -110,6 +111,13 @@ class AdminPanelProvider extends PanelProvider
                         return 'Selamat Datang di Ditressiber Polda Jatim';
                     }),
                     \Hasnayeen\Themes\ThemesPlugin::make()
-            ]);
+            ])
+            ->renderHook(
+                // custom footer
+                PanelsRenderHook::FOOTER,
+                function () {
+                    return view('customFooter');
+                }
+            );
     }
 }

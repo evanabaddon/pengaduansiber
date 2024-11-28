@@ -84,7 +84,7 @@ class UnitResource extends Resource
                 TextColumn::make('name')->label('UNIT')->sortable(),
                 // tampilkan nama subdit
                 TextColumn::make('subdit.name')->label('SUBDIT')->sortable(),
-                TextColumn::make('nama_pimpinan')->label('NAMA KANIT')->sortable(),
+                TextColumn::make('nama_pimpinan')->label('KANIT')->sortable(),
                 TextColumn::make('pangkat_pimpinan')
                     ->label('PANGKAT')
                     ->formatStateUsing(fn (string $state): string => match ($state) {

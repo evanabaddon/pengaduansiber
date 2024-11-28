@@ -20,6 +20,8 @@
         "oriondevelops/filament-greeter": "^0.2.0",
         "parfaitementweb/filament-country-field": "^2.2",
         "petercoles/multilingual-country-list": "^1.2",
+        "psr/simple-cache": "2.0",
+        "pxlrbt/filament-excel": "^2.3",
         "spatie/laravel-medialibrary": "^11.10",
         "teguh02/indonesia-territory-forms": "^1.1",
         "ysfkaya/filament-phone-input": "^3.1"
