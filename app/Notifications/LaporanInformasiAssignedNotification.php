@@ -13,7 +13,7 @@ class LaporanInformasiAssignedNotification extends BaseNotification
 
     public function __construct(
         protected LaporanInformasi $laporanInformasi,
-        protected string $assignedRole
+        protected string $assignedLevel
     ) {}
 
     public function via($notifiable): array
@@ -23,16 +23,7 @@ class LaporanInformasiAssignedNotification extends BaseNotification
 
     public function toDatabase($notifiable): array
     {
-        // Cek apakah user yang menerima notifikasi sesuai dengan role yang ditugaskan
-        if (
-            ($this->assignedRole === 'subdit' && !$notifiable->hasRole('subdit')) ||
-            ($this->assignedRole === 'unit' && !$notifiable->hasRole('unit')) ||
-            ($this->assignedRole === 'penyidik' && !$notifiable->hasRole('penyidik'))
-        ) {
-            return [];
-        }
-
-        $message = match($this->assignedRole) {
+        $message = match($this->assignedLevel) {
             'subdit' => 'Subdit anda mendapatkan laporan baru',
             'unit' => 'Unit anda mendapatkan laporan baru', 
             'penyidik' => 'Anda telah ditugaskan sebagai Penyidik',
