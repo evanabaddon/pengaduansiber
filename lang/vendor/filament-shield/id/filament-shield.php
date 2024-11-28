@@ -81,4 +81,18 @@ return [
         'reorder' => 'Susun Ulang',
         'restore_any' => 'Pulihkan Apa Saja',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Resource Permission Labels
+    |--------------------------------------------------------------------------
+    */
+    'generator' => [
+        'option' => 'policies_and_permissions',
+        'resource_label_override' => [
+            'LaporanInfo' => 'Laporan Informasi (LI)',
+            // tambahkan resource lain yang perlu di-override
+        ],
+    ],
+    
 ];

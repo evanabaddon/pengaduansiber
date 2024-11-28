@@ -12,6 +12,12 @@ class EditLaporan extends EditRecord
     
     protected static string $resource = LaporanResource::class;
 
+    // redirect after edit
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

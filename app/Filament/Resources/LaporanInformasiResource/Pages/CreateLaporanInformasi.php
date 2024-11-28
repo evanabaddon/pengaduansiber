@@ -14,6 +14,8 @@ class CreateLaporanInformasi extends CreateRecord
 {
     protected static string $resource = LaporanInformasiResource::class;
 
+    protected static bool $canCreateAnother = false;
+
     // redirect ke halaman list setelah create
     protected function getRedirectUrl(): string
     {

@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateLaporanInfo extends CreateRecord
 {
     protected static string $resource = LaporanInfoResource::class;
+
+    protected static bool $canCreateAnother = false;
 }
