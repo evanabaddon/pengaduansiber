@@ -27,13 +27,14 @@ class LatestLaporanInformasiWidget extends BaseWidget
         $query = LaporanInformasi::query()
             ->whereBetween('tanggal_lapor', [now()->subDays(7), now()]);
 
-        // Filter berdasarkan role
-        if (auth()->user()->hasRole('subdit')) {
-            $query->where('subdit_id', auth()->user()->subdit_id); 
-        } elseif (auth()->user()->hasRole('unit')) {
-            $query->whereNotNull('unit_id')->where('unit_id', auth()->user()->unit_id);
-        } elseif (auth()->user()->hasRole('penyidik')) {
-            $query->whereNotNull('penyidik_id')->where('penyidik_id', auth()->user()->id);
+        // Filter jika user mempunyai subdit_id maka tampilkan laporan miliknya saja, jika user juga mempunyai unit_id maka tampilkan laporan miliknya saja
+        if (auth()->user()->subdit_id) {
+            $query->where('subdit_id', auth()->user()->subdit_id);
+            
+            // Jika user juga memiliki unit_id, tambahkan filter unit
+            if (auth()->user()->unit_id) {
+                $query->where('unit_id', auth()->user()->unit_id);
+            }
         }
         
         // Urutkan data berdasarkan tanggal_lapor terbaru

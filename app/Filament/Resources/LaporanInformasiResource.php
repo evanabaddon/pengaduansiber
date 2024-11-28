@@ -675,41 +675,55 @@ class LaporanInformasiResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
-        
-        if (auth()->user()->hasRole('super_admin')) {
-            return $query; // Super Admin bisa lihat semua
+    
+        // Jika user memiliki subdit_id
+        if (auth()->user()->subdit_id) {
+            $query->where('subdit_id', auth()->user()->subdit_id);
+            
+            // Jika user juga memiliki unit_id, tambahkan filter unit
+            if (auth()->user()->unit_id) {
+                $query->where('unit_id', auth()->user()->unit_id);
+            }
         }
         
-        if (auth()->user()->hasRole('Kasubdit')) {
-            return $query->where('subdit_id', auth()->user()->subdit_id); // Subdit bisa lihat laporan miliknya
-        }
-        if (auth()->user()->hasRole('subdit')) {
-            return $query->where('subdit_id', auth()->user()->subdit_id); // Subdit bisa lihat laporan miliknya
-        }
-
-        if (auth()->user()->hasRole('Admin Subdit')) {
-            return $query->where('subdit_id', auth()->user()->subdit_id); // Subdit bisa lihat laporan miliknya
-        }
+        return $query;
+        // if (auth()->user()->hasRole('super_admin')) {
+        //     return $query; // Super Admin bisa lihat semua
+        // }
         
-        if (auth()->user()->hasRole('Kanit')) {
-            return $query->where('unit_id', auth()->user()->unit_id); // Unit bisa lihat laporan miliknya
-        }
+        // if (auth()->user()->hasRole('Kasubdit')) {
+        //     return $query->where('subdit_id', auth()->user()->subdit_id); // Subdit bisa lihat laporan miliknya
+        // }
+        // if (auth()->user()->hasRole('subdit')) {
+        //     return $query->where('subdit_id', auth()->user()->subdit_id); // Subdit bisa lihat laporan miliknya
+        // }
 
-        if (auth()->user()->hasRole('unit')) {
-            return $query->where('unit_id', auth()->user()->unit_id); // Unit bisa lihat laporan miliknya
-        }
-
-        if (auth()->user()->hasRole('Admin Unit')) {
-            return $query->where('unit_id', auth()->user()->unit_id); // Unit bisa lihat laporan miliknya
-        }
+        // if (auth()->user()->hasRole('Admin Subdit')) {
+        //     return $query->where('subdit_id', auth()->user()->subdit_id); // Subdit bisa lihat laporan miliknya
+        // }
         
-        if (auth()->user()->hasRole('penyidik')) {
-            return $query->where('penyidik_id', auth()->user()->id); // Penyidik bisa lihat laporan miliknya
-        }
+        // if (auth()->user()->hasRole('Kanit')) {
+        //     return $query->where('unit_id', auth()->user()->unit_id)
+        //                 ->where('subdit_id', auth()->user()->subdit_id); // Unit dan subdit bisa lihat laporan miliknya
+        // }
 
-        if (auth()->user()->hasRole('Penyidik/Penyidik Pembantu')) {
-            return $query->where('penyidik_id', auth()->user()->id); // Penyidik bisa lihat laporan miliknya
-        }
+        // if (auth()->user()->hasRole('unit')) {
+        //     return $query->where('unit_id', auth()->user()->unit_id)
+        //                 ->where('subdit_id', auth()->user()->subdit_id); // Unit dan subdit bisa lihat laporan miliknya
+        // }
+
+        // if (auth()->user()->hasRole('Admin Unit')) {
+        //     return $query->where('unit_id', auth()->user()->unit_id)
+        //                 ->where('subdit_id', auth()->user()->subdit_id); // Unit dan subdit bisa lihat laporan miliknya
+        // }
+        
+        // if (auth()->user()->hasRole('penyidik')) {
+        //     return $query->where('penyidik_id', auth()->user()->id); // Penyidik bisa lihat laporan miliknya
+        // }
+
+        // if (auth()->user()->hasRole('Penyidik/Penyidik Pembantu')) {
+        //     return $query->where('penyidik_id', auth()->user()->id); // Penyidik bisa lihat laporan miliknya
+        // }
         
         return $query;
     }
