@@ -11,6 +11,8 @@ class CreatePenyidik extends CreateRecord
 {
     protected static string $resource = PenyidikResource::class;
 
+    protected static bool $canCreateAnother = false;
+
     // title
     public function getTitle(): string
     {

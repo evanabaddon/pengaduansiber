@@ -80,4 +80,18 @@ return [
         'restore_any' => 'Restore Any',
         'replicate' => 'Replicate',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Resource Permission Labels
+    |--------------------------------------------------------------------------
+    */
+    'generator' => [
+        'option' => 'policies_and_permissions',
+        'resource_label_override' => [
+            'LaporanInfo' => 'Laporan Informasi (LI)',
+            // tambahkan resource lain yang perlu di-override
+        ],
+    ],
+
 ];

@@ -16,4 +16,10 @@ class EditLaporanPolisi extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    // redirect after edit
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }   
 }

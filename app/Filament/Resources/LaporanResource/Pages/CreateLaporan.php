@@ -12,6 +12,8 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateLaporan extends CreateRecord
 {
     protected static string $resource = LaporanResource::class;
+
+    protected static bool $canCreateAnother = false;
     
     public function handleRecordCreation(array $data): Laporan
     {

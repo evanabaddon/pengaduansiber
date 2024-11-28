@@ -32,7 +32,7 @@ class UserResource extends Resource implements HasShieldPermissions
             'publish'
         ];
     }
-    
+
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';

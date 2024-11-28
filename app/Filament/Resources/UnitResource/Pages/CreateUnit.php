@@ -12,6 +12,8 @@ class CreateUnit extends CreateRecord
 {
     protected static string $resource = UnitResource::class;
 
+    protected static bool $canCreateAnother = false;
+
     // fungsi handle record creation
     // public function handleRecordCreation(array $data): Unit
     // {

@@ -10,12 +10,6 @@ class LaporanInformasiPolicy
 {
     use HandlesAuthorization;
 
-    // title
-    public function getTitle(): string
-    {
-        return 'Laporan Informasi';
-    }
-
     /**
      * Determine whether the user can view any models.
      */

@@ -9,6 +9,8 @@ class CreateSubdit extends CreateRecord
 {
     protected static string $resource = SubditResource::class;
 
+    protected static bool $canCreateAnother = false;
+
     // redirect ke halaman list setelah create
     protected function getRedirectUrl(): string
     {
