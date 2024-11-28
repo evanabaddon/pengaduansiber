@@ -44,11 +44,11 @@ class SubditResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')->label('NAMA SUBDIT')->columnSpanFull(),
+                TextInput::make('name')->label('SUBDIT')->columnSpanFull(),
                 TextInput::make('nama_pimpinan')->label('KASUBDIT'),
                 // select pangkat pimpinan
                 Select::make('pangkat_pimpinan')
-                    ->label('PANGKAT PIMPINAN')
+                    ->label('PANGKAT')
                     ->options([
                         1 => 'KOMBESPOL',
                         2 => 'AKBP',
