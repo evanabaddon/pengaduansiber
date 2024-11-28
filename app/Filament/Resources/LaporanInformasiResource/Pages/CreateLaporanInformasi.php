@@ -27,7 +27,7 @@ class CreateLaporanInformasi extends CreateRecord
         // dd($data);
 
         // default value status adalah 'Terlapor'
-        $data['status'] = 'Terlapor';
+        $data['status'] = 'Proses';
 
         // Step 1: Simpan data utama LaporanInformasi
         $laporanInformasi = LaporanInformasi::create($data);
@@ -45,7 +45,7 @@ class CreateLaporanInformasi extends CreateRecord
             'jenis_kelamin' => $data['pelapors']['jenis_kelamin'],
             'pekerjaan' => $data['pelapors']['pekerjaan'],
             'kontak' => $data['pelapors']['kontak'],
-            'domestic' => $data['pelapors']['domestic'],
+            // 'domestic' => $data['pelapors']['domestic'],
             'province_id' => $data['pelapors']['province_id'] ?? null,
             'city_id' => $data['pelapors']['city_id'] ?? null,
             'district_id' => $data['pelapors']['district_id'] ?? null,
@@ -64,7 +64,7 @@ class CreateLaporanInformasi extends CreateRecord
             'tanggal_lahir' => $data['korbans']['tanggal_lahir'],
             'jenis_kelamin' => $data['korbans']['jenis_kelamin'],
             'pekerjaan' => $data['korbans']['pekerjaan'],
-            'domestic' => $data['korbans']['domestic'],
+            // 'domestic' => $data['korbans']['domestic'],
             'province_id' => $data['korbans']['province_id'] ?? null,
             'city_id' => $data['korbans']['city_id'] ?? null,
             'district_id' => $data['korbans']['district_id'] ?? null,
@@ -81,7 +81,7 @@ class CreateLaporanInformasi extends CreateRecord
             'kontak' => $data['terlapors']['kontak'],
             'usia' => $data['terlapors']['usia'],
             'jenis_kelamin' => $data['terlapors']['jenis_kelamin'],
-            'domestic' => $data['terlapors']['domestic'],
+            // 'domestic' => $data['terlapors']['domestic'],
             'province_id' => $data['terlapors']['province_id'] ?? null,
             'city_id' => $data['terlapors']['city_id'] ?? null,
             'district_id' => $data['terlapors']['district_id'] ?? null,
@@ -91,5 +91,14 @@ class CreateLaporanInformasi extends CreateRecord
 
         // Step 5: Update data laporan dengan pelapor, korban, dan terlapor jika diperlukan
         return $laporanInformasi;
+    }
+
+    // hidden save button
+    protected function getFormActions(): array
+    {
+        return [
+            //$this->getSaveFormAction(),
+            $this->getCancelFormAction(),
+        ];
     }
 }

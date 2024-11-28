@@ -25,6 +25,15 @@ class EditLaporanInformasi extends EditRecord
         ];
     }
 
+    // hidden save button
+    protected function getFormActions(): array
+    {
+        return [
+            //$this->getSaveFormAction(),
+            $this->getCancelFormAction(),
+        ];
+    }
+
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         // dd($data);
@@ -43,7 +52,7 @@ class EditLaporanInformasi extends EditRecord
             'kewarganegaraan' => $data['pelapors']['kewarganegaraan'],
             'pekerjaan' => $data['pelapors']['pekerjaan'],
             'kontak' => $data['pelapors']['kontak'],
-            'domestic' => $data['pelapors']['domestic'],
+            // 'domestic' => $data['pelapors']['domestic'],
             'province_id' => $data['pelapors']['province_id'] ?? null,
             'city_id' => $data['pelapors']['city_id'] ?? null,
             'district_id' => $data['pelapors']['district_id'] ?? null,
@@ -63,7 +72,7 @@ class EditLaporanInformasi extends EditRecord
             'agama' => $data['korbans']['agama'],
             'kewarganegaraan' => $data['korbans']['kewarganegaraan'],
             'pekerjaan' => $data['korbans']['pekerjaan'],
-            'domestic' => $data['korbans']['domestic'],
+            // 'domestic' => $data['korbans']['domestic'],
             'province_id' => $data['korbans']['province_id'] ?? null,
             'city_id' => $data['korbans']['city_id'] ?? null,
             'district_id' => $data['korbans']['district_id'] ?? null,
@@ -81,7 +90,7 @@ class EditLaporanInformasi extends EditRecord
             'agama' => $data['terlapors']['agama'],
             'kewarganegaraan' => $data['terlapors']['kewarganegaraan'],
             'pekerjaan' => $data['terlapors']['pekerjaan'],
-            'domestic' => $data['terlapors']['domestic'],
+            // 'domestic' => $data['terlapors']['domestic'],
             'province_id' => $data['terlapors']['province_id'] ?? null,
             'city_id' => $data['terlapors']['city_id'] ?? null,
             'district_id' => $data['terlapors']['district_id'] ?? null,

@@ -263,45 +263,14 @@
                                     <div class="space-y-2 text-sm flex justify-between items-start p-4">
                                         <div class="space-y-2 flex-1">
                                             <div class="flex gap-2">
-                                                <p class="w-32">Nama Barang</p>
-                                                <p>: {{ $barangBukti->nama_barang }}</p>
-                                            </div>
-                                            <div class="flex gap-2">
-                                                <p class="w-32">Deskripsi</p>
-                                                <p>: {{ $barangBukti->deskripsi }}</p>
-                                            </div>
-                                            <div class="flex gap-2">
                                                 <p class="w-32">Jumlah</p>
                                                 <p>: {{ $barangBukti->jumlah }}</p>
                                             </div>
                                             <div class="flex gap-2">
-                                                <p class="w-32">Kondisi</p>
-                                                <p>: {{ $barangBukti->kondisi }}</p>
-                                            </div>
-                                            <div class="flex gap-2">
-                                                <p class="w-32">Lokasi</p>
-                                                <p>: {{ $barangBukti->lokasi_penyimpanan }}</p>
+                                                <p class="w-32">Nama Barang</p>
+                                                <p>: {{ $barangBukti->nama_barang }}</p>
                                             </div>
                                         </div>
-                                        <a href="{{ Storage::url($barangBukti->media[0]) }}" 
-                                           target="_blank"
-                                           class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-semibold rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all shadow-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" 
-                                                 class="w-5 h-5 mr-2" 
-                                                 fill="none" 
-                                                 viewBox="0 0 24 24" 
-                                                 stroke="currentColor">
-                                                    <path stroke-linecap="round" 
-                                                          stroke-linejoin="round" 
-                                                          stroke-width="2" 
-                                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    <path stroke-linecap="round" 
-                                                          stroke-linejoin="round" 
-                                                          stroke-width="2" 
-                                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                            <span>Lihat</span>
-                                        </a>
                                     </div>
                                 </div>
                             @endforeach

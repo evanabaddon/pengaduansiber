@@ -13,10 +13,12 @@ use Illuminate\View\View;
 use Filament\Tables\Table;
 use App\Models\LaporanInformasi;
 use Filament\Resources\Resource;
+use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Wizard;
 use Filament\Support\Enums\Alignment;
+use Illuminate\Support\Facades\Blade;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
@@ -106,12 +108,7 @@ class LaporanInformasiResource extends Resource
                                     TextInput::make('pelapors.nama')->label('NAMA')->required(),
                                     TextInput::make('pelapors.identity_no')->label('NO IDENTITAS')->required(),
                                     PhoneInput::make('pelapors.kontak')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->required()->label('KONTAK'),
-                                    Select::make('pelapors.kewarganegaraan')
-                                        ->label('KEWARGANEGARAAN')
-                                        ->options([
-                                            'WNI' => 'WNI',
-                                            'WNA' => 'WNA'
-                                        ]),
+                                    Country::make('pelapors.kewarganegaraan')->label('KEWARGANEGARAAN')->default('Indonesia')->searchable(),
                                     Select::make('pelapors.jenis_kelamin')
                                             ->label('JENIS KELAMIN')
                                             ->options([
@@ -139,7 +136,7 @@ class LaporanInformasiResource extends Resource
                                                 }
                                             }),
                                         TextInput::make('pelapors.usia')->readonly()->label('USIA'),
-                                        TextInput::make('pelapors.pekerjaan')->label('PEKERJAAN'),
+                                        TextInput::make('pelapors.pekerjaan')->label('PEKERJAAN')->required(),
                                         // select agama tidak ada di database
                                         Select::make('pelapors.agama')->label('AGAMA')->options([
                                             'Islam' => 'Islam',
@@ -466,28 +463,32 @@ class LaporanInformasiResource extends Resource
                                     ->label('BARANG BUKTI')
                                     ->relationship('barangBuktis')
                                     ->schema([
-                                        TextInput::make('nama_barang')->label('NAMA BARANG'),
-                                        Textarea::make('deskripsi')->label('DESKRIPSI'),
-                                        Grid::make(3)
+                                        Grid::make(2)
                                             ->schema([
                                                 TextInput::make('jumlah')->label('JUMLAH'),
-                                                Select::make('kondisi')
-                                                ->options([
-                                                    'Baik' => 'Baik',
-                                                    'Rusak Ringan' => 'Rusak Ringan',
-                                                    'Rusak Berat' => 'Rusak Berat'
-                                                ]),
-                                                TextInput::make('lokasi_penyimpanan')
-                                            ->label('LOKASI PENYIMPANAN'),
+                                                TextInput::make('nama_barang')->label('NAMA BARANG'),
                                             ]),
+                                        // Textarea::make('deskripsi')->label('DESKRIPSI'),
+                                        // Grid::make(3)
+                                        //     ->schema([
+                                        //         TextInput::make('jumlah')->label('JUMLAH'),
+                                        //         Select::make('kondisi')
+                                        //         ->options([
+                                        //             'Baik' => 'Baik',
+                                        //             'Rusak Ringan' => 'Rusak Ringan',
+                                        //             'Rusak Berat' => 'Rusak Berat'
+                                        //         ]),
+                                        //         TextInput::make('lokasi_penyimpanan')
+                                        //     ->label('LOKASI PENYIMPANAN'),
+                                        //     ]),
                                         
-                                        FileUpload::make('media')
-                                            ->label('FOTO BARANG BUKTI')
-                                            ->multiple()
-                                            ->directory('barang-bukti')
-                                            ->preserveFilenames()
-                                            ->image()
-                                            ->maxSize(2048)
+                                        // FileUpload::make('media')
+                                        //     ->label('FOTO BARANG BUKTI')
+                                        //     ->multiple()
+                                        //     ->directory('barang-bukti')
+                                        //     ->preserveFilenames()
+                                        //     ->image()
+                                        //     ->maxSize(2048)
                                     ])
                                     ->columnSpanFull()
                                     ->defaultItems(0)
@@ -515,7 +516,15 @@ class LaporanInformasiResource extends Resource
                                     ->storeFileNamesIn('media'), // Pastikan nama file tersimpan di kolom media
                             ]),
                             ])
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->submitAction(new HtmlString(Blade::render(<<<BLADE
+                                <x-filament::button
+                                    type="submit"
+                                    size="sm"
+                                >
+                                    Simpan
+                                </x-filament::button>
+                            BLADE))),
             ]);
     }
 
@@ -604,7 +613,20 @@ class LaporanInformasiResource extends Resource
                                 if (!$record->unit_id) return [];
                                 return User::where('unit_id', $record->unit_id)
                                     ->whereDoesntHave('roles', function($query) {
-                                        $query->whereIn('name', ['super_admin', 'subdit', 'unit']);
+                                        $query->whereIn('name', [
+                                            'super_admin',
+                                            'Admin Subdit',
+                                            'Kasubdit',
+                                            'Admin Unit',
+                                            'Kanit',
+                                            'Admin Bagbinopsnal',
+                                            'Kabagbinopsnal',
+                                            'Direktur/Wakil Direktur',
+                                            'Kasubbagrenmin',
+                                            'Admin Subbagrenmin',
+                                            'Kabagwassidik',
+                                            'Admin Bagwassidik',
+                                        ]);
                                     })
                                     ->pluck('name', 'id');
                             })
@@ -623,10 +645,9 @@ class LaporanInformasiResource extends Resource
                     ->searchable()
                     ->selectablePlaceholder('Pilih Status')
                     ->options([
-                        'Terlapor' => 'Terlapor',
                         'Proses' => 'Proses',
-                        'Selesai' => 'Selesai',
                         'Terkendala' => 'Terkendala',
+                        'Selesai' => 'Selesai',
                     ])
                     ->rules(['required']),
             ])
