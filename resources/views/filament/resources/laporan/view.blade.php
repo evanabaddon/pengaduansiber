@@ -56,11 +56,11 @@
                         <div class="space-y-2 pl-4 text-sm">
                             <div class="flex gap-2">
                                 <p class="w-32">Nama</p>
-                                <p>: {{ $record->pelapors->nama }}</p>
+                                <p>: {{ $record->pelapors->nama ?? '-' }}</p>
                             </div>
                             <div class="flex gap-2">
                                 <p class="w-32">No Identitas</p>
-                                <p>: {{ $record->pelapors->identity_no }}</p>
+                                <p>: {{ $record->pelapors->identity_no ?? '-' }}</p>
                             </div>
                             {{-- Kewarganegaraan --}}
                             <div class="flex gap-2">
@@ -73,26 +73,26 @@
                             </div>
                             <div class="flex gap-2">
                                 <p class="w-32">Jenis Kelamin</p>
-                                <p>: {{ $record->pelapors->jenis_kelamin }}</p>
+                                <p>: {{ $record->pelapors->jenis_kelamin ?? '-' }}</p>
                             </div>
                             {{-- Tempat Tanggal Lahir --}}
                             <div class="flex gap-2">
                                 <p class="w-32">Tempat/Tgl Lahir</p>
-                                <p>: {{ $record->pelapors->tempat_lahir }}, {{ date('d F Y', strtotime($record->pelapors->tanggal_lahir)) }}</p>
+                                <p>: {{ $record->pelapors->tempat_lahir ?? '-' }}, {{ date('d F Y', strtotime($record->pelapors->tanggal_lahir)) ?? '-' }}</p>
                             </div>
                             {{-- Agama --}}
                             <div class="flex gap-2">
                                 <p class="w-32">Agama</p>
-                                <p>: {{ $record->pelapors->agama }}</p>
+                                <p>: {{ $record->pelapors->agama ?? '-' }}</p>
                             </div>
                             {{-- Alamat --}}
                             <div class="flex gap-2">
                                 <p class="w-32">Alamat</p>
-                                <p>: {{ $record->pelapors->alamat }}, {{ ucwords(strtolower($kelurahan)) }}, {{ ucwords(strtolower($kecamatan)) }}, {{ ucwords(strtolower($kabupaten)) }}, {{ ucwords(strtolower($provinsi)) }}</p>
+                                <p>: {{ $record->pelapors->alamat ?? '-' }}, {{ ucwords(strtolower($kelurahan)) ?? '-' }}, {{ ucwords(strtolower($kecamatan)) ?? '-' }}, {{ ucwords(strtolower($kabupaten)) ?? '-' }}, {{ ucwords(strtolower($provinsi)) ?? '-' }}</p>
                             </div>
                             <div class="flex gap-2">
                                 <p class="w-32">Kontak</p>
-                                <p>: {{ $record->pelapors->kontak }}</p>
+                                <p>: {{ $record->pelapors->kontak ?? '-' }}</p>
                             </div>
                         </div>
                     </div>
@@ -103,11 +103,11 @@
                         <div class="space-y-2 pl-4 text-sm">
                             <div class="flex gap-2">
                                 <p class="w-32">Nama</p>
-                                <p>: {{ $record->korbans->nama }}</p>
+                                <p>: {{ $record->korbans->nama ?? '-' }}</p>
                             </div>
                             <div class="flex gap-2">
                                 <p class="w-32">No Identitas</p>
-                                <p>: {{ $record->korbans->identity_no }}</p>
+                                <p>: {{ $record->korbans->identity_no ?? '-' }}</p>
                             </div>
                             <div class="flex gap-2">
                                 <p class="w-32">Kewarganegaraan</p>
@@ -119,26 +119,26 @@
                             </div>
                             <div class="flex gap-2">
                                 <p class="w-32">Jenis Kelamin</p>
-                                <p>: {{ $record->korbans->jenis_kelamin }}</p>
+                                <p>: {{ $record->korbans->jenis_kelamin ?? '-' }}</p>
                             </div>
                             {{-- Tempat Tanggal Lahir --}}
                             <div class="flex gap-2">
                                 <p class="w-32">Tempat/Tgl Lahir</p>
-                                <p>: {{ $record->korbans->tempat_lahir }}, {{ date('d F Y', strtotime($record->korbans->tanggal_lahir)) }}</p>
+                                <p>: {{ $record->korbans->tempat_lahir ?? '-' }}, {{ date('d F Y', strtotime($record->korbans->tanggal_lahir)) ?? '-' }}</p>
                             </div>
                             {{-- Agama --}}
                             <div class="flex gap-2">
                                 <p class="w-32">Agama</p>
-                                <p>: {{ $record->korbans->agama }}</p>
+                                <p>: {{ $record->korbans->agama ?? '-' }}</p>
                             </div>
                             {{-- Alamat --}}
                             <div class="flex gap-2">
                                 <p class="w-32">Alamat</p>
-                                <p>: {{ $record->korbans->alamat }}, {{ ucwords(strtolower($kelurahanKorban)) }}, {{ ucwords(strtolower($kecamatanKorban)) }}, {{ ucwords(strtolower($kabupatenKorban)) }}, {{ ucwords(strtolower($provinsiKorban)) }}</p>
+                                <p>: {{ $record->korbans->alamat ?? '-' }}, {{ ucwords(strtolower($kelurahanKorban)) ?? '-' }}, {{ ucwords(strtolower($kecamatanKorban)) ?? '-' }}, {{ ucwords(strtolower($kabupatenKorban)) ?? '-' }}, {{ ucwords(strtolower($provinsiKorban)) ?? '-' }}</p>
                             </div>
                             <div class="flex gap-2">
                                 <p class="w-32">Kontak</p>
-                                <p>: {{ $record->korbans->kontak }}</p>
+                                <p>: {{ $record->korbans->kontak ?? '-' }}</p>
                             </div>
                             
                         </div>
@@ -151,11 +151,11 @@
                     <div class="space-y-2 pl-4 text-sm">
                         <div class="flex gap-2">
                             <p class="w-32">Nama</p>
-                            <p>: {{ $record->terlapors->nama }}</p>
+                            <p>: {{ $record->terlapors->nama ?? '-' }}</p>
                         </div>
                         <div class="flex gap-2">
                             <p class="w-32">No Identitas</p>
-                            <p>: {{ $record->terlapors->identity_no }}</p>
+                            <p>: {{ $record->terlapors->identity_no ?? '-' }}</p>
                         </div>
                         <div class="flex gap-2">
                             <p class="w-32">Kewarganegaraan</p>
@@ -167,23 +167,23 @@
                         </div>
                         <div class="flex gap-2">
                             <p class="w-32">Jenis Kelamin</p>
-                            <p>: {{ $record->terlapors->jenis_kelamin }}</p>
+                            <p>: {{ $record->terlapors->jenis_kelamin ?? '-' }}</p>
                         </div>
                         <div class="flex gap-2">
                             <p class="w-32">Tempat/Tgl Lahir</p>
-                            <p>: {{ $record->terlapors->tempat_lahir }}, {{ date('d F Y', strtotime($record->terlapors->tanggal_lahir)) }}</p>
+                            <p>: {{ $record->terlapors->tempat_lahir ?? '-' }}, {{ date('d F Y', strtotime($record->terlapors->tanggal_lahir)) ?? '-' }}</p>
                         </div>
                         <div class="flex gap-2">
                             <p class="w-32">Agama</p>
-                            <p>: {{ $record->terlapors->agama }}</p>
+                            <p>: {{ $record->terlapors->agama ?? '-' }}</p>
                         </div>
                         <div class="flex gap-2">
                             <p class="w-32">Alamat</p>
-                            <p>: {{ $record->terlapors->alamat }}, {{ ucwords(strtolower($kelurahanTerlapor)) }}, {{ ucwords(strtolower($kecamatanTerlapor)) }}, {{ ucwords(strtolower($kabupatenTerlapor)) }}, {{ ucwords(strtolower($provinsiTerlapor)) }}</p>
+                            <p>: {{ $record->terlapors->alamat ?? '-' }}, {{ ucwords(strtolower($kelurahanTerlapor)) ?? '-' }}, {{ ucwords(strtolower($kecamatanTerlapor)) ?? '-' }}, {{ ucwords(strtolower($kabupatenTerlapor)) ?? '-' }}, {{ ucwords(strtolower($provinsiTerlapor)) ?? '-' }}</p>
                         </div>
                         <div class="flex gap-2">
                             <p class="w-32">Kontak</p>
-                            <p>: {{ $record->terlapors->kontak }}</p>
+                            <p>: {{ $record->terlapors->kontak ?? '-' }}</p>
                         </div>
                     </div>
                 </div>
