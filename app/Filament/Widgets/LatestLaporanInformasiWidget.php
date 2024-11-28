@@ -40,7 +40,7 @@ class LatestLaporanInformasiWidget extends BaseWidget
         $query->latest('tanggal_lapor');
 
         return $table
-            ->heading('Laporan Informasi Terbaru (7 Hari Terakhir)')
+            ->heading('Informasi / Surat Masyarakat Terbaru (7 Hari Terakhir)')
             ->striped()
             ->query($query)
             ->columns([

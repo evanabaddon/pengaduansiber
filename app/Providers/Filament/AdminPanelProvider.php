@@ -32,6 +32,7 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
 use App\Filament\Resources\LaporanResource\Widgets\LaporanStatusOverview;
 use App\Filament\Resources\LaporanInformasiResource\Widgets\LaporanInformasiStatusOverview;
 
@@ -45,7 +46,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->darkMode(false)
             ->login()
-            ->profile(isSimple:false)
+            // ->profile(isSimple:false)
             ->colors([
                 'primary' => Color::Blue,
             ])
@@ -54,12 +55,12 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 LaporanInformasiStatusOverview::class,
-                LaporanStatusOverview::class,
-                LatestLaporanWidget::class,
                 LatestLaporanInformasiWidget::class,
+                // LaporanStatusOverview::class,
+                // LatestLaporanWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -78,6 +79,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
+                // FilamentEditProfilePlugin::make()
+                    
+                // FilamentEditProfilePlugin::make()
+                //     ->customProfileComponents([
+                //         \App\Livewire\CustomProfileComponent::class,
+                //     ])
             ])
             ->maxContentWidth('full')
             ->spa()
