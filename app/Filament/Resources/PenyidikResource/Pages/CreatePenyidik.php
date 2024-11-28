@@ -11,6 +11,12 @@ class CreatePenyidik extends CreateRecord
 {
     protected static string $resource = PenyidikResource::class;
 
+    // title
+    public function getTitle(): string
+    {
+        return 'Tambah Penyidik/Penyidik Pembantu';
+    }
+
     // fungsi handle record creation
     // public function handleRecordCreation(array $data): Penyidik
     // {
