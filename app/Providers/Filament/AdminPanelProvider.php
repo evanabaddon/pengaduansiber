@@ -11,6 +11,7 @@ use Pages\ComingSoon;
 use Filament\PanelProvider;
 use Kenepa\Banner\BannerPlugin;
 use App\Settings\GeneralSetting;
+use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Schema;
@@ -19,6 +20,7 @@ use Filament\Notifications\Notification;
 use Orion\FilamentGreeter\GreeterPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Notifications\Actions\Action;
+use App\Filament\Pages\Profile\EditProfile;
 use App\Filament\Widgets\LatestLaporanWidget;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -47,6 +49,9 @@ class AdminPanelProvider extends PanelProvider
             ->darkMode(false)
             ->login()
             // ->profile(isSimple:false)
+            ->userMenuItems([
+                'profile' => MenuItem::make()->url(fn (): string => EditProfile::getUrl())
+            ])
             ->colors([
                 'primary' => Color::Blue,
             ])
@@ -54,6 +59,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,
+                EditProfile::class
             ])
             // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
@@ -79,12 +85,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
-                // FilamentEditProfilePlugin::make()
                     
-                // FilamentEditProfilePlugin::make()
-                //     ->customProfileComponents([
-                //         \App\Livewire\CustomProfileComponent::class,
-                //     ])
+                // \JoaoPaulolndev\FilamentEditProfile\FilamentEditProfilePlugin::make()
+                // ->editProfileComponents([
+                //     'editProfile' => EditProfile::class
+                // ])
             ])
             ->maxContentWidth('full')
             ->spa()
