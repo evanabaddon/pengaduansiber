@@ -680,15 +680,34 @@ class LaporanInformasiResource extends Resource
             return $query; // Super Admin bisa lihat semua
         }
         
+        if (auth()->user()->hasRole('Kasubdit')) {
+            return $query->where('subdit_id', auth()->user()->subdit_id); // Subdit bisa lihat laporan miliknya
+        }
         if (auth()->user()->hasRole('subdit')) {
             return $query->where('subdit_id', auth()->user()->subdit_id); // Subdit bisa lihat laporan miliknya
         }
+
+        if (auth()->user()->hasRole('Admin Subdit')) {
+            return $query->where('subdit_id', auth()->user()->subdit_id); // Subdit bisa lihat laporan miliknya
+        }
         
+        if (auth()->user()->hasRole('Kanit')) {
+            return $query->where('unit_id', auth()->user()->unit_id); // Unit bisa lihat laporan miliknya
+        }
+
         if (auth()->user()->hasRole('unit')) {
+            return $query->where('unit_id', auth()->user()->unit_id); // Unit bisa lihat laporan miliknya
+        }
+
+        if (auth()->user()->hasRole('Admin Unit')) {
             return $query->where('unit_id', auth()->user()->unit_id); // Unit bisa lihat laporan miliknya
         }
         
         if (auth()->user()->hasRole('penyidik')) {
+            return $query->where('penyidik_id', auth()->user()->id); // Penyidik bisa lihat laporan miliknya
+        }
+
+        if (auth()->user()->hasRole('Penyidik/Penyidik Pembantu')) {
             return $query->where('penyidik_id', auth()->user()->id); // Penyidik bisa lihat laporan miliknya
         }
         
