@@ -11,6 +11,12 @@ class ListPenyidiks extends ListRecords
 {
     protected static string $resource = PenyidikResource::class;
 
+    // title
+    public function getTitle(): string
+    {
+        return 'Penyidik/Penyidik Pembantu';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
