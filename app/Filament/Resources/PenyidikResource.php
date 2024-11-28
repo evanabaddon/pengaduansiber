@@ -47,7 +47,22 @@ class PenyidikResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')->label('NAMA PENYIDIK/PENYIDIK PEMBANTU'),
+                // select subdit dan unit
+                Select::make('subdit_id')
+                    ->label('SUBDIT')
+                    ->options(Subdit::all()->pluck('name', 'id'))
+                    ->searchable()
+                    ->live()
+                    ->hidden(auth()->user()->hasRole('subdit') || auth()->user()->hasRole('unit')),
+                // select unit berdasarkan subdit_id
+                Select::make('unit_id')
+                    ->label('UNIT')
+                    ->hidden(auth()->user()->hasRole('subdit') || auth()->user()->hasRole('unit'))
+                    ->options(fn (Get $get): Collection => Unit::query()
+                        ->where('subdit_id', $get('subdit_id'))
+                        ->pluck('name', 'id'))
+                        ->searchable(),
+                TextInput::make('name')->label('PENYIDIK/PENYIDIK PEMBANTU'),
                 // select pangkat
                 Select::make('pangkat_penyidik')
                     ->label('PANGKAT')
@@ -68,21 +83,7 @@ class PenyidikResource extends Resource
                     ->searchable(),
                 TextInput::make('nrp_penyidik')->label('NRP'),
                 PhoneInput::make('kontak')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->required()->label('KONTAK'),
-                // select subdit dan unit
-                Select::make('subdit_id')
-                    ->label('SUBDIT')
-                    ->options(Subdit::all()->pluck('name', 'id'))
-                    ->searchable()
-                    ->live()
-                    ->hidden(auth()->user()->hasRole('subdit') || auth()->user()->hasRole('unit')),
-                // select unit berdasarkan subdit_id
-                Select::make('unit_id')
-                    ->label('UNIT')
-                    ->hidden(auth()->user()->hasRole('subdit') || auth()->user()->hasRole('unit'))
-                    ->options(fn (Get $get): Collection => Unit::query()
-                        ->where('subdit_id', $get('subdit_id'))
-                        ->pluck('name', 'id'))
-                        ->searchable(),
+                
             ]);
     }
 
