@@ -1,21 +1,21 @@
 @php
     // Data wilayah pelapor
-    $provinsi = app('wilayah')->getProvinsi()[$record->pelapors->province_id] ?? '-';
-    $kabupaten = app('wilayah')->getKabupaten($record->pelapors->province_id)[$record->pelapors->city_id] ?? '-';
-    $kecamatan = app('wilayah')->getKecamatan($record->pelapors->city_id)[$record->pelapors->district_id] ?? '-';
-    $kelurahan = app('wilayah')->getKelurahan($record->pelapors->district_id)[$record->pelapors->subdistrict_id] ?? '-';
+    $provinsi = $record->pelapors ? (app('wilayah')->getProvinsi()[$record->pelapors->province_id] ?? '-') : '-';
+    $kabupaten = $record->pelapors ? (app('wilayah')->getKabupaten($record->pelapors->province_id)[$record->pelapors->city_id] ?? '-') : '-';
+    $kecamatan = $record->pelapors ? (app('wilayah')->getKecamatan($record->pelapors->city_id)[$record->pelapors->district_id] ?? '-') : '-';
+    $kelurahan = $record->pelapors ? (app('wilayah')->getKelurahan($record->pelapors->district_id)[$record->pelapors->subdistrict_id] ?? '-') : '-';
 
     // Data wilayah korban
-    $provinsiKorban = app('wilayah')->getProvinsi()[$record->korbans->province_id] ?? '-';
-    $kabupatenKorban = app('wilayah')->getKabupaten($record->korbans->province_id)[$record->korbans->city_id] ?? '-';
-    $kecamatanKorban = app('wilayah')->getKecamatan($record->korbans->city_id)[$record->korbans->district_id] ?? '-';
-    $kelurahanKorban = app('wilayah')->getKelurahan($record->korbans->district_id)[$record->korbans->subdistrict_id] ?? '-';
+    $provinsiKorban = $record->korbans ? (app('wilayah')->getProvinsi()[$record->korbans->province_id] ?? '-') : '-';
+    $kabupatenKorban = $record->korbans ? (app('wilayah')->getKabupaten($record->korbans->province_id)[$record->korbans->city_id] ?? '-') : '-';
+    $kecamatanKorban = $record->korbans ? (app('wilayah')->getKecamatan($record->korbans->city_id)[$record->korbans->district_id] ?? '-') : '-';
+    $kelurahanKorban = $record->korbans ? (app('wilayah')->getKelurahan($record->korbans->district_id)[$record->korbans->subdistrict_id] ?? '-') : '-';
 
     // Data wilayah terlapor
-    $provinsiTerlapor = app('wilayah')->getProvinsi()[$record->terlapors->province_id] ?? '-';
-    $kabupatenTerlapor = app('wilayah')->getKabupaten($record->terlapors->province_id)[$record->terlapors->city_id] ?? '-';
-    $kecamatanTerlapor = app('wilayah')->getKecamatan($record->terlapors->city_id)[$record->terlapors->district_id] ?? '-';
-    $kelurahanTerlapor = app('wilayah')->getKelurahan($record->terlapors->district_id)[$record->terlapors->subdistrict_id] ?? '-';
+    $provinsiTerlapor = $record->terlapors ? (app('wilayah')->getProvinsi()[$record->terlapors->province_id] ?? '-') : '-';
+    $kabupatenTerlapor = $record->terlapors ? (app('wilayah')->getKabupaten($record->terlapors->province_id)[$record->terlapors->city_id] ?? '-') : '-';
+    $kecamatanTerlapor = $record->terlapors ? (app('wilayah')->getKecamatan($record->terlapors->city_id)[$record->terlapors->district_id] ?? '-') : '-';
+    $kelurahanTerlapor = $record->terlapors ? (app('wilayah')->getKelurahan($record->terlapors->district_id)[$record->terlapors->subdistrict_id] ?? '-') : '-';
 
     // Data wilayah tkp
     $provinsiTkp = app('wilayah')->getProvinsi()[$record->province_id] ?? '-';
