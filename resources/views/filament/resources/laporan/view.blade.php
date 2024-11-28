@@ -66,9 +66,13 @@
                             <div class="flex gap-2">
                                 <p class="w-32">Kewarganegaraan</p>
                                 <p>: @php
-                                    $countryCode = $record->pelapors->kewarganegaraan;
-                                    $countries = \PeterColes\Countries\CountriesFacade::lookup(null, 'id')->toArray();
-                                    echo array_flip($countries)[$countryCode] ?? $countryCode;
+                                    $countryCode = $record->pelapors?->kewarganegaraan;
+                                    if ($countryCode) {
+                                        $countries = \PeterColes\Countries\CountriesFacade::lookup(null, 'id')->toArray();
+                                        echo array_flip($countries)[$countryCode] ?? $countryCode;
+                                    } else {
+                                        echo '-';
+                                    }
                                 @endphp</p>
                             </div>
                             <div class="flex gap-2">
@@ -112,9 +116,13 @@
                             <div class="flex gap-2">
                                 <p class="w-32">Kewarganegaraan</p>
                                 <p>: @php
-                                    $countryCode = $record->korbans->kewarganegaraan;
-                                    $countries = \PeterColes\Countries\CountriesFacade::lookup(null, 'id')->toArray();
-                                    echo array_flip($countries)[$countryCode] ?? $countryCode;
+                                    $countryCode = $record->korbans?->kewarganegaraan;
+                                    if ($countryCode) {
+                                        $countries = \PeterColes\Countries\CountriesFacade::lookup(null, 'id')->toArray();
+                                        echo array_flip($countries)[$countryCode] ?? $countryCode;
+                                    } else {
+                                        echo '-';
+                                    }
                                 @endphp</p>
                             </div>
                             <div class="flex gap-2">
