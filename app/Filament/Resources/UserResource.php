@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 use Filament\Forms;
+use App\Models\Role;
 use App\Models\User;
 use Filament\Tables;
 use Filament\Forms\Get;
@@ -103,11 +104,6 @@ class UserResource extends Resource implements HasShieldPermissions
                     ->badge(),
             ])
             ->filters([
-                // filter by role
-                SelectFilter::make('roles.name')
-                    ->label('Role')
-                    ->options(Role::all()->pluck('name', 'id'))
-                    ->searchable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
