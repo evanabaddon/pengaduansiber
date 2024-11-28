@@ -19,7 +19,7 @@ class LatestLaporanInformasiWidget extends BaseWidget
     // title
     public function getTitle(): string
     {
-        return 'Informasi / Surat Masyarakat Terbaru (7 Hari Terakhir)';
+        return 'Laporan Informasi / Surat Masyarakat (Dumas) Terbaru (7 Hari Terakhir)';
     }
 
     public function table(Table $table): Table
@@ -40,7 +40,7 @@ class LatestLaporanInformasiWidget extends BaseWidget
         $query->latest('tanggal_lapor');
 
         return $table
-            ->heading('Informasi / Surat Masyarakat Terbaru (7 Hari Terakhir)')
+            ->heading('Laporan Informasi / Surat Masyarakat (Dumas) Terbaru (7 Hari Terakhir)')
             ->striped()
             ->query($query)
             ->columns([
