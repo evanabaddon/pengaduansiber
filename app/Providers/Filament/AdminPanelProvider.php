@@ -9,6 +9,7 @@ use App\Models\User;
 use Filament\Widgets;
 use Pages\ComingSoon;
 use Filament\PanelProvider;
+use Filament\Pages\Auth\Login;
 use Kenepa\Banner\BannerPlugin;
 use App\Settings\GeneralSetting;
 use Filament\Navigation\MenuItem;
@@ -47,7 +48,10 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->darkMode(false)
-            ->login()
+            ->login(Login::class)
+            ->brandName('Ditressiber Polda Jatim') 
+            ->brandLogo(asset('images/logo-siber-polri.png')) // Logo berada di folder public/images/
+            ->brandLogoHeight('5rem') // Atur tinggi logo
             // ->profile(isSimple:false)
             ->userMenuItems([
                 'profile' => MenuItem::make()->url(fn (): string => EditProfile::getUrl())
