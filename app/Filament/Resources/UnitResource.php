@@ -52,7 +52,7 @@ class UnitResource extends Resource
                     ->hidden(auth()->user()->hasRole('subdit'))
                     ->required()
                     ->searchable(),
-                TextInput::make('nama_pimpinan')->label('NAMA KANIT'),
+                TextInput::make('nama_pimpinan')->label('KANIT'),
                 // select pangkat pimpinan
                 Select::make('pangkat_pimpinan')
                     ->label('PANGKAT PIMPINAN')

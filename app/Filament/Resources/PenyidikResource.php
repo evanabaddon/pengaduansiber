@@ -50,7 +50,7 @@ class PenyidikResource extends Resource
                 TextInput::make('name')->label('NAMA PENYIDIK/PENYIDIK PEMBANTU'),
                 // select pangkat
                 Select::make('pangkat_penyidik')
-                    ->label('PANGKAT PENYIDIK')
+                    ->label('PANGKAT')
                     ->options([
                         1 => 'KOMBESPOL',
                         2 => 'AKBP',
