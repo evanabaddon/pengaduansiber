@@ -226,7 +226,7 @@
                         </div>
                         <div class="flex gap-2">
                             <p class="w-32">Kerugian</p>
-                            <p>: Rp {{ number_format($record->kerugian, 0, ',', '.') }}</p>
+                            <p>: {{ $record->kerugian }}</p>
                         </div>
                     </div>
                 </div>
