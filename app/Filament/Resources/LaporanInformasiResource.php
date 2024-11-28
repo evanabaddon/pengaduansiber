@@ -544,16 +544,19 @@ class LaporanInformasiResource extends Resource
                             ->selectablePlaceholder('Pilih Subdit')
                             ->options(Subdit::all()->pluck('name', 'id'))
                             ->searchable()
-                            ->disabled(auth()->user()->hasRole('subdit') || auth()->user()->hasRole('unit') || auth()->user()->hasRole('penyidik'))
+                            ->disabled(auth()->user()->subdit_id || auth()->user()->unit_id || auth()->user()->penyidik_id)
                             ->afterStateUpdated(function (LaporanInformasi $record, $state) {
                                 $record->update([
                                     'unit_id' => null,
-                                    'penyidik_id' => null
+                                    // 'penyidik_id' => null
                                 ]);
 
-                                // Kirim notifikasi ke user subdit
+                                // Kirim notifikasi ke user subdit saja (yang tidak memiliki unit_id)
                                 if ($state) {
-                                    $users = User::where('subdit_id', $state)->get();
+                                    $users = User::where('subdit_id', $state)
+                                        ->whereNull('unit_id')  // Tambahkan filter ini
+                                        // ->whereNull('penyidik_id')  // Tambahkan filter ini
+                                        ->get();
                                     foreach ($users as $user) {
                                         $user->notify(new LaporanInformasiAssignedNotification($record, 'subdit'));
                                     }
@@ -562,7 +565,7 @@ class LaporanInformasiResource extends Resource
                         SelectColumn::make('unit_id')
                             ->label('UNIT')
                             ->alignment(Alignment::Center)
-                            ->disabled(auth()->user()->hasRole('unit') || auth()->user()->hasRole('penyidik'))
+                            ->disabled(auth()->user()->unit_id || auth()->user()->penyidik_id)
                             ->selectablePlaceholder('Pilih Unit')
                             ->options(function (LaporanInformasi $record) {
                                 if (!$record->subdit_id) return [];
@@ -572,12 +575,14 @@ class LaporanInformasiResource extends Resource
                             ->searchable()
                             ->afterStateUpdated(function (LaporanInformasi $record, $state) {
                                 $record->update([
-                                    'penyidik_id' => null
+                                    // 'penyidik_id' => null
                                 ]);
 
-                                // Kirim notifikasi ke user unit
+                                // Kirim notifikasi ke user unit saja (yang memiliki unit_id tapi bukan penyidik)
                                 if ($state) {
-                                    $users = User::where('unit_id', $state)->get();
+                                    $users = User::where('unit_id', $state)
+                                        // ->whereNull('penyidik_id')  // Tambahkan filter ini
+                                        ->get();
                                     foreach ($users as $user) {
                                         $user->notify(new LaporanInformasiAssignedNotification($record, 'unit'));
                                     }
@@ -587,7 +592,7 @@ class LaporanInformasiResource extends Resource
                             ->label('PENYIDIK')
                             ->alignment(Alignment::Center)
                             ->selectablePlaceholder('Pilih Penyidik')
-                            ->disabled(auth()->user()->hasRole('penyidik'))
+                            ->disabled(fn(): bool => (bool) auth()->user()->penyidik_id)
                             ->options(function (LaporanInformasi $record) {
                                 if (!$record->subdit_id || !$record->unit_id) return [];
                                 return Penyidik::where('subdit_id', $record->subdit_id)
@@ -685,45 +690,6 @@ class LaporanInformasiResource extends Resource
                 $query->where('unit_id', auth()->user()->unit_id);
             }
         }
-        
-        return $query;
-        // if (auth()->user()->hasRole('super_admin')) {
-        //     return $query; // Super Admin bisa lihat semua
-        // }
-        
-        // if (auth()->user()->hasRole('Kasubdit')) {
-        //     return $query->where('subdit_id', auth()->user()->subdit_id); // Subdit bisa lihat laporan miliknya
-        // }
-        // if (auth()->user()->hasRole('subdit')) {
-        //     return $query->where('subdit_id', auth()->user()->subdit_id); // Subdit bisa lihat laporan miliknya
-        // }
-
-        // if (auth()->user()->hasRole('Admin Subdit')) {
-        //     return $query->where('subdit_id', auth()->user()->subdit_id); // Subdit bisa lihat laporan miliknya
-        // }
-        
-        // if (auth()->user()->hasRole('Kanit')) {
-        //     return $query->where('unit_id', auth()->user()->unit_id)
-        //                 ->where('subdit_id', auth()->user()->subdit_id); // Unit dan subdit bisa lihat laporan miliknya
-        // }
-
-        // if (auth()->user()->hasRole('unit')) {
-        //     return $query->where('unit_id', auth()->user()->unit_id)
-        //                 ->where('subdit_id', auth()->user()->subdit_id); // Unit dan subdit bisa lihat laporan miliknya
-        // }
-
-        // if (auth()->user()->hasRole('Admin Unit')) {
-        //     return $query->where('unit_id', auth()->user()->unit_id)
-        //                 ->where('subdit_id', auth()->user()->subdit_id); // Unit dan subdit bisa lihat laporan miliknya
-        // }
-        
-        // if (auth()->user()->hasRole('penyidik')) {
-        //     return $query->where('penyidik_id', auth()->user()->id); // Penyidik bisa lihat laporan miliknya
-        // }
-
-        // if (auth()->user()->hasRole('Penyidik/Penyidik Pembantu')) {
-        //     return $query->where('penyidik_id', auth()->user()->id); // Penyidik bisa lihat laporan miliknya
-        // }
         
         return $query;
     }
