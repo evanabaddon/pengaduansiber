@@ -452,36 +452,26 @@ class LaporanInformasiResource extends Resource
                                     ->label('BARANG BUKTI')
                                     ->relationship('barangBuktis')
                                     ->schema([
-                                        Grid::make(2)
+                                        Grid::make(3)
                                             ->schema([
-                                                TextInput::make('jumlah')->label('JUMLAH'),
-                                                TextInput::make('nama_barang')->label('NAMA BARANG'),
+                                                TextInput::make('jumlah')
+                                                    ->label('JUMLAH')
+                                                    ->required(),
+                                                TextInput::make('satuan')
+                                                    ->label('SATUAN / UNIT')
+                                                    ->required(),
+                                                TextInput::make('nama_barang')
+                                                    ->label('NAMA BARANG')
+                                                    ->required(),
                                             ]),
-                                        // Textarea::make('deskripsi')->label('DESKRIPSI'),
-                                        // Grid::make(3)
-                                        //     ->schema([
-                                        //         TextInput::make('jumlah')->label('JUMLAH'),
-                                        //         Select::make('kondisi')
-                                        //         ->options([
-                                        //             'Baik' => 'Baik',
-                                        //             'Rusak Ringan' => 'Rusak Ringan',
-                                        //             'Rusak Berat' => 'Rusak Berat'
-                                        //         ]),
-                                        //         TextInput::make('lokasi_penyimpanan')
-                                        //     ->label('LOKASI PENYIMPANAN'),
-                                        //     ]),
-                                        
-                                        // FileUpload::make('media')
-                                        //     ->label('FOTO BARANG BUKTI')
-                                        //     ->multiple()
-                                        //     ->directory('barang-bukti')
-                                        //     ->preserveFilenames()
-                                        //     ->image()
-                                        //     ->maxSize(2048)
                                     ])
                                     ->columnSpanFull()
                                     ->defaultItems(0)
-                                    ->addActionLabel('Tambah Barang Bukti'),
+                                    ->addActionLabel('Tambah Barang Bukti')
+                                    ->mutateRelationshipDataBeforeCreateUsing(function (array $data): array {
+                                        $data['buktiable_type'] = LaporanInformasi::class;
+                                        return $data;
+                                    }),
                             ]),
                         // wizard media
                         Wizard\Step::make('Media')
