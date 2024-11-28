@@ -82,7 +82,7 @@
                             {{-- Tempat Tanggal Lahir --}}
                             <div class="flex gap-2">
                                 <p class="w-32">Tempat/Tgl Lahir</p>
-                                <p>: {{ $record->pelapors->tempat_lahir ?? '-' }}, {{ $record->pelapors->tanggal_lahir ? date('d F Y', strtotime($record->pelapors->tanggal_lahir)) : '-' }}</p>
+                                <p>: {{ $record->pelapors->tempat_lahir ?? '-' }}, {{ $record->pelapors?->tanggal_lahir ? date('d F Y', strtotime($record->pelapors?->tanggal_lahir)) : '-' }}</p>
                             </div>
                             {{-- Agama --}}
                             <div class="flex gap-2">
@@ -132,7 +132,7 @@
                             {{-- Tempat Tanggal Lahir --}}
                             <div class="flex gap-2">
                                 <p class="w-32">Tempat/Tgl Lahir</p>
-                                <p>: {{ $record->korbans->tempat_lahir ?? '-' }}, {{ $record->korbans->tanggal_lahir ? date('d F Y', strtotime($record->korbans->tanggal_lahir)) : '-' }}</p>
+                                <p>: {{ $record->korbans->tempat_lahir ?? '-' }}, {{ $record->korbans?->tanggal_lahir ? date('d F Y', strtotime($record->korbans?->tanggal_lahir)) : '-' }}</p>
                             </div>
                             {{-- Agama --}}
                             <div class="flex gap-2">
@@ -183,7 +183,7 @@
                         </div>
                         <div class="flex gap-2">
                             <p class="w-32">Tempat/Tgl Lahir</p>
-                            <p>: {{ $record->terlapors->tempat_lahir ?? '-' }}, {{ $record->terlapors->tanggal_lahir ? date('d F Y', strtotime($record->terlapors->tanggal_lahir)) : '-' }}</p>
+                            <p>: {{ $record->terlapors?->tempat_lahir ?? '-' }}, {{ $record->terlapors?->tanggal_lahir ? date('d F Y', strtotime($record->terlapors?->tanggal_lahir)) : '-' }}</p>
                         </div>
                         <div class="flex gap-2">
                             <p class="w-32">Agama</p>
