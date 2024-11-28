@@ -47,13 +47,6 @@ class PenyidikResource extends Resource
     {
         return $form
             ->schema([
-                // select subdit dan unit
-                Select::make('subdit_id')
-                    ->label('SUBDIT')
-                    ->options(Subdit::all()->pluck('name', 'id'))
-                    ->searchable()
-                    ->live()
-                    ->hidden(auth()->user()->hasRole('subdit') || auth()->user()->hasRole('unit')),
                 // select unit berdasarkan subdit_id
                 Select::make('unit_id')
                     ->label('UNIT')
@@ -62,6 +55,13 @@ class PenyidikResource extends Resource
                         ->where('subdit_id', $get('subdit_id'))
                         ->pluck('name', 'id'))
                         ->searchable(),
+                // select subdit dan unit
+                Select::make('subdit_id')
+                    ->label('SUBDIT')
+                    ->options(Subdit::all()->pluck('name', 'id'))
+                    ->searchable()
+                    ->live()
+                    ->hidden(auth()->user()->hasRole('subdit') || auth()->user()->hasRole('unit')),
                 TextInput::make('name')->label('PENYIDIK/PENYIDIK PEMBANTU'),
                 // select pangkat
                 Select::make('pangkat_penyidik')
