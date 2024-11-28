@@ -66,6 +66,15 @@ class EditProfile extends Page
             ->revealable()
             ->columnSpan('2');
             
+        // Field konfirmasi password
+        $fields[] = TextInput::make('password_confirmation')
+            ->type('password')
+            ->password()
+            ->label('Konfirmasi Password')
+            ->revealable()
+            ->same('password')
+            ->columnSpan('2');
+            
         return $fields;
     }
 
@@ -75,9 +84,17 @@ class EditProfile extends Page
         
         $user = auth()->user();
 
+        // Validasi password dan konfirmasi harus sama
         if (!empty($state['password'])) {
+            if ($state['password'] !== $state['password_confirmation']) {
+                Notification::make()
+                    ->title('Password dan konfirmasi password tidak sama')
+                    ->danger()
+                    ->send();
+                return;
+            }
+            
             $user->password = Hash::make($state['password']);
-            // $user->plain_password = $state['password'];
         }
         
         if ($user->hasRole('super_admin')) {
