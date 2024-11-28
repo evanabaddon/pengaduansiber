@@ -81,10 +81,8 @@ class EditProfile extends Page
     public function save()
     {
         $state = $this->data;
-        
         $user = auth()->user();
-
-        // Validasi password dan konfirmasi harus sama
+        
         if (!empty($state['password'])) {
             if ($state['password'] !== $state['password_confirmation']) {
                 Notification::make()
@@ -95,6 +93,16 @@ class EditProfile extends Page
             }
             
             $user->password = Hash::make($state['password']);
+            auth()->logout();
+            session()->invalidate();
+            session()->regenerateToken();
+            
+            Notification::make()
+                ->title('Password berhasil diubah. Silakan login kembali.')
+                ->success()
+                ->send();
+                
+            return redirect(route('filament.admin.auth.login'));
         }
         
         if ($user->hasRole('super_admin')) {
@@ -108,5 +116,7 @@ class EditProfile extends Page
             ->title('Profil berhasil diperbarui')
             ->success()
             ->send();
+            
+        return redirect(config('filament.path'));
     }
 } 
