@@ -36,7 +36,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 use App\Filament\Resources\LaporanInformasiResource\Pages;
-use App\Models\Penyidik;
 use App\Notifications\LaporanInformasiAssignedNotification;
 use Filament\Tables\Actions\ViewAction as ActionsViewAction;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -166,7 +165,6 @@ class LaporanInformasiResource extends Resource
                                     ->schema([
                                         Select::make('pelapors.province_id')
                                             ->label('PROVINSI')
-                                            ->hidden(fn (Get $get) => $get('pelapors.domestic'))
                                             ->provinsi()
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('pelapors.city_id', null);
@@ -175,7 +173,6 @@ class LaporanInformasiResource extends Resource
                                             }),
                                         Select::make('pelapors.city_id')
                                             ->label('KABUPATEN / KOTA')
-                                            ->hidden(fn (Get $get) => $get('pelapors.domestic'))
                                             ->kabupaten()
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('pelapors.district_id', null);
@@ -186,12 +183,10 @@ class LaporanInformasiResource extends Resource
                                     ->schema([
                                         Select::make('pelapors.district_id')
                                             ->label('KECAMATAN')
-                                            ->hidden(fn (Get $get) => $get('pelapors.domestic'))
                                             ->kecamatan()
                                             ->afterStateUpdated(fn (callable $set) => $set('pelapors.subdistrict_id', null)),
                                         Select::make('pelapors.subdistrict_id')
                                             ->label('KELURAHAN / DESA')
-                                            ->hidden(fn (Get $get) => $get('pelapors.domestic'))
                                             ->kelurahan(),
                                     ]),
                                 ]),
@@ -300,7 +295,6 @@ class LaporanInformasiResource extends Resource
                                     ->schema([
                                         Select::make('korbans.province_id')
                                             ->label('PROVINSI')
-                                            ->hidden(fn (Get $get) => $get('korbans.domestic'))
                                             ->provinsi()
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('korbans.city_id', null);
@@ -309,7 +303,6 @@ class LaporanInformasiResource extends Resource
                                             }),
                                         Select::make('korbans.city_id')
                                             ->label('KABUPATEN / KOTA')
-                                            ->hidden(fn (Get $get) => $get('korbans.domestic'))
                                             ->kabupaten()
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('korbans.district_id', null);
@@ -320,12 +313,10 @@ class LaporanInformasiResource extends Resource
                                     ->schema([
                                         Select::make('korbans.district_id')
                                             ->label('KECAMATAN')
-                                            ->hidden(fn (Get $get) => $get('korbans.domestic'))
                                             ->kecamatan()
                                             ->afterStateUpdated(fn (callable $set) => $set('korbans.subdistrict_id', null)),
                                         Select::make('korbans.subdistrict_id')
                                             ->label('KELURAHAN / DESA')
-                                            ->hidden(fn (Get $get) => $get('korbans.domestic'))
                                             ->kelurahan(),
                                     ]),
                             ]),
@@ -393,7 +384,6 @@ class LaporanInformasiResource extends Resource
                                     ->schema([
                                         Select::make('terlapors.province_id')
                                             ->label('PROVINSI')
-                                            ->hidden(fn (Get $get) => $get('terlapors.domestic'))
                                             ->provinsi()
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('terlapors.city_id', null);
@@ -402,7 +392,6 @@ class LaporanInformasiResource extends Resource
                                             }),
                                         Select::make('terlapors.city_id')
                                             ->label('KABUPATEN / KOTA')
-                                            ->hidden(fn (Get $get) => $get('terlapors.domestic'))
                                             ->kabupaten()
                                             ->afterStateUpdated(function (callable $set) {
                                                 $set('terlapors.district_id', null);
@@ -413,12 +402,10 @@ class LaporanInformasiResource extends Resource
                                     ->schema([
                                         Select::make('terlapors.district_id')
                                             ->label('KECAMATAN')
-                                            ->hidden(fn (Get $get) => $get('terlapors.domestic'))
                                             ->kecamatan()
                                             ->afterStateUpdated(fn (callable $set) => $set('terlapors.subdistrict_id', null)),
                                         Select::make('terlapors.subdistrict_id')
                                             ->label('KELURAHAN / DESA')
-                                            ->hidden(fn (Get $get) => $get('terlapors.domestic'))
                                             ->kelurahan(),
                                     ]),
                             ]),
