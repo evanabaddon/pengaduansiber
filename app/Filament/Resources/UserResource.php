@@ -86,8 +86,8 @@ class UserResource extends Resource implements HasShieldPermissions
     {
         return $table
             ->columns([
-                TextColumn::make('name'),
-                TextColumn::make('email'),
+                TextColumn::make('name')->sortable()->searchable(),
+                TextColumn::make('email')->sortable()->searchable(),
                 // role
                 TextColumn::make('roles.name')
                     ->label('Role')
@@ -102,7 +102,11 @@ class UserResource extends Resource implements HasShieldPermissions
                     ->badge(),
             ])
             ->filters([
-                //
+                // filter by role
+                SelectFilter::make('roles.name')
+                    ->label('Role')
+                    ->options(Role::all()->pluck('name', 'id'))
+                    ->searchable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
