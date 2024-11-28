@@ -60,7 +60,10 @@ class UserResource extends Resource implements HasShieldPermissions
                     ->email(),
                 TextInput::make('password')
                     ->password()
-                    ->required(fn (string $context): bool => $context === 'create'),
+                    ->required(fn (string $context): bool => $context === 'create')
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                    ->revealable(),
                     
                 Forms\Components\Select::make('roles')
                     ->relationship('roles', 'name')
