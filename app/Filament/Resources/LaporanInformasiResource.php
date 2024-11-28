@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 use App\Filament\Resources\LaporanInformasiResource\Pages;
+use App\Models\Penyidik;
 use App\Notifications\LaporanInformasiAssignedNotification;
 use Filament\Tables\Actions\ViewAction as ActionsViewAction;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -610,24 +611,9 @@ class LaporanInformasiResource extends Resource
                             ->selectablePlaceholder('Pilih Penyidik')
                             ->disabled(auth()->user()->hasRole('penyidik'))
                             ->options(function (LaporanInformasi $record) {
-                                if (!$record->unit_id) return [];
-                                return User::where('unit_id', $record->unit_id)
-                                    ->whereDoesntHave('roles', function($query) {
-                                        $query->whereIn('name', [
-                                            'super_admin',
-                                            'Admin Subdit',
-                                            'Kasubdit',
-                                            'Admin Unit',
-                                            'Kanit',
-                                            'Admin Bagbinopsnal',
-                                            'Kabagbinopsnal',
-                                            'Direktur/Wakil Direktur',
-                                            'Kasubbagrenmin',
-                                            'Admin Subbagrenmin',
-                                            'Kabagwassidik',
-                                            'Admin Bagwassidik',
-                                        ]);
-                                    })
+                                if (!$record->subdit_id || !$record->unit_id) return [];
+                                return Penyidik::where('subdit_id', $record->subdit_id)
+                                    ->where('unit_id', $record->unit_id)
                                     ->pluck('name', 'id');
                             })
                             ->searchable()
