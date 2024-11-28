@@ -9,6 +9,12 @@ class EditPenyidik extends EditRecord
 {
     protected static string $resource = PenyidikResource::class;
 
+    // title
+    public function getTitle(): string
+    {
+        return 'Ubah Penyidik/Penyidik Pembantu';
+    }
+
     // redirect ke halaman list setelah edit
     protected function getRedirectUrl(): string
     {

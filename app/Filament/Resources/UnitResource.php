@@ -55,7 +55,7 @@ class UnitResource extends Resource
                 TextInput::make('nama_pimpinan')->label('KANIT'),
                 // select pangkat pimpinan
                 Select::make('pangkat_pimpinan')
-                    ->label('PANGKAT PIMPINAN')
+                    ->label('PANGKAT')
                     ->options([
                         1 => 'KOMBESPOL',
                         2 => 'AKBP',
