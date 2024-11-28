@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
-use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
 use App\Filament\Resources\UserResource;
+use App\Models\User;
+use Filament\Resources\Pages\EditRecord;
 
 class EditUser extends EditRecord
 {
@@ -14,5 +16,6 @@ class EditUser extends EditRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
 }
 

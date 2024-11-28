@@ -58,21 +58,6 @@ class UserResource extends Resource implements HasShieldPermissions
     {
         return $form
             ->schema([
-                TextInput::make('name'),
-                TextInput::make('email')
-                    ->email(),
-                TextInput::make('password')
-                    ->password()
-                    ->required(fn (string $context): bool => $context === 'create')
-                    ->dehydrated(fn ($state) => filled($state))
-                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                    ->revealable(),
-                    
-                Forms\Components\Select::make('roles')
-                    ->relationship('roles', 'name')
-                    ->multiple()
-                    ->preload()
-                    ->searchable(),
                 Forms\Components\Select::make('subdit_id')
                     ->relationship('subdit', 'name')
                     ->searchable()
@@ -81,6 +66,23 @@ class UserResource extends Resource implements HasShieldPermissions
                     ->relationship('unit', 'name')
                     ->searchable()
                     ->preload(),
+                TextInput::make('name'),
+                TextInput::make('email')
+                    ->email(),
+                TextInput::make('password')
+                    ->password()
+                    ->required(fn (string $context): bool => $context === 'create')
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                    ->revealable()
+                    ->default(fn ($record) => $record?->password),
+                    
+                Forms\Components\Select::make('roles')
+                    ->relationship('roles', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->searchable(),
+                
             ]);
     }
 
@@ -106,6 +108,8 @@ class UserResource extends Resource implements HasShieldPermissions
             ->filters([
             ])
             ->actions([
+                // view
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
