@@ -50,7 +50,7 @@ class AdminPanelProvider extends PanelProvider
             ->darkMode(false)
             ->login(Login::class)
             ->brandName('Ditressiber Polda Jatim') 
-            ->brandLogo(asset('images/logo-siber-polri.png')) // Logo berada di folder public/images/
+            // ->brandLogo(asset('images/logo-siber-polri.png')) // Logo berada di folder public/images/
             ->brandLogoHeight('5rem') // Atur tinggi logo
             // ->profile(isSimple:false)
             ->userMenuItems([
