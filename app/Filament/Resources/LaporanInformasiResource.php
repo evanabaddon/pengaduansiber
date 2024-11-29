@@ -284,7 +284,18 @@ class LaporanInformasiResource extends Resource
                                         $set('korbans.kontak', $get('pelapors.kontak'));
                                         $set('korbans.kewarganegaraan', $get('pelapors.kewarganegaraan'));
                                         $set('korbans.tempat_lahir', $get('pelapors.tempat_lahir'));
-                                        $set('korbans.tanggal_lahir', $get('pelapors.tanggal_lahir'));
+                                        // Set tanggal lahir dengan format yang benar
+                                        $tanggalLahir = $get('pelapors.tanggal_lahir');
+                                        if ($tanggalLahir) {
+                                            // Pastikan format tanggal sesuai
+                                            $formattedDate = Carbon::parse($tanggalLahir)->format('Y-m-d');
+                                            $set('korbans.tanggal_lahir', $formattedDate);
+                                            
+                                            // Hitung dan set usia
+                                            $birthDate = Carbon::parse($tanggalLahir);
+                                            $age = $birthDate->age;
+                                            $set('korbans.usia', $age);
+                                        }
                                         $set('korbans.jenis_kelamin', $get('pelapors.jenis_kelamin'));
                                         $set('korbans.pekerjaan', $get('pelapors.pekerjaan'));
                                         $set('korbans.usia', $get('pelapors.usia'));
@@ -344,15 +355,16 @@ class LaporanInformasiResource extends Resource
                                             'Perempuan' => 'Perempuan'
                                         ]),
                                         TextInput::make('korbans.tempat_lahir')->label('TEMPAT LAHIR')->required(),
-                                        DatePicker::make('korbans.tanggal_lahir')
+                                        Flatpickr::make('korbans.tanggal_lahir')
                                             ->label('TGL. LAHIR')
-                                            ->reactive()
-                                            ->displayFormat('d F Y')
-                                            ->native(false)
-                                            ->closeOnDateSelection()
+                                            ->required()
+                                            ->allowInput()
+                                            ->dateFormat('d F Y')
+                                            ->altFormat('d F Y')
+                                            ->live()
                                             ->afterStateUpdated(function ($state, callable $set) {
                                                 if ($state) {
-                                                    $birthDate = \Carbon\Carbon::parse($state);
+                                                    $birthDate = Carbon::parse($state);
                                                     $age = $birthDate->age;
                                                     $set('korbans.usia', $age);
                                                 } else {
@@ -515,15 +527,16 @@ class LaporanInformasiResource extends Resource
                                                 'Perempuan' => 'Perempuan'
                                             ]),
                                         TextInput::make('terlapors.tempat_lahir')->label('TEMPAT LAHIR'),
-                                        DatePicker::make('terlapors.tanggal_lahir')
+                                        Flatpickr::make('terlapors.tanggal_lahir')
                                             ->label('TGL. LAHIR')
-                                            ->reactive()
-                                            ->displayFormat('d F Y')
-                                            ->native(false)
-                                            ->closeOnDateSelection()
+                                            ->allowInput()
+                                            // ->dateFormat('d F Y')
+                                            ->altFormat('d F Y')
+                                            ->altInput(true)
+                                            ->live()
                                             ->afterStateUpdated(function ($state, callable $set) {
                                                 if ($state) {
-                                                    $birthDate = \Carbon\Carbon::parse($state);
+                                                    $birthDate = Carbon::parse($state);
                                                     $age = $birthDate->age;
                                                     $set('terlapors.usia', $age);
                                                 } else {

@@ -18,6 +18,8 @@ class Terlapor extends Model
         'alamat',
         'kontak',
         'usia',
+        'tempat_lahir',
+        'tanggal_lahir',
         'domestic',
         'province_id',
         'city_id',
