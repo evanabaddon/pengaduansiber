@@ -98,6 +98,8 @@ class EditLaporanInformasi extends EditRecord
             'kontak' => $data['terlapors']['kontak'],
             'kontak_2' => $data['terlapors']['kontak_2'] ?? null,
             'jenis_kelamin' => $data['terlapors']['jenis_kelamin'],
+            'tempat_lahir' => $data['terlapors']['tempat_lahir'],
+            'tanggal_lahir' => $data['terlapors']['tanggal_lahir'],
             'usia' => $data['terlapors']['usia'],
             'agama' => $data['terlapors']['agama'],
             'kewarganegaraan' => $data['terlapors']['kewarganegaraan'],

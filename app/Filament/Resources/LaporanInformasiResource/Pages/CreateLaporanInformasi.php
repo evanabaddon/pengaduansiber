@@ -109,6 +109,8 @@ class CreateLaporanInformasi extends CreateRecord
             'kontak_2' => $data['terlapors']['kontak_2'] ?? null,
             'usia' => $data['terlapors']['usia'],
             'jenis_kelamin' => $data['terlapors']['jenis_kelamin'],
+            'tempat_lahir' => $data['terlapors']['tempat_lahir'],
+            'tanggal_lahir' => $data['terlapors']['tanggal_lahir'],
             'data_tambahan' => $data['terlapors']['data_tambahan'] ?? null,
             'province_id' => $data['terlapors']['province_id'] ?? null,
             'city_id' => $data['terlapors']['city_id'] ?? null,
