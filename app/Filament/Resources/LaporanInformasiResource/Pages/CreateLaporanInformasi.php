@@ -29,11 +29,23 @@ class CreateLaporanInformasi extends CreateRecord
         // default value status adalah 'Terlapor'
         $data['status'] = 'Proses';
 
+
+        // jika yang input usernya memliki subdit_id dan atau memiliki unit_id maka inject subdit_id dan unit_id ke data
+        if (auth()->user()->subdit_id) {
+            $data['subdit_id'] = auth()->user()->subdit_id;
+        }
+        if (auth()->user()->unit_id) {
+            $data['unit_id'] = auth()->user()->unit_id;
+        }
+
+        // dd($data);
+
         // Step 1: Simpan data utama LaporanInformasi
         $laporanInformasi = LaporanInformasi::create($data);
 
         // dd($laporanInformasi);
 
+        
         // Step 2: Simpan data Pelapor
         Pelapor::create([
             'laporan_informasi_id' => $laporanInformasi->id,
@@ -72,6 +84,11 @@ class CreateLaporanInformasi extends CreateRecord
             'alamat' => $data['korbans']['alamat'],
 
         ]);
+
+        // jika nama terlapor tidak diisi maka isi dengan null
+        if ($data['terlapors']['nama'] == '') {
+            $data['terlapors']['nama'] = 'null';
+        }
 
         // Step 4: Simpan data Terlapor
         Terlapor::create([

@@ -413,7 +413,7 @@ class LaporanInformasiResource extends Resource
                         Wizard\Step::make('TKP')
                             ->description('Tempat Kejadian Perkara')
                             ->schema([
-                                Textarea::make('tkp')->label('TEMPAT KEJADIAN PERKARA'),
+                                Textarea::make('tkp')->label('TEMPAT KEJADIAN PERKARA')->required(),
                                 Select::make('province_id')
                                     ->label('PROVINSI')
                                     ->provinsi()
