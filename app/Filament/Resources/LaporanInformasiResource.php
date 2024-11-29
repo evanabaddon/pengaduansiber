@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use Carbon\Carbon;
 use Filament\Forms;
 use App\Models\Unit;
 use App\Models\User;
 use Filament\Tables;
 use App\Models\Subdit;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 use App\Models\Penyidik;
 use Filament\Forms\Form;
 use Illuminate\View\View;
@@ -36,12 +38,15 @@ use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
+use Coolsam\FilamentFlatpickr\Forms\Components\Flatpickr;
 use App\Filament\Resources\LaporanInformasiResource\Pages;
 use App\Notifications\LaporanInformasiAssignedNotification;
 use Filament\Tables\Actions\ViewAction as ActionsViewAction;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Parfaitementweb\FilamentCountryField\Forms\Components\Country;
 use Parfaitementweb\FilamentCountryField\Infolists\Components\CountryEntry;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Toggle;
 
 class LaporanInformasiResource extends Resource
 {
@@ -100,8 +105,23 @@ class LaporanInformasiResource extends Resource
                             ->schema([
                                 Grid::make(2)
                                     ->schema([
-                                        DatePicker::make('tanggal_lapor')->default('now')->label('TGL. LAPOR')->readOnly()->native(false)->displayFormat('d F Y'),
-                                        DatePicker::make('tanggal_kejadian')->default('now')->label('TGL. KEJADIAN')->native(false)->displayFormat('d F Y'),
+                                        Flatpickr::make('tanggal_lapor')
+                                            ->label('TGL. LAPOR')
+                                            ->default(today()->format('d F Y'))
+                                            ->required()
+                                            ->allowInput()
+                                            ->dateFormat('d F Y')
+                                            ->altFormat('d F Y')
+                                            ->readonly()
+                                            ->altInput(true),
+                                        Flatpickr::make('tanggal_kejadian')
+                                            ->label('TGL. KEJADIAN')
+                                            ->default(today()->format('d F Y'))
+                                            ->required()
+                                            ->allowInput()
+                                            ->dateFormat('d F Y')
+                                            ->altFormat('d F Y')
+                                            ->altInput(true),
                                     ]),
                                 // identitas pelapor
                                 Grid::make(5)
@@ -109,33 +129,38 @@ class LaporanInformasiResource extends Resource
                                     TextInput::make('pelapors.nama')->label('NAMA')->required(),
                                     TextInput::make('pelapors.identity_no')->label('NO IDENTITAS')->required(),
                                     PhoneInput::make('pelapors.kontak')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->required()->label('KONTAK'),
+                                    PhoneInput::make('pelapors.kontak_2')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->label('KONTAK LAIN'),
                                     Country::make('pelapors.kewarganegaraan')->label('KEWARGANEGARAAN')->default('Indonesia')->searchable(),
-                                    Select::make('pelapors.jenis_kelamin')
+                                    
+                                ]),
+                                Grid::make(6)
+                                    ->schema([
+                                        Select::make('pelapors.jenis_kelamin')
                                             ->label('JENIS KELAMIN')
                                             ->options([
                                                 'Laki - Laki' => 'Laki - Laki',
                                                 'Perempuan' => 'Perempuan'
                                             ])
                                             ->required(),
-                                ]),
-                                Grid::make(5)
-                                    ->schema([
                                         TextInput::make('pelapors.tempat_lahir')->label('TEMPAT LAHIR')->required(),
-                                        DatePicker::make('pelapors.tanggal_lahir')
+                                        Flatpickr::make('pelapors.tanggal_lahir')
                                             ->label('TGL. LAHIR')
-                                            ->reactive()
-                                            ->displayFormat('d F Y')
-                                            ->native(false)
                                             ->required()
+                                            ->allowInput()
+                                            ->dateFormat('d F Y')
+                                            ->altFormat('d F Y')
+                                            ->altInput(true)
+                                            ->live()
                                             ->afterStateUpdated(function ($state, callable $set) {
                                                 if ($state) {
-                                                    $birthDate = \Carbon\Carbon::parse($state);
+                                                    $birthDate = Carbon::parse($state);
                                                     $age = $birthDate->age;
                                                     $set('pelapors.usia', $age);
                                                 } else {
                                                     $set('pelapors.usia', null);
                                                 }
                                             }),
+
                                         TextInput::make('pelapors.usia')->readonly()->label('USIA'),
                                         TextInput::make('pelapors.pekerjaan')->label('PEKERJAAN')->required(),
                                         // select agama tidak ada di database
@@ -149,48 +174,102 @@ class LaporanInformasiResource extends Resource
                                             'Lainnya' => 'Lainnya',
                                         ]),
                                     ]),
-                                // checkbox domestic atau tidak
-                                // Checkbox::make('pelapors.domestic')
-                                //     ->label('LUAR NEGERI')
-                                //     ->reactive()
-                                //     ->afterStateUpdated(function ($state, callable $set) {
-                                //         if ($state) {
-                                //             $set('pelapors.province_id', null);
-                                //             $set('pelapors.city_id', null); 
-                                //             $set('pelapors.district_id', null);
-                                //             $set('pelapors.subdistrict_id', null);
-                                //         }
-                                //     }),
-                                Textarea::make('pelapors.alamat')->label('ALAMAT')->required(),
-                                Grid::make(2)
-                                    ->schema([
-                                        Select::make('pelapors.province_id')
-                                            ->label('PROVINSI')
-                                            ->provinsi()
-                                            ->afterStateUpdated(function (callable $set) {
-                                                $set('pelapors.city_id', null);
-                                                $set('pelapors.district_id', null);
-                                                $set('pelapors.subdistrict_id', null);
-                                            }),
-                                        Select::make('pelapors.city_id')
-                                            ->label('KABUPATEN / KOTA')
-                                            ->kabupaten()
-                                            ->afterStateUpdated(function (callable $set) {
-                                                $set('pelapors.district_id', null);
-                                                $set('pelapors.subdistrict_id', null);
-                                            }),
+                                
+                                    // Alamat section
+                                    Section::make('Alamat')
+                                        ->schema([
+                                            // Alamat 1 (Utama)
+                                            Section::make('Alamat Utama')
+                                                ->schema([
+                                                    Textarea::make('pelapors.alamat')
+                                                        ->label('ALAMAT')
+                                                        ->required(),
+                                                    Select::make('pelapors.province_id')
+                                                        ->label('PROVINSI')
+                                                        ->provinsi()
+                                                        ->live()
+                                                        ->searchable()
+                                                        ->afterStateUpdated(function (callable $set) {
+                                                            $set('pelapors.city_id', null);
+                                                            $set('pelapors.district_id', null);
+                                                            $set('pelapors.subdistrict_id', null);
+                                                        }),
+                                                    Select::make('pelapors.city_id')
+                                                        ->label('KABUPATEN / KOTA')
+                                                        ->kabupaten()
+                                                        ->live()
+                                                        ->searchable()
+                                                        ->afterStateUpdated(function (callable $set) {
+                                                            $set('pelapors.district_id', null);
+                                                            $set('pelapors.subdistrict_id', null);
+                                                        }),
+                                                    Select::make('pelapors.district_id')
+                                                        ->label('KECAMATAN')
+                                                        ->kecamatan()
+                                                        ->live()
+                                                        ->searchable()
+                                                        ->afterStateUpdated(fn (callable $set) => $set('pelapors.subdistrict_id', null)),
+                                                    Select::make('pelapors.subdistrict_id')
+                                                        ->label('KELURAHAN / DESA')
+                                                        ->kelurahan()
+                                                        ->live()
+                                                        ->searchable(),
+                                                ]),
+
+                                            // Toggle untuk menampilkan Alamat 2
+                                            Toggle::make('pelapors_has_second_address')
+                                                ->label('Tambah Alamat Lain?')
+                                                ->live()
+                                                ->dehydrated(false)
+                                                ->afterStateHydrated(function (Get $get, Set $set, $state) {
+                                                    if ($get('pelapors.alamat_2') || 
+                                                        $get('pelapors.province_id_2') || 
+                                                        $get('pelapors.city_id_2') || 
+                                                        $get('pelapors.district_id_2') || 
+                                                        $get('pelapors.subdistrict_id_2')) {
+                                                        $set('pelapors_has_second_address', true);
+                                                    }
+                                                }),
+
+                                            // Alamat 2 (Opsional)
+                                            Section::make('Alamat Lain')
+                                                ->schema([
+                                                    Textarea::make('pelapors.alamat_2')
+                                                        ->label('ALAMAT LAIN'),
+                                                    Select::make('pelapors.province_id_2')
+                                                        ->label('PROVINSI')
+                                                        ->provinsi()
+                                                        ->live()
+                                                        ->searchable()
+                                                        ->afterStateUpdated(function (callable $set) {
+                                                            $set('pelapors.city_id_2', null);
+                                                            $set('pelapors.district_id_2', null);
+                                                            $set('pelapors.subdistrict_id_2', null);
+                                                        }),
+                                                    Select::make('pelapors.city_id_2')
+                                                        ->label('KABUPATEN / KOTA')
+                                                        ->kabupaten(fn (Get $get): ?string => $get('pelapors.province_id_2'))
+                                                        ->live()
+                                                        ->searchable()
+                                                        ->afterStateUpdated(function (callable $set) {
+                                                            $set('pelapors.district_id_2', null);
+                                                            $set('pelapors.subdistrict_id_2', null);
+                                                        }),
+                                                    Select::make('pelapors.district_id_2')
+                                                        ->label('KECAMATAN')
+                                                        ->kecamatan(fn (Get $get): ?string => $get('pelapors.city_id_2'))
+                                                        ->live()
+                                                        ->searchable()
+                                                        ->afterStateUpdated(fn (callable $set) => $set('pelapors.subdistrict_id_2', null)),
+                                                    Select::make('pelapors.subdistrict_id_2')
+                                                        ->label('KELURAHAN / DESA')
+                                                        ->kelurahan(fn (Get $get): ?string => $get('pelapors.district_id_2'))
+                                                        ->live()
+                                                        ->searchable(),
+                                                ])
+                                                ->visible(fn (Get $get): bool => $get('pelapors_has_second_address')),
+                                        ])
                                     ]),
-                                Grid::make(2)
-                                    ->schema([
-                                        Select::make('pelapors.district_id')
-                                            ->label('KECAMATAN')
-                                            ->kecamatan()
-                                            ->afterStateUpdated(fn (callable $set) => $set('pelapors.subdistrict_id', null)),
-                                        Select::make('pelapors.subdistrict_id')
-                                            ->label('KELURAHAN / DESA')
-                                            ->kelurahan(),
-                                    ]),
-                                ]),
                         Wizard\Step::make('Korban')
                             ->description('Identitas Korban')
                             ->schema([
@@ -216,6 +295,12 @@ class LaporanInformasiResource extends Resource
                                         $set('korbans.subdistrict_id', $get('pelapors.subdistrict_id'));
                                         $set('korbans.domestic', $get('pelapors.domestic'));
                                         $set('korbans.agama', $get('pelapors.agama'));
+                                        $set('korbans.alamat_2', $get('pelapors.alamat_2'));
+                                        $set('korbans.province_id_2', $get('pelapors.province_id_2'));
+                                        $set('korbans.city_id_2', $get('pelapors.city_id_2'));
+                                        $set('korbans.district_id_2', $get('pelapors.district_id_2'));
+                                        $set('korbans.subdistrict_id_2', $get('pelapors.subdistrict_id_2'));
+                                        $set('korbans.kontak_2', $get('pelapors.kontak_2'));
 
                                     } else {
                                         $set('korbans.identity_no', null);
@@ -234,6 +319,12 @@ class LaporanInformasiResource extends Resource
                                         $set('korbans.subdistrict_id', null);
                                         $set('korbans.domestic', null);
                                         $set('korbans.agama', null);
+                                        $set('korbans.alamat_2', null);
+                                        $set('korbans.province_id_2', null);
+                                        $set('korbans.city_id_2', null);
+                                        $set('korbans.district_id_2', null);
+                                        $set('korbans.subdistrict_id_2', null);
+                                        $set('korbans.kontak_2', null);
                                     }
                                 }),
                                 Grid::make(5)
@@ -241,16 +332,17 @@ class LaporanInformasiResource extends Resource
                                         TextInput::make('korbans.nama')->label('NAMA'),
                                         TextInput::make('korbans.identity_no')->label('NO IDENTITAS'),
                                         PhoneInput::make('korbans.kontak')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->label('KONTAK'),
+                                        PhoneInput::make('korbans.kontak_2')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->label('KONTAK LAIN'),
                                         Country::make('korbans.kewarganegaraan')->label('KEWARGANEGARAAN')->default('Indonesia')->searchable(),
-                                        Select::make('korbans.jenis_kelamin')
-                                            ->label('JENIS KELAMIN')
-                                            ->options([
-                                                'Laki - Laki' => 'Laki - Laki',
-                                                'Perempuan' => 'Perempuan'
-                                            ]),
                                     ]),
-                                Grid::make(5)
+                                Grid::make(6)
                                     ->schema([
+                                        Select::make('korbans.jenis_kelamin')
+                                        ->label('JENIS KELAMIN')
+                                        ->options([
+                                            'Laki - Laki' => 'Laki - Laki',
+                                            'Perempuan' => 'Perempuan'
+                                        ]),
                                         TextInput::make('korbans.tempat_lahir')->label('TEMPAT LAHIR')->required(),
                                         DatePicker::make('korbans.tanggal_lahir')
                                             ->label('TGL. LAHIR')
@@ -279,66 +371,149 @@ class LaporanInformasiResource extends Resource
                                             'Lainnya' => 'Lainnya',
                                         ]),
                                     ]),
-                                // checkbox domestic atau tidak
-                                // Checkbox::make('korbans.domestic')
-                                // ->label('LUAR NEGERI')
-                                // ->reactive()
-                                // ->afterStateUpdated(function ($state, callable $set) {
-                                //     if ($state) {
-                                //         $set('korbans.province_id', null);
-                                //         $set('korbans.city_id', null); 
-                                //         $set('korbans.district_id', null);
-                                //         $set('korbans.subdistrict_id', null);
-                                //     }
-                                // }),
-                                Textarea::make('korbans.alamat')->label('ALAMAT'),
-                                Grid::make(2)
-                                    ->schema([
-                                        Select::make('korbans.province_id')
-                                            ->label('PROVINSI')
-                                            ->provinsi()
-                                            ->afterStateUpdated(function (callable $set) {
-                                                $set('korbans.city_id', null);
-                                                $set('korbans.district_id', null);
-                                                $set('korbans.subdistrict_id', null);
-                                            }),
-                                        Select::make('korbans.city_id')
-                                            ->label('KABUPATEN / KOTA')
-                                            ->kabupaten()
-                                            ->afterStateUpdated(function (callable $set) {
-                                                $set('korbans.district_id', null);
-                                                $set('korbans.subdistrict_id', null);
-                                            }),
-                                    ]),
-                                Grid::make(2)
-                                    ->schema([
-                                        Select::make('korbans.district_id')
-                                            ->label('KECAMATAN')
-                                            ->kecamatan()
-                                            ->afterStateUpdated(fn (callable $set) => $set('korbans.subdistrict_id', null)),
-                                        Select::make('korbans.subdistrict_id')
-                                            ->label('KELURAHAN / DESA')
-                                            ->kelurahan(),
-                                    ]),
+                                // Alamat section
+                                Section::make('Alamat')
+                                ->schema([
+                                    // Alamat 1 (Utama)
+                                    Section::make('Alamat Utama')
+                                        ->schema([
+                                            Textarea::make('korbans.alamat')
+                                                ->label('ALAMAT')
+                                                ->required(),
+                                            Select::make('korbans.province_id')
+                                                ->label('PROVINSI')
+                                                ->provinsi()
+                                                ->live()
+                                                ->searchable()
+                                                ->afterStateUpdated(function (callable $set) {
+                                                    $set('korbans.city_id', null);
+                                                    $set('korbans.district_id', null);
+                                                    $set('korbans.subdistrict_id', null);
+                                                }),
+                                            Select::make('korbans.city_id')
+                                                ->label('KABUPATEN / KOTA')
+                                                ->kabupaten()
+                                                ->live()
+                                                ->searchable()
+                                                ->afterStateUpdated(function (callable $set) {
+                                                    $set('korbans.district_id', null);
+                                                    $set('korbans.subdistrict_id', null);
+                                                }),
+                                            Select::make('korbans.district_id')
+                                                ->label('KECAMATAN')
+                                                ->kecamatan()
+                                                ->live()
+                                                ->searchable()
+                                                ->afterStateUpdated(fn (callable $set) => $set('korbans.subdistrict_id', null)),
+                                            Select::make('korbans.subdistrict_id')
+                                                ->label('KELURAHAN / DESA')
+                                                ->kelurahan()
+                                                ->live()
+                                                ->searchable(),
+                                        ]),
+
+                                    // Toggle untuk menampilkan Alamat 2
+                                    Toggle::make('korbans_has_second_address')
+                                        ->label('Tambah Alamat Lain?')
+                                        ->live()
+                                        ->dehydrated(false)
+                                        ->afterStateHydrated(function (Get $get, Set $set, $state) {
+                                            // Cek jika ada data alamat kedua dari pelapor ketika checkbox sama_dengan_pelapor aktif
+                                            if ($get('sama_dengan_pelapor') && 
+                                                ($get('pelapors.alamat_2') || 
+                                                 $get('pelapors.province_id_2') || 
+                                                 $get('pelapors.city_id_2') || 
+                                                 $get('pelapors.district_id_2') || 
+                                                 $get('pelapors.subdistrict_id_2'))) {
+                                                $set('korbans_has_second_address', true);
+                                                return;
+                                            }
+
+                                            // Cek data alamat kedua korban
+                                            if ($get('korbans.alamat_2') || 
+                                                $get('korbans.province_id_2') || 
+                                                $get('korbans.city_id_2') || 
+                                                $get('korbans.district_id_2') || 
+                                                $get('korbans.subdistrict_id_2')) {
+                                                $set('korbans_has_second_address', true);
+                                                return;
+                                            }
+                                        })
+                                        ->default(function (Get $get) {
+                                            // Tambahkan default state sebagai backup
+                                            return $get('korbans.alamat_2') || 
+                                                   $get('korbans.province_id_2') || 
+                                                   $get('korbans.city_id_2') || 
+                                                   $get('korbans.district_id_2') || 
+                                                   $get('korbans.subdistrict_id_2') ||
+                                                   ($get('sama_dengan_pelapor') && 
+                                                    ($get('pelapors.alamat_2') || 
+                                                     $get('pelapors.province_id_2') || 
+                                                     $get('pelapors.city_id_2') || 
+                                                     $get('pelapors.district_id_2') || 
+                                                     $get('pelapors.subdistrict_id_2')));
+                                        }),
+
+                                    // Alamat 2 (Opsional)
+                                    Section::make('Alamat Lain')
+                                        ->schema([
+                                            Textarea::make('korbans.alamat_2')
+                                                ->label('ALAMAT LAIN'),
+                                            Select::make('korbans.province_id_2')
+                                                ->label('PROVINSI')
+                                                ->provinsi()
+                                                ->live()
+                                                ->searchable()
+                                                ->afterStateUpdated(function (callable $set) {
+                                                    $set('korbans.city_id_2', null);
+                                                    $set('korbans.district_id_2', null);
+                                                    $set('korbans.subdistrict_id_2', null);
+                                                }),
+                                            Select::make('korbans.city_id_2')
+                                                ->label('KABUPATEN / KOTA')
+                                                ->kabupaten(fn (Get $get): ?string => $get('korbans.province_id_2'))
+                                                ->live()
+                                                ->searchable()
+                                                ->afterStateUpdated(function (callable $set) {
+                                                    $set('korbans.district_id_2', null);
+                                                    $set('korbans.subdistrict_id_2', null);
+                                                }),
+                                            Select::make('korbans.district_id_2')
+                                                ->label('KECAMATAN')
+                                                ->kecamatan(fn (Get $get): ?string => $get('korbans.city_id_2'))
+                                                ->live()
+                                                ->searchable()
+                                                ->afterStateUpdated(fn (callable $set) => $set('korbans.subdistrict_id_2', null)),
+                                            Select::make('korbans.subdistrict_id_2')
+                                                ->label('KELURAHAN / DESA')
+                                                ->kelurahan(fn (Get $get): ?string => $get('korbans.district_id_2'))
+                                                ->live()
+                                                ->searchable(),
+                                        ])
+                                        ->visible(function (Get $get): bool { return (bool) $get('korbans_has_second_address');}),
+                                ])
                             ]),
                         Wizard\Step::make('Terlapor')
                             ->description('Identitas Terlapor')
                             ->schema([
-                                Grid::make(5)
+                                Grid::make(6)
                                     ->schema([
                                         TextInput::make('terlapors.nama')->label('NAMA'),
                                         TextInput::make('terlapors.identity_no')->label('NO IDENTITAS'),
+                                        TextInput::make('terlapors.data_tambahan')->label('DATA TAMBAHAN'),
                                         PhoneInput::make('terlapors.kontak')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->label('KONTAK'),
+                                        PhoneInput::make('terlapors.kontak_2')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->label('KONTAK LAIN'),
                                         Country::make('terlapors.kewarganegaraan')->label('KEWARGANEGARAAN')->default('Indonesia')->searchable(),
+                                        
+                                    ]),
+                                Grid::make(6)
+                                    ->schema([
                                         Select::make('terlapors.jenis_kelamin')
                                             ->label('JENIS KELAMIN')
                                             ->options([
                                                 'Laki - Laki' => 'Laki - Laki',
                                                 'Perempuan' => 'Perempuan'
                                             ]),
-                                    ]),
-                                Grid::make(5)
-                                    ->schema([
                                         TextInput::make('terlapors.tempat_lahir')->label('TEMPAT LAHIR'),
                                         DatePicker::make('terlapors.tanggal_lahir')
                                             ->label('TGL. LAHIR')
@@ -368,67 +543,128 @@ class LaporanInformasiResource extends Resource
                                             'Lainnya' => 'Lainnya',
                                         ]),
                                     ]),
-                                // checkbox domestic atau tidak
-                                // Checkbox::make('terlapors.domestic')
-                                //     ->label('LUAR NEGERI')
-                                //     ->reactive()
-                                //     ->afterStateUpdated(function ($state, callable $set) {
-                                //         if ($state) {
-                                //             $set('terlapors.province_id', null);
-                                //             $set('terlapors.city_id', null);
-                                //             $set('terlapors.district_id', null);
-                                //             $set('terlapors.subdistrict_id', null);
-                                //         }
-                                //     }),
-                                Textarea::make('terlapors.alamat')->label('ALAMAT'),
-                                Grid::make(2)
-                                    ->schema([
-                                        Select::make('terlapors.province_id')
-                                            ->label('PROVINSI')
-                                            ->provinsi()
-                                            ->afterStateUpdated(function (callable $set) {
-                                                $set('terlapors.city_id', null);
-                                                $set('terlapors.district_id', null);
-                                                $set('terlapors.subdistrict_id', null);
-                                            }),
-                                        Select::make('terlapors.city_id')
-                                            ->label('KABUPATEN / KOTA')
-                                            ->kabupaten()
-                                            ->afterStateUpdated(function (callable $set) {
-                                                $set('terlapors.district_id', null);
-                                                $set('terlapors.subdistrict_id', null);
-                                            }),
-                                    ]),
-                                Grid::make(2)
-                                    ->schema([
-                                        Select::make('terlapors.district_id')
-                                            ->label('KECAMATAN')
-                                            ->kecamatan()
-                                            ->afterStateUpdated(fn (callable $set) => $set('terlapors.subdistrict_id', null)),
-                                        Select::make('terlapors.subdistrict_id')
-                                            ->label('KELURAHAN / DESA')
-                                            ->kelurahan(),
-                                    ]),
+                                // Alamat section
+                                Section::make('Alamat')
+                                ->schema([
+                                    // Alamat 1 (Utama)
+                                    Section::make('Alamat Utama')
+                                        ->schema([
+                                            Textarea::make('terlapors.alamat')
+                                                ->label('ALAMAT'),
+                                            Select::make('terlapors.province_id')
+                                                ->label('PROVINSI')
+                                                ->provinsi()
+                                                ->live()
+                                                ->searchable()
+                                                ->afterStateUpdated(function (callable $set) {
+                                                    $set('terlapors.city_id', null);
+                                                    $set('terlapors.district_id', null);
+                                                    $set('terlapors.subdistrict_id', null);
+                                                }),
+                                            Select::make('terlapors.city_id')
+                                                ->label('KABUPATEN / KOTA')
+                                                ->kabupaten()
+                                                ->live()
+                                                ->searchable()
+                                                ->afterStateUpdated(function (callable $set) {
+                                                    $set('terlapors.district_id', null);
+                                                    $set('terlapors.subdistrict_id', null);
+                                                }),
+                                            Select::make('terlapors.district_id')
+                                                ->label('KECAMATAN')
+                                                ->kecamatan()
+                                                ->live()
+                                                ->searchable()
+                                                ->afterStateUpdated(fn (callable $set) => $set('terlapors.subdistrict_id', null)),
+                                            Select::make('terlapors.subdistrict_id')
+                                                ->label('KELURAHAN / DESA')
+                                                ->kelurahan()
+                                                ->live()
+                                                ->searchable(),
+                                        ]),
+
+                                    // Toggle untuk menampilkan Alamat 2
+                                    Toggle::make('terlapors_has_second_address')
+                                        ->label('Tambah Alamat Lain?')
+                                        ->live(),
+
+                                    // Alamat 2 (Opsional)
+                                    Section::make('Alamat Lain')
+                                        ->schema([
+                                            Textarea::make('terlapors.alamat_2')
+                                                ->label('ALAMAT LAIN'),
+                                            Select::make('terlapors.province_id_2')
+                                                ->label('PROVINSI')
+                                                ->provinsi()
+                                                ->live()
+                                                ->searchable()
+                                                ->afterStateUpdated(function (callable $set) {
+                                                    $set('terlapors.city_id_2', null);
+                                                    $set('terlapors.district_id_2', null);
+                                                    $set('terlapors.subdistrict_id_2', null);
+                                                }),
+                                            Select::make('terlapors.city_id_2')
+                                                ->label('KABUPATEN / KOTA')
+                                                ->kabupaten(fn (Get $get): ?string => $get('terlapors.province_id_2'))
+                                                ->live()
+                                                ->searchable()
+                                                ->afterStateUpdated(function (callable $set) {
+                                                    $set('terlapors.district_id_2', null);
+                                                    $set('terlapors.subdistrict_id_2', null);
+                                                }),
+                                            Select::make('terlapors.district_id_2')
+                                                ->label('KECAMATAN')
+                                                ->kecamatan(fn (Get $get): ?string => $get('terlapors.city_id_2'))
+                                                ->live()
+                                                ->searchable()
+                                                ->afterStateUpdated(fn (callable $set) => $set('terlapors.subdistrict_id_2', null)),
+                                            Select::make('terlapors.subdistrict_id_2')
+                                                ->label('KELURAHAN / DESA')
+                                                ->kelurahan(fn (Get $get): ?string => $get('terlapors.district_id_2'))
+                                                ->live()
+                                                ->searchable(),
+                                        ])
+                                        ->visible(fn (Get $get): bool => $get('terlapors_has_second_address')),
+                                ])
                             ]),
                         Wizard\Step::make('TKP')
                             ->description('Tempat Kejadian Perkara')
                             ->schema([
-                                Textarea::make('tkp')->label('TEMPAT KEJADIAN PERKARA')->required(),
+                                Textarea::make('tkp')
+                                    ->label('TEMPAT KEJADIAN PERKARA')
+                                    ->required(),
                                 Select::make('province_id')
                                     ->label('PROVINSI')
+                                    ->searchable()
                                     ->provinsi()
-                                    ->afterStateUpdated(fn (callable $set) => $set('city_id', null)),
+                                    ->live()
+                                    ->afterStateUpdated(function (callable $set) {
+                                        $set('city_id', null);
+                                        $set('district_id', null);
+                                        $set('subdistrict_id', null);
+                                    }),
                                 Select::make('city_id')
                                     ->label('KABUPATEN / KOTA')
-                                    ->kabupaten()
-                                    ->afterStateUpdated(fn (callable $set) => $set('district_id', null)),
+                                    ->searchable()
+                                    ->kabupatenTkp()
+                                    ->live()
+                                    ->afterStateUpdated(function (callable $set) {
+                                        $set('district_id', null);
+                                        $set('subdistrict_id', null);
+                                    }),
                                 Select::make('district_id')
                                     ->label('KECAMATAN')
-                                    ->kecamatan()
-                                    ->afterStateUpdated(fn (callable $set) => $set('subdistrict_id', null)),
+                                    ->kecamatanTkp()
+                                    ->live()
+                                    ->searchable()
+                                    ->afterStateUpdated(function (callable $set) {
+                                        $set('subdistrict_id', null);
+                                    }),
                                 Select::make('subdistrict_id')
                                     ->label('KELURAHAN / DESA')
-                                    ->kelurahan(),
+                                    ->kelurahanTkp()
+                                    ->live()
+                                    ->searchable(),
                             ]),
                         Wizard\Step::make('Perkara')
                             ->description('Informasi Perkara')
@@ -503,7 +739,7 @@ class LaporanInformasiResource extends Resource
                                 >
                                     Simpan
                                 </x-filament::button>
-                            BLADE))),
+                            BLADE)))
             ]);
     }
 

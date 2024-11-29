@@ -43,7 +43,7 @@ class CreateLaporanInformasi extends CreateRecord
         // Step 1: Simpan data utama LaporanInformasi
         $laporanInformasi = LaporanInformasi::create($data);
 
-        // dd($laporanInformasi);
+        // dd($data);
 
         
         // Step 2: Simpan data Pelapor
@@ -57,12 +57,17 @@ class CreateLaporanInformasi extends CreateRecord
             'jenis_kelamin' => $data['pelapors']['jenis_kelamin'],
             'pekerjaan' => $data['pelapors']['pekerjaan'],
             'kontak' => $data['pelapors']['kontak'],
-            // 'domestic' => $data['pelapors']['domestic'],
+            'kontak_2' => $data['pelapors']['kontak_2'],
             'province_id' => $data['pelapors']['province_id'] ?? null,
             'city_id' => $data['pelapors']['city_id'] ?? null,
             'district_id' => $data['pelapors']['district_id'] ?? null,
             'subdistrict_id' => $data['pelapors']['subdistrict_id'] ?? null,
             'alamat' => $data['pelapors']['alamat'],
+            'alamat_2' => $data['pelapors']['alamat_2'] ?? null,
+            'province_id_2' => $data['pelapors']['province_id_2'] ?? null,
+            'city_id_2' => $data['pelapors']['city_id_2'] ?? null,
+            'district_id_2' => $data['pelapors']['district_id_2'] ?? null,
+            'subdistrict_id_2' => $data['pelapors']['subdistrict_id_2'] ?? null,
         ]);
 
         // Step 3: Simpan data Korban 
@@ -76,12 +81,17 @@ class CreateLaporanInformasi extends CreateRecord
             'tanggal_lahir' => $data['korbans']['tanggal_lahir'],
             'jenis_kelamin' => $data['korbans']['jenis_kelamin'],
             'pekerjaan' => $data['korbans']['pekerjaan'],
-            // 'domestic' => $data['korbans']['domestic'],
+            'kontak_2' => $data['korbans']['kontak_2'],
             'province_id' => $data['korbans']['province_id'] ?? null,
             'city_id' => $data['korbans']['city_id'] ?? null,
             'district_id' => $data['korbans']['district_id'] ?? null,
             'subdistrict_id' => $data['korbans']['subdistrict_id'] ?? null,
             'alamat' => $data['korbans']['alamat'],
+            'alamat_2' => $data['korbans']['alamat_2'] ?? null,
+            'province_id_2' => $data['korbans']['province_id_2'] ?? null,
+            'city_id_2' => $data['korbans']['city_id_2'] ?? null,
+            'district_id_2' => $data['korbans']['district_id_2'] ?? null,
+            'subdistrict_id_2' => $data['korbans']['subdistrict_id_2'] ?? null,
 
         ]);
 
@@ -96,14 +106,20 @@ class CreateLaporanInformasi extends CreateRecord
             'identity_no' => $data['terlapors']['identity_no'],
             'nama' => $data['terlapors']['nama'],
             'kontak' => $data['terlapors']['kontak'],
+            'kontak_2' => $data['terlapors']['kontak_2'] ?? null,
             'usia' => $data['terlapors']['usia'],
             'jenis_kelamin' => $data['terlapors']['jenis_kelamin'],
-            // 'domestic' => $data['terlapors']['domestic'],
+            'data_tambahan' => $data['terlapors']['data_tambahan'] ?? null,
             'province_id' => $data['terlapors']['province_id'] ?? null,
             'city_id' => $data['terlapors']['city_id'] ?? null,
             'district_id' => $data['terlapors']['district_id'] ?? null,
             'subdistrict_id' => $data['terlapors']['subdistrict_id'] ?? null,
             'alamat' => $data['terlapors']['alamat'],
+            'alamat_2' => $data['terlapors']['alamat_2'] ?? null,
+            'province_id_2' => $data['terlapors']['province_id_2'] ?? null,
+            'city_id_2' => $data['terlapors']['city_id_2'] ?? null,
+            'district_id_2' => $data['terlapors']['district_id_2'] ?? null,
+            'subdistrict_id_2' => $data['terlapors']['subdistrict_id_2'] ?? null,
         ]);
 
         // Step 5: Update data laporan dengan pelapor, korban, dan terlapor jika diperlukan
