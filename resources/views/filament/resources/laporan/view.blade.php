@@ -5,17 +5,35 @@
     $kecamatan = $record->pelapors ? (app('wilayah')->getKecamatan($record->pelapors->city_id)[$record->pelapors->district_id] ?? '-') : '-';
     $kelurahan = $record->pelapors ? (app('wilayah')->getKelurahan($record->pelapors->district_id)[$record->pelapors->subdistrict_id] ?? '-') : '-';
 
+    // Data wilayah pelapor kedua
+    $provinsiKedua = $record->pelapors ? (app('wilayah')->getProvinsi()[$record->pelapors->province_id_2] ?? '-') : '-';
+    $kabupatenKedua = $record->pelapors ? (app('wilayah')->getKabupaten($record->pelapors->province_id_2)[$record->pelapors->city_id_2] ?? '-') : '-';
+    $kecamatanKedua = $record->pelapors ? (app('wilayah')->getKecamatan($record->pelapors->city_id_2)[$record->pelapors->district_id_2] ?? '-') : '-';
+    $kelurahanKedua = $record->pelapors ? (app('wilayah')->getKelurahan($record->pelapors->district_id_2)[$record->pelapors->subdistrict_id_2] ?? '-') : '-';
+
     // Data wilayah korban
     $provinsiKorban = $record->korbans ? (app('wilayah')->getProvinsi()[$record->korbans->province_id] ?? '-') : '-';
     $kabupatenKorban = $record->korbans ? (app('wilayah')->getKabupaten($record->korbans->province_id)[$record->korbans->city_id] ?? '-') : '-';
     $kecamatanKorban = $record->korbans ? (app('wilayah')->getKecamatan($record->korbans->city_id)[$record->korbans->district_id] ?? '-') : '-';
     $kelurahanKorban = $record->korbans ? (app('wilayah')->getKelurahan($record->korbans->district_id)[$record->korbans->subdistrict_id] ?? '-') : '-';
 
+    // Data wilayah korban kedua
+    $provinsiKorbanKedua = $record->korbans ? (app('wilayah')->getProvinsi()[$record->korbans->province_id_2] ?? '-') : '-';
+    $kabupatenKorbanKedua = $record->korbans ? (app('wilayah')->getKabupaten($record->korbans->province_id_2)[$record->korbans->city_id_2] ?? '-') : '-';
+    $kecamatanKorbanKedua = $record->korbans ? (app('wilayah')->getKecamatan($record->korbans->city_id_2)[$record->korbans->district_id_2] ?? '-') : '-';
+    $kelurahanKorbanKedua = $record->korbans ? (app('wilayah')->getKelurahan($record->korbans->district_id_2)[$record->korbans->subdistrict_id_2] ?? '-') : '-';
+
     // Data wilayah terlapor
     $provinsiTerlapor = $record->terlapors ? (app('wilayah')->getProvinsi()[$record->terlapors->province_id] ?? '-') : '-';
     $kabupatenTerlapor = $record->terlapors ? (app('wilayah')->getKabupaten($record->terlapors->province_id)[$record->terlapors->city_id] ?? '-') : '-';
     $kecamatanTerlapor = $record->terlapors ? (app('wilayah')->getKecamatan($record->terlapors->city_id)[$record->terlapors->district_id] ?? '-') : '-';
     $kelurahanTerlapor = $record->terlapors ? (app('wilayah')->getKelurahan($record->terlapors->district_id)[$record->terlapors->subdistrict_id] ?? '-') : '-';
+
+    // Data wilayah terlapor kedua
+    $provinsiTerlaporKedua = $record->terlapors ? (app('wilayah')->getProvinsi()[$record->terlapors->province_id_2] ?? '-') : '-';
+    $kabupatenTerlaporKedua = $record->terlapors ? (app('wilayah')->getKabupaten($record->terlapors->province_id_2)[$record->terlapors->city_id_2] ?? '-') : '-';
+    $kecamatanTerlaporKedua = $record->terlapors ? (app('wilayah')->getKecamatan($record->terlapors->city_id_2)[$record->terlapors->district_id_2] ?? '-') : '-';
+    $kelurahanTerlaporKedua = $record->terlapors ? (app('wilayah')->getKelurahan($record->terlapors->district_id_2)[$record->terlapors->subdistrict_id_2] ?? '-') : '-';
 
     // Data wilayah tkp
     $provinsiTkp = app('wilayah')->getProvinsi()[$record->province_id] ?? '-';
@@ -105,11 +123,27 @@
                                     {{ ucwords(strtolower($kabupaten)) ?? '-' }}, 
                                     {{ ucwords(strtolower($provinsi)) ?? '-' }}</div>
                             </div>
+                            {{-- Alamat Kedua --}}
+                            <div class="flex items-start">
+                                <div class="w-32">Alamat Kedua</div>
+                                <div class="w-4">:</div>
+                                <div class="flex-1 break-words">{{ $record->pelapors?->alamat_2 ?? '-' }}, 
+                                    {{ ucwords(strtolower($kelurahanKedua)) ?? '-' }}, 
+                                    {{ ucwords(strtolower($kecamatanKedua)) ?? '-' }}, 
+                                    {{ ucwords(strtolower($kabupatenKedua)) ?? '-' }}, 
+                                    {{ ucwords(strtolower($provinsiKedua)) ?? '-' }}</div>
+                            </div>
                             {{-- Kontak --}}
                             <div class="flex items-start">
                                 <div class="w-32">Kontak</div>
                                 <div class="w-4">:</div>
                                 <div class="flex-1">{{ $record->pelapors->kontak ?? '-' }}</div>
+                            </div>
+                            {{-- Kontak Kedua --}}
+                            <div class="flex items-start">
+                                <div class="w-32">Kontak Kedua</div>
+                                <div class="w-4">:</div>
+                                <div class="flex-1">{{ $record->pelapors?->kontak_2 ?? '-' }}</div>
                             </div>
                         </div>
                     </div>
@@ -168,12 +202,26 @@
                                     {{ ucwords(strtolower($kabupatenKorban)) ?? '-' }}, 
                                     {{ ucwords(strtolower($provinsiKorban)) ?? '-' }}</div>
                             </div>
+                            {{-- Alamat Kedua --}}
+                            <div class="flex items-start">
+                                <div class="w-32">Alamat Kedua</div>
+                                <div class="w-4">:</div>
+                                <div class="flex-1 break-words">{{ $record->korbans?->alamat_2 ?? '-' }}, 
+                                    {{ ucwords(strtolower($kelurahanKorbanKedua)) ?? '-' }}, 
+                                    {{ ucwords(strtolower($kecamatanKorbanKedua)) ?? '-' }}, 
+                                    {{ ucwords(strtolower($kabupatenKorbanKedua)) ?? '-' }}, 
+                                    {{ ucwords(strtolower($provinsiKorbanKedua)) ?? '-' }}</div>
+                            </div>
                             <div class="flex items-start">
                                 <div class="w-32">Kontak</div>
                                 <div class="w-4">:</div>
                                 <div class="flex-1">{{ $record->korbans->kontak ?? '-' }}</div>
                             </div>
-                            
+                            <div class="flex items-start">
+                                <div class="w-32">Kontak Kedua</div>
+                                <div class="w-4">:</div>
+                                <div class="flex-1">{{ $record->korbans?->kontak_2 ?? '-' }}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -230,9 +278,28 @@
                                 {{ ucwords(strtolower($provinsiTerlapor)) ?? '-' }}</div>
                         </div>
                         <div class="flex items-start">
+                            <div class="w-32">Alamat Kedua</div>
+                            <div class="w-4">:</div>
+                            <div class="flex-1 break-words">{{ $record->terlapors?->alamat_2 ?? '-' }}, 
+                                {{ ucwords(strtolower($kelurahanTerlaporKedua)) ?? '-' }}, 
+                                {{ ucwords(strtolower($kecamatanTerlaporKedua)) ?? '-' }}, 
+                                {{ ucwords(strtolower($kabupatenTerlaporKedua)) ?? '-' }}, 
+                                {{ ucwords(strtolower($provinsiTerlaporKedua)) ?? '-' }}</div>
+                        </div>
+                        <div class="flex items-start">
                             <div class="w-32">Kontak</div>
                             <div class="w-4">:</div>
                             <div class="flex-1">{{ $record->terlapors->kontak ?? '-' }}</div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-32">Kontak Kedua</div>
+                            <div class="w-4">:</div>
+                            <div class="flex-1">{{ $record->terlapors?->kontak_2 ?? '-' }}</div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-32">Data Tambahan</div>
+                            <div class="w-4">:</div>
+                            <div class="flex-1">{{ $record->terlapors?->data_tambahan ?? '-' }}</div>
                         </div>
                     </div>
                 </div>

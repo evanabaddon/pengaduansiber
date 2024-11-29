@@ -26,7 +26,13 @@ class Korban extends Model
         'district_id',
         'subdistrict_id',
         'domestic',
-        'identity_no'
+        'identity_no',
+        'alamat_2',
+        'kontak_2',
+        'province_id_2',
+        'city_id_2',
+        'district_id_2',
+        'subdistrict_id_2',
     ];
 
     // Relasi ke Laporan

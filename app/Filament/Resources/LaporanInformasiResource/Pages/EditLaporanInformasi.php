@@ -52,12 +52,17 @@ class EditLaporanInformasi extends EditRecord
             'kewarganegaraan' => $data['pelapors']['kewarganegaraan'],
             'pekerjaan' => $data['pelapors']['pekerjaan'],
             'kontak' => $data['pelapors']['kontak'],
-            // 'domestic' => $data['pelapors']['domestic'],
+            'kontak_2' => $data['pelapors']['kontak_2'],
             'province_id' => $data['pelapors']['province_id'] ?? null,
             'city_id' => $data['pelapors']['city_id'] ?? null,
             'district_id' => $data['pelapors']['district_id'] ?? null,
             'subdistrict_id' => $data['pelapors']['subdistrict_id'] ?? null,
             'alamat' => $data['pelapors']['alamat'],
+            'alamat_2' => $data['pelapors']['alamat_2'] ?? null,
+            'province_id_2' => $data['pelapors']['province_id_2'] ?? null,
+            'city_id_2' => $data['pelapors']['city_id_2'] ?? null,
+            'district_id_2' => $data['pelapors']['district_id_2'] ?? null,
+            'subdistrict_id_2' => $data['pelapors']['subdistrict_id_2'] ?? null,
         ]);
 
         // Update data Korban
@@ -72,12 +77,18 @@ class EditLaporanInformasi extends EditRecord
             'agama' => $data['korbans']['agama'],
             'kewarganegaraan' => $data['korbans']['kewarganegaraan'],
             'pekerjaan' => $data['korbans']['pekerjaan'],
-            // 'domestic' => $data['korbans']['domestic'],
+            'kontak_2' => $data['korbans']['kontak_2'],
             'province_id' => $data['korbans']['province_id'] ?? null,
             'city_id' => $data['korbans']['city_id'] ?? null,
             'district_id' => $data['korbans']['district_id'] ?? null,
             'subdistrict_id' => $data['korbans']['subdistrict_id'] ?? null,
             'alamat' => $data['korbans']['alamat'],
+            'alamat_2' => $data['korbans']['alamat_2'] ?? null,
+            'province_id_2' => $data['korbans']['province_id_2'] ?? null,
+            'city_id_2' => $data['korbans']['city_id_2'] ?? null,
+            'district_id_2' => $data['korbans']['district_id_2'] ?? null,
+            'subdistrict_id_2' => $data['korbans']['subdistrict_id_2'] ?? null,
+            
         ]);
 
         // Update data Terlapor
@@ -85,17 +96,23 @@ class EditLaporanInformasi extends EditRecord
             'identity_no' => $data['terlapors']['identity_no'],
             'nama' => $data['terlapors']['nama'],
             'kontak' => $data['terlapors']['kontak'],
+            'kontak_2' => $data['terlapors']['kontak_2'] ?? null,
             'jenis_kelamin' => $data['terlapors']['jenis_kelamin'],
             'usia' => $data['terlapors']['usia'],
             'agama' => $data['terlapors']['agama'],
             'kewarganegaraan' => $data['terlapors']['kewarganegaraan'],
             'pekerjaan' => $data['terlapors']['pekerjaan'],
-            // 'domestic' => $data['terlapors']['domestic'],
+            'data_tambahan' => $data['terlapors']['data_tambahan'] ?? null,
             'province_id' => $data['terlapors']['province_id'] ?? null,
             'city_id' => $data['terlapors']['city_id'] ?? null,
             'district_id' => $data['terlapors']['district_id'] ?? null,
             'subdistrict_id' => $data['terlapors']['subdistrict_id'] ?? null,
             'alamat' => $data['terlapors']['alamat'],
+            'alamat_2' => $data['terlapors']['alamat_2'] ?? null,
+            'province_id_2' => $data['terlapors']['province_id_2'] ?? null,
+            'city_id_2' => $data['terlapors']['city_id_2'] ?? null,
+            'district_id_2' => $data['terlapors']['district_id_2'] ?? null,
+            'subdistrict_id_2' => $data['terlapors']['subdistrict_id_2'] ?? null,
         ]);
 
         return $record;

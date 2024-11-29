@@ -23,7 +23,14 @@ class Terlapor extends Model
         'city_id',
         'district_id',
         'subdistrict_id',
-        'identity_no'
+        'identity_no',
+        'alamat_2',
+        'kontak_2',
+        'province_id_2',
+        'city_id_2',
+        'district_id_2',
+        'subdistrict_id_2',
+        'data_tambahan',
     ];
 
     // Relasi ke Laporan

@@ -71,58 +71,74 @@ class AppServiceProvider extends ServiceProvider
 
         // Macro untuk Select Wilayah dengan mapping field yang berbeda dengan support relationship
         Select::macro('provinsi', function () {
-            return $this
-                ->options(fn() => app('wilayah')->getProvinsi())
-                ->searchable()
-                ->preload()
-                ->live();
+            return $this->options(fn () => app('wilayah')->getProvinsi());
         });
 
         Select::macro('kabupaten', function () {
-            return $this
-                ->options(function (callable $get, $state) {
-                    $path = explode('.', $this->getName());
-                    $prefix = count($path) > 1 ? $path[0] . '.' : '';
-                    
-                    // Cek field province_id atau provinsi_id
-                    $provinsiId = $get($prefix . 'province_id') ?? $get($prefix . 'provinsi_id');
-                    if (!$provinsiId) return [];
-                    return app('wilayah')->getKabupaten($provinsiId);
-                })
-                ->searchable()
-                ->preload()
-                ->live();
+            return $this->options(function (callable $get) {
+                $isSecondAddress = str_contains($this->getName(), '_2');
+                $modelName = str_contains($this->getName(), 'terlapor') ? 'terlapors' : 'pelapors';
+                
+                $provinsiId = $isSecondAddress 
+                    ? $get($modelName . '.province_id_2') 
+                    : $get($modelName . '.province_id');
+                
+                return $provinsiId 
+                    ? app('wilayah')->getKabupaten($provinsiId) 
+                    : [];
+            });
         });
 
         Select::macro('kecamatan', function () {
-            return $this
-                ->options(function (callable $get, $state) {
-                    $path = explode('.', $this->getName());
-                    $prefix = count($path) > 1 ? $path[0] . '.' : '';
-                    
-                    // Cek field city_id atau kabupaten_id
-                    $kabupatenId = $get($prefix . 'city_id') ?? $get($prefix . 'kabupaten_id');
-                    if (!$kabupatenId) return [];
-                    return app('wilayah')->getKecamatan($kabupatenId);
-                })
-                ->searchable()
-                ->preload()
-                ->live();
+            return $this->options(function (callable $get) {
+                $isSecondAddress = str_contains($this->getName(), '_2');
+                $modelName = str_contains($this->getName(), 'terlapor') ? 'terlapors' : 'pelapors';
+                
+                $kabupatenId = $isSecondAddress 
+                    ? $get($modelName . '.city_id_2') 
+                    : $get($modelName . '.city_id');
+                
+                return $kabupatenId 
+                    ? app('wilayah')->getKecamatan($kabupatenId) 
+                    : [];
+            });
         });
 
         Select::macro('kelurahan', function () {
-            return $this
-                ->options(function (callable $get, $state) {
-                    $path = explode('.', $this->getName());
-                    $prefix = count($path) > 1 ? $path[0] . '.' : '';
-                    
-                    // Cek field district_id atau kecamatan_id
-                    $kecamatanId = $get($prefix . 'district_id') ?? $get($prefix . 'kecamatan_id');
-                    if (!$kecamatanId) return [];
-                    return app('wilayah')->getKelurahan($kecamatanId);
-                })
-                ->searchable()
-                ->preload();
+            return $this->options(function (callable $get) {
+                $isSecondAddress = str_contains($this->getName(), '_2');
+                $modelName = str_contains($this->getName(), 'terlapor') ? 'terlapors' : 'pelapors';
+                
+                $kecamatanId = $isSecondAddress 
+                    ? $get($modelName . '.district_id_2') 
+                    : $get($modelName . '.district_id');
+                
+                return $kecamatanId 
+                    ? app('wilayah')->getKelurahan($kecamatanId) 
+                    : [];
+            });
+        });
+
+        // Macro untuk TKP
+        Select::macro('kabupatenTkp', function () {
+            return $this->options(function (callable $get) {
+                $provinsiId = $get('province_id');
+                return $provinsiId ? app('wilayah')->getKabupaten($provinsiId) : [];
+            });
+        });
+
+        Select::macro('kecamatanTkp', function () {
+            return $this->options(function (callable $get) {
+                $kabupatenId = $get('city_id');
+                return $kabupatenId ? app('wilayah')->getKecamatan($kabupatenId) : [];
+            });
+        });
+
+        Select::macro('kelurahanTkp', function () {
+            return $this->options(function (callable $get) {
+                $kecamatanId = $get('district_id');
+                return $kecamatanId ? app('wilayah')->getKelurahan($kecamatanId) : [];
+            });
         });
 
        
