@@ -124,15 +124,17 @@
                                     {{ ucwords(strtolower($provinsi)) ?? '-' }}</div>
                             </div>
                             {{-- Alamat Kedua --}}
+                            @if($record->pelapors?->alamat_2)
                             <div class="flex items-start">
                                 <div class="w-32">Alamat Kedua</div>
                                 <div class="w-4">:</div>
-                                <div class="flex-1 break-words">{{ $record->pelapors?->alamat_2 ?? '-' }}, 
+                                <div class="flex-1 break-words">{{ $record->pelapors?->alamat_2 }}, 
                                     {{ ucwords(strtolower($kelurahanKedua)) ?? '-' }}, 
                                     {{ ucwords(strtolower($kecamatanKedua)) ?? '-' }}, 
                                     {{ ucwords(strtolower($kabupatenKedua)) ?? '-' }}, 
                                     {{ ucwords(strtolower($provinsiKedua)) ?? '-' }}</div>
                             </div>
+                            @endif
                             {{-- Kontak --}}
                             <div class="flex items-start">
                                 <div class="w-32">Kontak</div>
@@ -140,11 +142,13 @@
                                 <div class="flex-1">{{ $record->pelapors->kontak ?? '-' }}</div>
                             </div>
                             {{-- Kontak Kedua --}}
+                            @if($record->pelapors?->kontak_2)
                             <div class="flex items-start">
                                 <div class="w-32">Kontak Kedua</div>
                                 <div class="w-4">:</div>
                                 <div class="flex-1">{{ $record->pelapors?->kontak_2 ?? '-' }}</div>
                             </div>
+                            @endif
                         </div>
                     </div>
 
@@ -203,6 +207,7 @@
                                     {{ ucwords(strtolower($provinsiKorban)) ?? '-' }}</div>
                             </div>
                             {{-- Alamat Kedua --}}
+                            @if($record->korbans?->alamat_2)
                             <div class="flex items-start">
                                 <div class="w-32">Alamat Kedua</div>
                                 <div class="w-4">:</div>
@@ -212,16 +217,19 @@
                                     {{ ucwords(strtolower($kabupatenKorbanKedua)) ?? '-' }}, 
                                     {{ ucwords(strtolower($provinsiKorbanKedua)) ?? '-' }}</div>
                             </div>
+                            @endif
                             <div class="flex items-start">
                                 <div class="w-32">Kontak</div>
                                 <div class="w-4">:</div>
                                 <div class="flex-1">{{ $record->korbans->kontak ?? '-' }}</div>
                             </div>
+                            @if($record->korbans?->kontak_2)
                             <div class="flex items-start">
                                 <div class="w-32">Kontak Kedua</div>
                                 <div class="w-4">:</div>
                                 <div class="flex-1">{{ $record->korbans?->kontak_2 ?? '-' }}</div>
                             </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -277,6 +285,7 @@
                                 {{ ucwords(strtolower($kabupatenTerlapor)) ?? '-' }}, 
                                 {{ ucwords(strtolower($provinsiTerlapor)) ?? '-' }}</div>
                         </div>
+                        @if($record->terlapors?->alamat_2)
                         <div class="flex items-start">
                             <div class="w-32">Alamat Kedua</div>
                             <div class="w-4">:</div>
@@ -286,16 +295,19 @@
                                 {{ ucwords(strtolower($kabupatenTerlaporKedua)) ?? '-' }}, 
                                 {{ ucwords(strtolower($provinsiTerlaporKedua)) ?? '-' }}</div>
                         </div>
+                        @endif
                         <div class="flex items-start">
                             <div class="w-32">Kontak</div>
                             <div class="w-4">:</div>
                             <div class="flex-1">{{ $record->terlapors->kontak ?? '-' }}</div>
                         </div>
+                        @if($record->terlapors?->kontak_2)
                         <div class="flex items-start">
                             <div class="w-32">Kontak Kedua</div>
                             <div class="w-4">:</div>
                             <div class="flex-1">{{ $record->terlapors?->kontak_2 ?? '-' }}</div>
                         </div>
+                        @endif
                         <div class="flex items-start">
                             <div class="w-32">Data Tambahan</div>
                             <div class="w-4">:</div>
