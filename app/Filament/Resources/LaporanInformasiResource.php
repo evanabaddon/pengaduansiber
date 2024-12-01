@@ -741,6 +741,8 @@ class LaporanInformasiResource extends Resource
                                 FileUpload::make('media')
                             ->label('MEDIA / DOKUMEN PENDUKUNG')
                             ->multiple()
+                            ->disk('public')
+                            ->visibility('public')
                             ->directory('laporan-informasi')
                             ->preserveFilenames()
                             ->getUploadedFileNameForStorageUsing(
