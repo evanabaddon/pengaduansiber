@@ -778,7 +778,6 @@ class LaporanInformasiResource extends Resource
                 ->wrapHeader()
                     ->sortable()
                     ->wrapHeader()
-                    ->alignment(Alignment::Center)
                     ->dateTime('d M Y')
                     ->label('TGL. LAPOR'),
                 TextColumn::make('pelapors.nama')
@@ -786,15 +785,15 @@ class LaporanInformasiResource extends Resource
                     ->description(fn (LaporanInformasi $record): string => $record->korbans()->where('laporan_informasi_id', $record->id)->pluck('nama')->join(', '))
                     ->label('PELAPOR / KORBAN'),
                 // terlapor
-                TextColumn::make('terlapors.nama')->label('TERLAPOR')->alignment(Alignment::Center)->toggleable()->searchable(),
-                TextColumn::make('tkp')->label('TKP')->alignment(Alignment::Center)->toggleable()->searchable(),
-                TextColumn::make('perkara')->label('PERKARA')->alignment(Alignment::Center)->toggleable()->searchable(),
+                TextColumn::make('terlapors.nama')->label('TERLAPOR')->toggleable()->searchable(),
+                TextColumn::make('tkp')->label('TKP')->toggleable()->searchable(),
+                TextColumn::make('perkara')->label('PERKARA')->toggleable()->searchable(),
                 TextColumn::make('uraian_peristiwa')->label('URAIAN PERISTIWA')->limit(15)->toggleable(isToggledHiddenByDefault: true)->searchable()->wrap(),
                 TextColumn::make('kerugian')
                     ->sortable()
                     ->toggleable()
                     ->searchable()
-                    ->alignment(Alignment::Center)
+                    ->alignment(Alignment::Right)
                     ->money('IDR', locale: 'id')
                     ->label('KERUGIAN'),
                 ColumnGroup::make('YANG MENANGANI')
@@ -875,6 +874,7 @@ class LaporanInformasiResource extends Resource
                 TextColumn::make('barangBuktis.nama_barang')->label('BARANG BUKTI')->limit(15)->toggleable(isToggledHiddenByDefault: true),
                 SelectColumn::make('status')
                     ->searchable()
+                    ->alignment(Alignment::Center)
                     ->selectablePlaceholder('Pilih Status')
                     ->options([
                         'Proses' => 'Proses',
