@@ -267,7 +267,19 @@ class LaporanInformasiResource extends Resource
                                                         ->live()
                                                         ->searchable(),
                                                 ])
-                                                ->visible(fn (Get $get): bool => $get('pelapors_has_second_address')),
+                                                ->visible(function (Get $get): bool {
+                                                    // Cek toggle state
+                                                    if ($get('pelapors_has_second_address')) {
+                                                        return true;
+                                                    }
+                                                    
+                                                    // Cek apakah ada data alamat 2 yang sudah tersimpan
+                                                    return $get('pelapors.alamat_2') || 
+                                                           $get('pelapors.province_id_2') || 
+                                                           $get('pelapors.city_id_2') || 
+                                                           $get('pelapors.district_id_2') || 
+                                                           $get('pelapors.subdistrict_id_2');
+                                                }),
                                         ])
                                     ]),
                         Wizard\Step::make('Korban')
