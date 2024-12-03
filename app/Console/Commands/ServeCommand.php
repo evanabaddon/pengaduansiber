@@ -23,17 +23,14 @@ class ServeCommand extends BaseServeCommand
             $line = str_replace('  ', ' ', $line);
 
             if (preg_match($regex, $line, $matches)) {
-                // Jika format sesuai dengan yang diharapkan
                 if (isset($matches[1]) && strtotime($matches[1])) {
                     return Carbon::createFromFormat('D M d H:i:s Y', $matches[1]);
                 }
             }
 
-            // Jika format tidak sesuai, gunakan waktu saat ini
             return Carbon::now();
 
         } catch (\Exception $e) {
-            // Jika terjadi error, gunakan waktu saat ini
             return Carbon::now();
         }
     }
@@ -51,7 +48,6 @@ class ServeCommand extends BaseServeCommand
                 return (int) $matches[1];
             }
             
-            // Jika tidak menemukan port, gunakan port default
             return static::port();
             
         } catch (\Exception $e) {
