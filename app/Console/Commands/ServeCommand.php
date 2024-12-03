@@ -52,10 +52,10 @@ class ServeCommand extends BaseServeCommand
             }
             
             // Jika tidak menemukan port, gunakan port default
-            return $this->port();
+            return static::port();
             
         } catch (\Exception $e) {
-            return $this->port();
+            return static::port();
         }
     }
 
