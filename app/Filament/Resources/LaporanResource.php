@@ -680,10 +680,6 @@ class LaporanResource extends Resource
 
     public static function getPages(): array
     {
-        // sedang pengembangan
-        // return [
-        //     'index' => \App\Filament\Pages\ComingSoon::route('/'),
-        // ];
         return [
             'index' => Pages\ListLaporans::route('/'),
             'create' => Pages\CreateLaporan::route('/create'),

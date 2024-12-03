@@ -32,6 +32,7 @@ use App\Filament\Widgets\LatestLaporanInformasiWidget;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
+use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -115,6 +116,7 @@ class AdminPanelProvider extends PanelProvider
                 return 'Ditressiber Polda Jatim';
             })
             ->plugins([
+                // FilamentBackgroundsPlugin::make()->showAttribution(false)->showAttribution(false),
                 BannerPlugin::make()
                     ->navigationGroup('Setting')
                     ->bannerManagerAccessPermission('super_admin'),
