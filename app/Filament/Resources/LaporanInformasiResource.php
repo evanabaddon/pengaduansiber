@@ -18,10 +18,13 @@ use App\Models\LaporanInformasi;
 use Filament\Resources\Resource;
 use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Grid;
+use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Wizard;
 use Filament\Support\Enums\Alignment;
 use Illuminate\Support\Facades\Blade;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
@@ -42,8 +45,6 @@ use App\Notifications\LaporanInformasiAssignedNotification;
 use Filament\Tables\Actions\ViewAction as ActionsViewAction;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Parfaitementweb\FilamentCountryField\Forms\Components\Country;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Toggle;
 
 class LaporanInformasiResource extends Resource
 {
@@ -890,26 +891,59 @@ class LaporanInformasiResource extends Resource
                         'Selesai' => 'Selesai',
                         'Terkendala' => 'Terkendala',
                     ]),
-                // filter by subdit
-                SelectFilter::make('subdit_id')
-                    ->label('SUBDIT')
-                    ->options(Subdit::all()->pluck('name', 'id'))
-                    ->searchable()
-                    ->visible(!auth()->user()->hasRole('subdit') && !auth()->user()->hasRole('unit') && !auth()->user()->hasRole('penyidik')),
-                // filter by unit  
-                SelectFilter::make('unit_id')
-                    ->label('UNIT')
-                    ->options(Unit::all()->pluck('name', 'id'))
-                    ->searchable()
-                    ->visible(!auth()->user()->hasRole('unit') && !auth()->user()->hasRole('penyidik')),
-                // filter by penyidik
-                SelectFilter::make('penyidik_id')
-                    ->label('PENYIDIK')
-                    ->options(User::whereDoesntHave('roles', function($query) {
-                        $query->whereIn('name', ['super_admin', 'subdit', 'unit']);
-                    })->pluck('name', 'id'))
-                    ->searchable()
-                    ->visible(!auth()->user()->hasRole('penyidik')),
+                Filter::make('filter')
+                    ->form([
+                        Select::make('subdit_id')
+                            ->label('SUBDIT')
+                            ->placeholder('Pilih Subdit')
+                            ->options(Subdit::all()->pluck('name', 'id'))
+                            ->searchable()
+                            ->afterStateUpdated(function (callable $set) {
+                                $set('unit_id', null);
+                            })
+                            ->reactive()
+                            ->default(auth()->user()->subdit_id)
+                            ->disabled(auth()->user()->subdit_id || auth()->user()->unit_id || auth()->user()->penyidik_id),
+                        Select::make('unit_id')
+                            ->label('UNIT')
+                            ->placeholder('Pilih Unit')
+                            ->options(function (Get $get) {
+                                $subditId = $get('subdit_id');
+                                if (!$subditId) return [];
+                                return Unit::where('subdit_id', $subditId)->pluck('name', 'id');
+                            })
+                            ->reactive()
+                            ->default(auth()->user()->unit_id)
+                            ->disabled(auth()->user()->unit_id || auth()->user()->penyidik_id),
+                        Select::make('penyidik_id')
+                            ->label('PENYIDIK')
+                            ->placeholder('Pilih Penyidik')
+                            ->options(function (Get $get) {
+                                $subditId = $get('subdit_id');
+                                $unitId = $get('unit_id');
+                                if (!$subditId && !$unitId) return [];
+                                return Penyidik::where('subdit_id', $subditId)
+                                    ->where('unit_id', $unitId)
+                                    ->pluck('name', 'id');
+                            })
+                            ->searchable()
+                    ])->query(function (Builder $query, array $data): Builder {
+                        return $query->when($data['subdit_id'], function (Builder $query, $subditId) {
+                            return $query->where('subdit_id', $subditId);
+                        })->when($data['unit_id'], function (Builder $query, $unitId) {
+                            return $query->where('unit_id', $unitId);
+                        })->when($data['penyidik_id'], function (Builder $query, $penyidikId) {
+                            return $query->where('penyidik_id', $penyidikId);
+                        });
+                    }),
+                // // filter by penyidik
+                // SelectFilter::make('penyidik_id')
+                //     ->label('PENYIDIK')
+                //     ->options(User::whereDoesntHave('roles', function($query) {
+                //         $query->whereIn('name', ['super_admin', 'subdit', 'unit']);
+                //     })->pluck('name', 'id'))
+                //     ->searchable()
+                //     ->visible(!auth()->user()->hasRole('penyidik')),
             ])
             ->actions([
                 ActionsViewAction::make()
