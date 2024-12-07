@@ -1,4 +1,4 @@
-@php
+{{-- @php
     // Data wilayah pelapor
     $provinsi = $record->pelapors ? (app('wilayah')->getProvinsi()[$record->pelapors->province_id] ?? '-') : '-';
     $kabupaten = $record->pelapors ? (app('wilayah')->getKabupaten($record->pelapors->province_id)[$record->pelapors->city_id] ?? '-') : '-';
@@ -40,7 +40,13 @@
     $kabupatenTkp = app('wilayah')->getKabupaten($record->province_id)[$record->city_id] ?? '-';
     $kecamatanTkp = app('wilayah')->getKecamatan($record->city_id)[$record->district_id] ?? '-';
     $kelurahanTkp = app('wilayah')->getKelurahan($record->district_id)[$record->subdistrict_id] ?? '-';
-@endphp
+
+
+    // Data tambahan Pelapor
+    $dataTambahanPelapor = $data_tambahan_pelapor;
+    $dataTambahanKorban = $data_tambahan_korban;
+    $dataTambahanTerlapor = $data_tambahan_terlapor;
+@endphp --}}
 <x-filament-panels::page>
     <div class="bg-white dark:bg-gray-800">
         <div class="p-6">
@@ -118,10 +124,10 @@
                                 <div class="w-32">Alamat</div>
                                 <div class="w-4">:</div>
                                 <div class="flex-1 break-words">{{ $record->pelapors?->alamat ?? '-' }}, 
-                                    {{ ucwords(strtolower($kelurahan)) ?? '-' }}, 
-                                    {{ ucwords(strtolower($kecamatan)) ?? '-' }}, 
-                                    {{ ucwords(strtolower($kabupaten)) ?? '-' }}, 
-                                    {{ ucwords(strtolower($provinsi)) ?? '-' }}</div>
+                                    {{ ucwords(strtolower($data['pelapors']['wilayah']['utama']['kelurahan'])) ?? '-' }}, 
+                                    {{ ucwords(strtolower($data['pelapors']['wilayah']['utama']['kecamatan'])) ?? '-' }}, 
+                                    {{ ucwords(strtolower($data['pelapors']['wilayah']['utama']['kabupaten'])) ?? '-' }}, 
+                                    {{ ucwords(strtolower($data['pelapors']['wilayah']['utama']['provinsi'])) ?? '-' }}</div>
                             </div>
                             {{-- Alamat Kedua --}}
                             @if($record->pelapors?->alamat_2)
@@ -129,10 +135,10 @@
                                 <div class="w-32">Alamat Kedua</div>
                                 <div class="w-4">:</div>
                                 <div class="flex-1 break-words">{{ $record->pelapors?->alamat_2 }}, 
-                                    {{ ucwords(strtolower($kelurahanKedua)) ?? '-' }}, 
-                                    {{ ucwords(strtolower($kecamatanKedua)) ?? '-' }}, 
-                                    {{ ucwords(strtolower($kabupatenKedua)) ?? '-' }}, 
-                                    {{ ucwords(strtolower($provinsiKedua)) ?? '-' }}</div>
+                                    {{ ucwords(strtolower($data['pelapors']['wilayah']['kedua']['kelurahan'])) ?? '-' }}, 
+                                    {{ ucwords(strtolower($data['pelapors']['wilayah']['kedua']['kecamatan'])) ?? '-' }}, 
+                                    {{ ucwords(strtolower($data['pelapors']['wilayah']['kedua']['kabupaten'])) ?? '-' }}, 
+                                    {{ ucwords(strtolower($data['pelapors']['wilayah']['kedua']['provinsi'])) ?? '-' }}</div>
                             </div>
                             @endif
                             {{-- Kontak --}}
@@ -149,88 +155,134 @@
                                 <div class="flex-1">{{ $record->pelapors?->kontak_2 ?? '-' }}</div>
                             </div>
                             @endif
+                            {{-- tampilkan list data tambahan --}}
+                            @if(is_array($data['pelapors']['data_tambahan']))
+                                @foreach($data['pelapors']['data_tambahan'] as $dataTambahan)
+                                    <div class="flex items-start">
+                                        <div class="w-32">{{ $dataTambahan['nama_data'] }}</div>
+                                        <div class="w-4">:</div>
+                                        <div class="flex-1">{{ $dataTambahan['keterangan'] }}</div>
+                                    </div>
+                                @endforeach
+                            @elseif(is_object($data['pelapors']['data_tambahan']))
+                                @foreach($data['pelapors']['data_tambahan'] as $dataTambahan)
+                                    <div class="flex items-start">
+                                        <div class="w-32">{{ $dataTambahan['nama_data'] }}</div>
+                                        <div class="w-4">:</div>
+                                        <div class="flex-1">{{ $dataTambahan['keterangan'] }}</div>
+                                    </div>
+                                @endforeach
+                            @endif
                         </div>
                     </div>
 
                     <!-- Informasi Korban -->
                     <div class="w-1/2">
                         <h3 class="text-base font-semibold bg-gray-100 dark:bg-gray-700 p-2 mb-3">B. IDENTITAS KORBAN</h3>
-                        <div class="space-y-2 pl-4 text-sm">
-                            <div class="flex items-start">
-                                <div class="w-32">Nama</div>
-                                <div class="w-4">:</div>
-                                <div class="flex-1">{{ $record->korbans->nama ?? '-' }}</div>
+                        @if(is_array($data['korbans']) || is_object($data['korbans']))
+                            @php $counter = 1; @endphp
+                            @foreach($data['korbans'] as $korban)
+                                @if(count((array)$data['korbans']) > 1)
+                                    <div class="font-medium text-gray-600 dark:text-gray-300 mb-2">Korban {{ $counter }}</div>
+                                    @php $counter++; @endphp
+                                @endif
+                                <div class="space-y-2 pl-4 text-sm">
+                                    <div class="flex items-start">
+                                        <div class="w-32">Nama</div>
+                                        <div class="w-4">:</div>
+                                        <div class="flex-1">{{ $korban['nama'] ?? '-' }}</div>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="w-32">No Identitas</div>
+                                        <div class="w-4">:</div>
+                                        <p>{{ $korban['identity_no'] ?? '-' }}</p>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="w-32">Kewarganegaraan</div>
+                                        <div class="w-4">:</div>
+                                        <div class="flex-1">@php
+                                            $countryCode = $korban['kewarganegaraan'] ?? null;
+                                            if ($countryCode) {
+                                                $countries = \PeterColes\Countries\CountriesFacade::lookup(null, 'id')->toArray();
+                                                echo array_flip($countries)[$countryCode] ?? $countryCode;
+                                            } else {
+                                                echo '-';
+                                            }
+                                        @endphp</div>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="w-32">Jenis Kelamin</div>
+                                        <div class="w-4">:</div>
+                                        <div class="flex-1">{{ $korban['jenis_kelamin'] ?? '-' }}</div>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="w-32">Tempat/Tgl Lahir</div>
+                                        <div class="w-4">:</div>
+                                        <div class="flex-1">{{ $korban['tempat_lahir'] ?? '-' }}, {{ isset($korban['tanggal_lahir']) ? date('d F Y', strtotime($korban['tanggal_lahir'])) : '-' }}</div>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="w-32">Agama</div>
+                                        <div class="w-4">:</div>
+                                        <div class="flex-1">{{ $korban['agama'] ?? '-' }}</div>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="w-32">Alamat</div>
+                                        <div class="w-4">:</div>
+                                        <div class="flex-1 break-words">{{ $korban['alamat'] ?? '-' }}
+                                            @if(isset($korban['wilayah']) && isset($korban['wilayah']['utama']))
+                                            , {{ ucwords(strtolower($korban['wilayah']['utama']['kelurahan'] ?? '-')) }}
+                                            , {{ ucwords(strtolower($korban['wilayah']['utama']['kecamatan'] ?? '-')) }}
+                                            , {{ ucwords(strtolower($korban['wilayah']['utama']['kabupaten'] ?? '-')) }}
+                                            , {{ ucwords(strtolower($korban['wilayah']['utama']['provinsi'] ?? '-')) }}
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @if(isset($korban['alamat_2']))
+                                    <div class="flex items-start">
+                                        <div class="w-32">Alamat Kedua</div>
+                                        <div class="w-4">:</div>
+                                        <div class="flex-1 break-words">{{ $korban['alamat_2'] ?? '-' }}
+                                            @if(isset($korban['wilayah']) && isset($korban['wilayah']['kedua']))
+                                            , {{ ucwords(strtolower($korban['wilayah']['kedua']['kelurahan'] ?? '-')) }}
+                                            , {{ ucwords(strtolower($korban['wilayah']['kedua']['kecamatan'] ?? '-')) }}
+                                            , {{ ucwords(strtolower($korban['wilayah']['kedua']['kabupaten'] ?? '-')) }}
+                                            , {{ ucwords(strtolower($korban['wilayah']['kedua']['provinsi'] ?? '-')) }}
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @endif
+                                    <div class="flex items-start">
+                                        <div class="w-32">Kontak</div>
+                                        <div class="w-4">:</div>
+                                        <div class="flex-1">{{ $korban['kontak'] ?? '-' }}</div>
+                                    </div>
+                                    @if(isset($korban['kontak_2']))
+                                    <div class="flex items-start">
+                                        <div class="w-32">Kontak Kedua</div>
+                                        <div class="w-4">:</div>
+                                        <div class="flex-1">{{ $korban['kontak_2'] ?? '-' }}</div>
+                                    </div>
+                                    @endif
+                                    {{-- tampilkan list data tambahan --}}
+                                    @if(!empty($korban['data_tambahan']))
+                                        @foreach($korban['data_tambahan'] as $dataTambahan)
+                                            <div class="flex items-start">
+                                                <div class="w-32">{{ $dataTambahan['nama_data'] }}</div>
+                                                <div class="w-4">:</div>
+                                                <div class="flex-1">{{ $dataTambahan['keterangan'] }}</div>
+                                            </div>
+                                        @endforeach
+                                    @endif
+                                </div>
+                                @if(!$loop->last)
+                                    <div class="border-b border-gray-200 dark:border-gray-700 my-4"></div>
+                                @endif
+                            @endforeach
+                        @else
+                            <div class="p-4 text-center text-gray-500">
+                                Data korban tidak tersedia
                             </div>
-                            <div class="flex items-start">
-                                <div class="w-32">No Identitas</div>
-                                <div class="w-4">:</div>
-                                <p>{{ $record->korbans->identity_no ?? '-' }}</p>
-                            </div>
-                            <div class="flex items-start">
-                                <div class="w-32">Kewarganegaraan</div>
-                                <div class="w-4">:</div>
-                                <div class="flex-1">@php
-                                    $countryCode = $record->korbans?->kewarganegaraan;
-                                    if ($countryCode) {
-                                        $countries = \PeterColes\Countries\CountriesFacade::lookup(null, 'id')->toArray();
-                                        echo array_flip($countries)[$countryCode] ?? $countryCode;
-                                    } else {
-                                        echo '-';
-                                    }
-                                @endphp</div>
-                            </div>
-                            <div class="flex items-start">
-                                <div class="w-32">Jenis Kelamin</div>
-                                <div class="w-4">:</div>
-                                <div class="flex-1">{{ $record->korbans->jenis_kelamin ?? '-' }}</div>
-                            </div>
-                            {{-- Tempat Tanggal Lahir --}}
-                            <div class="flex items-start">
-                                <div class="w-32">Tempat/Tgl Lahir</div>
-                                <div class="w-4">:</div>
-                                <div class="flex-1">{{ $record->korbans->tempat_lahir ?? '-' }}, {{ $record->korbans?->tanggal_lahir ? date('d F Y', strtotime($record->korbans?->tanggal_lahir)) : '-' }}</div>
-                            </div>
-                            {{-- Agama --}}
-                            <div class="flex items-start">
-                                <div class="w-32">Agama</div>
-                                <div class="w-4">:</div>
-                                <div class="flex-1">{{ $record->korbans->agama ?? '-' }}</div>
-                            </div>
-                            {{-- Alamat --}}
-                            <div class="flex items-start">
-                                <div class="w-32">Alamat</div>
-                                <div class="w-4">:</div>
-                                <div class="flex-1 break-words">{{ $record->korbans->alamat ?? '-' }}, 
-                                    {{ ucwords(strtolower($kelurahanKorban)) ?? '-' }}, 
-                                    {{ ucwords(strtolower($kecamatanKorban)) ?? '-' }}, 
-                                    {{ ucwords(strtolower($kabupatenKorban)) ?? '-' }}, 
-                                    {{ ucwords(strtolower($provinsiKorban)) ?? '-' }}</div>
-                            </div>
-                            {{-- Alamat Kedua --}}
-                            @if($record->korbans?->alamat_2)
-                            <div class="flex items-start">
-                                <div class="w-32">Alamat Kedua</div>
-                                <div class="w-4">:</div>
-                                <div class="flex-1 break-words">{{ $record->korbans?->alamat_2 ?? '-' }}, 
-                                    {{ ucwords(strtolower($kelurahanKorbanKedua)) ?? '-' }}, 
-                                    {{ ucwords(strtolower($kecamatanKorbanKedua)) ?? '-' }}, 
-                                    {{ ucwords(strtolower($kabupatenKorbanKedua)) ?? '-' }}, 
-                                    {{ ucwords(strtolower($provinsiKorbanKedua)) ?? '-' }}</div>
-                            </div>
-                            @endif
-                            <div class="flex items-start">
-                                <div class="w-32">Kontak</div>
-                                <div class="w-4">:</div>
-                                <div class="flex-1">{{ $record->korbans->kontak ?? '-' }}</div>
-                            </div>
-                            @if($record->korbans?->kontak_2)
-                            <div class="flex items-start">
-                                <div class="w-32">Kontak Kedua</div>
-                                <div class="w-4">:</div>
-                                <div class="flex-1">{{ $record->korbans?->kontak_2 ?? '-' }}</div>
-                            </div>
-                            @endif
-                        </div>
+                        @endif
                     </div>
                 </div>
 
@@ -279,21 +331,29 @@
                         <div class="flex items-start">
                             <div class="w-32">Alamat</div>
                             <div class="w-4">:</div>
-                            <div class="flex-1 break-words">{{ $record->terlapors->alamat ?? '-' }}, 
-                                {{ ucwords(strtolower($kelurahanTerlapor)) ?? '-' }}, 
-                                {{ ucwords(strtolower($kecamatanTerlapor)) ?? '-' }}, 
-                                {{ ucwords(strtolower($kabupatenTerlapor)) ?? '-' }}, 
-                                {{ ucwords(strtolower($provinsiTerlapor)) ?? '-' }}</div>
+                            <div class="flex-1 break-words">
+                                {{ $record->terlapors->alamat ?? '-' }}
+                                @if(isset($data['terlapors']['wilayah']) && isset($data['terlapors']['wilayah']['utama']))
+                                , {{ ucwords(strtolower($data['terlapors']['wilayah']['utama']['kelurahan'] ?? '-')) }}
+                                , {{ ucwords(strtolower($data['terlapors']['wilayah']['utama']['kecamatan'] ?? '-')) }}
+                                , {{ ucwords(strtolower($data['terlapors']['wilayah']['utama']['kabupaten'] ?? '-')) }}
+                                , {{ ucwords(strtolower($data['terlapors']['wilayah']['utama']['provinsi'] ?? '-')) }}
+                                @endif
+                            </div>
                         </div>
                         @if($record->terlapors?->alamat_2)
                         <div class="flex items-start">
                             <div class="w-32">Alamat Kedua</div>
                             <div class="w-4">:</div>
-                            <div class="flex-1 break-words">{{ $record->terlapors?->alamat_2 ?? '-' }}, 
-                                {{ ucwords(strtolower($kelurahanTerlaporKedua)) ?? '-' }}, 
-                                {{ ucwords(strtolower($kecamatanTerlaporKedua)) ?? '-' }}, 
-                                {{ ucwords(strtolower($kabupatenTerlaporKedua)) ?? '-' }}, 
-                                {{ ucwords(strtolower($provinsiTerlaporKedua)) ?? '-' }}</div>
+                            <div class="flex-1 break-words">
+                                {{ $record->terlapors?->alamat_2 ?? '-' }}
+                                @if(isset($data['terlapors']['wilayah']) && isset($data['terlapors']['wilayah']['kedua']))
+                                , {{ ucwords(strtolower($data['terlapors']['wilayah']['kedua']['kelurahan'] ?? '-')) }}
+                                , {{ ucwords(strtolower($data['terlapors']['wilayah']['kedua']['kecamatan'] ?? '-')) }}
+                                , {{ ucwords(strtolower($data['terlapors']['wilayah']['kedua']['kabupaten'] ?? '-')) }}
+                                , {{ ucwords(strtolower($data['terlapors']['wilayah']['kedua']['provinsi'] ?? '-')) }}
+                                @endif
+                            </div>
                         </div>
                         @endif
                         <div class="flex items-start">
@@ -308,11 +368,25 @@
                             <div class="flex-1">{{ $record->terlapors?->kontak_2 ?? '-' }}</div>
                         </div>
                         @endif
-                        <div class="flex items-start">
-                            <div class="w-32">Data Tambahan</div>
-                            <div class="w-4">:</div>
-                            <div class="flex-1">{{ $record->terlapors?->data_tambahan ?? '-' }}</div>
-                        </div>
+                        {{-- tampilkan list data tambahan --}}
+                        @if(is_array($data['terlapors']['data_tambahan']))
+                        @foreach($data['terlapors']['data_tambahan'] as $data)
+                            <div class="flex items-start">
+                                <div class="w-32">{{ $data->nama_data ?? $data['nama_data'] }}</div>
+                                <div class="w-4">:</div>
+                                <div class="flex-1">{{ $data->keterangan ?? $data['keterangan'] }}</div>
+                            </div>
+                        @endforeach
+                        @elseif(is_object($data['terlapors']['data_tambahan']))
+                        @foreach($data['terlapors']['data_tambahan'] as $data)
+                            <div class="flex items-start">
+                                <div class="w-32">{{ $data->nama_data }}</div>
+                                <div class="w-4">:</div>
+                                <div class="flex-1">{{ $data->keterangan }}</div>
+                            </div>
+                        @endforeach
+                    @endif
+
                     </div>
                 </div>
 
@@ -326,7 +400,7 @@
                                     <div class="flex items-start">
                                         <div class="w-32">TKP</div>
                                         <div class="w-4">:</div>
-                                        <div class="flex-1">{{ $record->tkp }}, {{ ucwords(strtolower($kelurahanTkp)) }}, {{ ucwords(strtolower($kecamatanTkp)) }}, {{ ucwords(strtolower($kabupatenTkp)) }}, {{ ucwords(strtolower($provinsiTkp)) }}</div>
+                                        <div class="flex-1">{{ $record->tkp }}, {{ ucwords(strtolower($data['wilayah_tkp']['kelurahan'])) }}, {{ ucwords(strtolower($data['wilayah_tkp']['kecamatan'])) }}, {{ ucwords(strtolower($data['wilayah_tkp']['kabupaten'])) }}, {{ ucwords(strtolower($data['wilayah_tkp']['provinsi'])) }}</div>
                                     </div>
                                     <div class="flex items-start">
                                         <div class="w-32">Tgl. Lapor</div>
@@ -419,8 +493,8 @@
                             @foreach ($record->media as $media)
                                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mb-4">
                                     <div class="space-y-2 text-sm flex justify-start items-center p-4">
-                                        <p class="w-full">{{ basename($media) }}</p>
-                                        <a href="{{ Storage::url($media) }}" 
+                                        <p class="w-full">{{ is_string($media) ? basename($media) : $media->file_name }}</p>
+                                        <a href="{{ is_string($media) ? Storage::url($media) : $media->getUrl() }}" 
                                            target="_blank"
                                            class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-semibold rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all shadow-sm">
                                             <svg xmlns="http://www.w3.org/2000/svg" 

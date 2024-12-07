@@ -48,7 +48,7 @@ class LaporanInformasi extends Model
 
     public function korbans()
     {
-        return $this->hasOne(Korban::class);
+        return $this->hasMany(Korban::class);
     }
 
     public function terlapors()
