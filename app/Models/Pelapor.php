@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\DataTambahan;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Pelapor extends Model
 {
@@ -34,6 +36,10 @@ class Pelapor extends Model
         'subdistrict_id_2',
     ];
 
+    protected $casts = [
+        'data_tambahan' => 'array'
+    ];
+
     // Relasi ke Laporan
     public function laporan()
     {
@@ -43,5 +49,10 @@ class Pelapor extends Model
     public function laporanInformasi()
     {
         return $this->belongsTo(LaporanInformasi::class, 'laporan_informasi_id');
+    }
+
+    public function dataTambahan(): MorphMany
+    {
+        return $this->morphMany(DataTambahan::class, 'recordable');
     }
 }

@@ -10,6 +10,13 @@ class EditLaporanInfo extends EditRecord
 {
     protected static string $resource = LaporanInfoResource::class;
 
+    // dd semua data termasuk data tambahan
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        dd($data);
+        return $data;
+    }
+
     protected function getHeaderActions(): array
     {
         return [

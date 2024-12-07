@@ -116,7 +116,7 @@ class AdminPanelProvider extends PanelProvider
                 return 'Ditressiber Polda Jatim';
             })
             ->plugins([
-                // FilamentBackgroundsPlugin::make()->showAttribution(false)->showAttribution(false),
+                FilamentBackgroundsPlugin::make()->showAttribution(false)->showAttribution(false),
                 BannerPlugin::make()
                     ->navigationGroup('Setting')
                     ->bannerManagerAccessPermission('super_admin'),
@@ -129,13 +129,14 @@ class AdminPanelProvider extends PanelProvider
                         return 'Selamat Datang di Ditressiber Polda Jatim';
                     }),
                     \Hasnayeen\Themes\ThemesPlugin::make()
-                ]);
-            // ->renderHook(
-            //     // custom footer
-            //     PanelsRenderHook::FOOTER,
-            //     function () {
-            //         return view('customFooter');
-            //     }
-            // );
+                ])
+            ->renderHook(
+                // custom footer
+                PanelsRenderHook::FOOTER,
+                // function () {
+                //     return view('customFooter');
+                // }
+                fn () => view('components.filament.auto-save-scripts')
+            );
     }
 }

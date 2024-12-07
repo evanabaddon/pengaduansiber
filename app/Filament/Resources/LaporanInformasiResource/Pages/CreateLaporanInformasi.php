@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\LaporanInformasiResource\Pages;
 
+use App\Models\FormDraft;
 use Filament\Actions;
 use App\Models\Korban;
 use App\Models\Pelapor;
@@ -9,131 +10,280 @@ use App\Models\Terlapor;
 use App\Models\LaporanInformasi;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\LaporanInformasiResource;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
+use Filament\Support\Exceptions\Halt;
+use Filament\Notifications\Actions\Action;
 
 class CreateLaporanInformasi extends CreateRecord
 {
     protected static string $resource = LaporanInformasiResource::class;
-
     protected static bool $canCreateAnother = false;
+    protected ?FormDraft $currentDraft = null;
+    public $currentStep = 1;
+    
+    protected $listeners = ['autoSaveDraft' => 'autoSaveDraft'];
 
-    // redirect ke halaman list setelah create
-    protected function getRedirectUrl(): string
+    public function autoSaveDraft(): void
     {
-        return $this->getResource()::getUrl('index');
+        try {
+            if (!$this->form) {
+                \Log::warning('Form belum dimount, skip auto save');
+                return;
+            }
+
+            // Ambil state form tanpa validasi
+            $state = $this->form->getRawState();
+            
+            \Log::info('Auto save triggered', ['state' => $state]);
+            
+            // Filter data yang kosong
+            $filteredMainData = collect($state)
+                ->except(['pelapors', 'korbans', 'terlapors'])
+                ->filter(function ($value) {
+                    return $value !== null && $value !== '';
+                })
+                ->toArray();
+                
+            // Filter data pelapor yang tidak kosong
+            $pelaporData = collect($state['pelapors'] ?? [])
+                ->filter(function ($value) {
+                    return $value !== null && $value !== '';
+                })
+                ->toArray();
+                
+            // Filter data korban yang tidak kosong
+            $korbanData = collect($state['korbans'] ?? [])
+                ->filter(function ($value) {
+                    return $value !== null && $value !== '';
+                })
+                ->toArray();
+                
+            // Filter data terlapor yang tidak kosong
+            $terlaporData = collect($state['terlapors'] ?? [])
+                ->filter(function ($value) {
+                    return $value !== null && $value !== '';
+                })
+                ->toArray();
+
+            // Jika semua data kosong, skip penyimpanan
+            if (empty($filteredMainData) && empty($pelaporData) && empty($korbanData) && empty($terlaporData)) {
+                \Log::info('Semua data kosong, skip auto save');
+                return;
+            }
+
+            // Gabungkan dengan data draft yang sudah ada
+            $existingDraft = FormDraft::where('user_id', auth()->id())
+                ->where('form_type', 'laporan_informasi')
+                ->first();
+
+            $draftData = [
+                'user_id' => auth()->id(),
+                'form_type' => 'laporan_informasi',
+                'main_data' => $existingDraft 
+                    ? array_merge($existingDraft->main_data ?? [], $filteredMainData)
+                    : $filteredMainData,
+                'pelapor_data' => $existingDraft 
+                    ? array_merge($existingDraft->pelapor_data ?? [], $pelaporData)
+                    : $pelaporData,
+                'korban_data' => $existingDraft 
+                    ? array_merge($existingDraft->korban_data ?? [], $korbanData)
+                    : $korbanData,
+                'terlapor_data' => $existingDraft 
+                    ? array_merge($existingDraft->terlapor_data ?? [], $terlaporData)
+                    : $terlaporData,
+                'current_step' => $this->getActiveStep()
+            ];
+
+            \Log::info('Saving draft data', ['draft' => $draftData]);
+
+            $this->currentDraft = FormDraft::updateOrCreate(
+                [
+                    'user_id' => auth()->id(),
+                    'form_type' => 'laporan_informasi'
+                ],
+                $draftData
+            );
+
+            // Notification::make()
+            //     ->success()
+            //     ->title('Draft tersimpan ' . now()->format('H:i:s'))
+            //     ->duration(3000)
+            //     ->send();
+            
+            \Log::info('Draft saved successfully', ['draft_id' => $this->currentDraft->id]);
+        } catch (\Exception $e) {
+            \Log::error('Error saving draft: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            Notification::make()
+                ->danger()
+                ->title('Gagal menyimpan draft')
+                ->body($e->getMessage())
+                ->duration(5000)
+                ->send();
+        }
+    }
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->loadExistingDraft();
+        
+        \Log::info('Component mounted, initializing auto-save');
+        
+        $this->dispatch('init-auto-save', interval: 10000);
+    }
+
+    protected function loadExistingDraft(): void
+    {
+        try {
+            $draft = FormDraft::where('user_id', auth()->id())
+                ->where('form_type', 'laporan_informasi')
+                ->first();
+
+            if ($draft) {
+                $this->currentDraft = $draft;
+                $this->currentStep = $draft->current_step;
+                
+                // Pastikan data korban adalah array yang sesuai untuk repeater
+                $korbanData = is_array($draft->korban_data) 
+                    ? array_values($draft->korban_data)  // Jika array, pastikan indeks berurutan
+                    : [];                                // Jika bukan array, gunakan array kosong
+                
+                $formData = [
+                    ...$draft->main_data ?? [],
+                    'pelapors' => $draft->pelapor_data ?? [],
+                    'korbans' => $korbanData,  // Data untuk repeater
+                    'terlapors' => $draft->terlapor_data ?? [],
+                ];
+                
+                $this->form->fill($formData);
+                
+                $this->notify('success', 'Draft terakhir berhasil dimuat');
+            }
+        } catch (\Exception $e) {
+            Log::error('Error loading draft: ' . $e->getMessage());
+        }
+    }
+
+    protected function getActiveStep(): int
+    {
+        return $this->currentStep ?? 1;
     }
 
     public function handleRecordCreation(array $data): LaporanInformasi
     {
-        // dd($data);
+        try {
+            // Simpan data utama
+            $data['status'] = 'Proses';
 
-        // default value status adalah 'Terlapor'
-        $data['status'] = 'Proses';
+            if (auth()->user()->subdit_id) {
+                $data['subdit_id'] = auth()->user()->subdit_id;
+            }
+            if (auth()->user()->unit_id) {
+                $data['unit_id'] = auth()->user()->unit_id;
+            }
 
+            $laporanInformasi = LaporanInformasi::create($data);
 
-        // jika yang input usernya memliki subdit_id dan atau memiliki unit_id maka inject subdit_id dan unit_id ke data
-        if (auth()->user()->subdit_id) {
-            $data['subdit_id'] = auth()->user()->subdit_id;
+            // Simpan Pelapor dengan data tambahan
+            if (isset($data['pelapors'])) {
+                $pelaporData = collect($data['pelapors'])->except('data_tambahan')->toArray();
+                $pelapor = Pelapor::create([
+                    'laporan_informasi_id' => $laporanInformasi->id,
+                    ...$pelaporData
+                ]);
+                
+                if (!empty($data['pelapors']['data_tambahan'])) {
+                    foreach ($data['pelapors']['data_tambahan'] as $dataTambahan) {
+                        $pelapor->dataTambahan()->create($dataTambahan);
+                    }
+                }
+            }
+
+            // Simpan Korban dengan data tambahan
+            // if (isset($data['korbans'])) {
+            //     $korbanData = collect($data['korbans'])->except('data_tambahan')->toArray();
+            //     $korban = Korban::create([
+            //         'laporan_informasi_id' => $laporanInformasi->id,
+            //         ...$korbanData
+            //     ]);
+                
+            //     if (!empty($data['korbans']['data_tambahan'])) {
+            //         foreach ($data['korbans']['data_tambahan'] as $dataTambahan) {
+            //             $korban->dataTambahan()->create($dataTambahan);
+            //         }
+            //     }
+            // }
+
+            // dd($data['korbans']);
+
+            // Simpan multiple Korban dengan data tambahan
+            if (isset($data['korbans']) && is_array($data['korbans'])) {
+                foreach ($data['korbans'] as $korbanItem) {
+                    // Ambil data korban yang benar dari struktur nested
+                    $korbanData = collect($korbanItem['korbans'])->except('data_tambahan')->toArray();
+                    
+                    $korban = Korban::create([
+                        'laporan_informasi_id' => $laporanInformasi->id,
+                        ...$korbanData
+                    ]);
+                    
+                    // Cek data_tambahan dari struktur yang benar
+                    if (!empty($korbanItem['korbans']['data_tambahan'])) {
+                        foreach ($korbanItem['korbans']['data_tambahan'] as $dataTambahan) {
+                            $korban->dataTambahan()->create($dataTambahan);
+                        }
+                    }
+                }
+            }
+
+            // Simpan Terlapor dengan data tambahan
+            if (isset($data['terlapors'])) {
+                $data['terlapors']['nama'] = $data['terlapors']['nama'] ?: 'null';
+                $terlaporData = collect($data['terlapors'])->except('data_tambahan')->toArray();
+                $terlapor = Terlapor::create([
+                    'laporan_informasi_id' => $laporanInformasi->id,
+                    ...$terlaporData
+                ]);
+                
+                if (!empty($data['terlapors']['data_tambahan'])) {
+                    foreach ($data['terlapors']['data_tambahan'] as $dataTambahan) {
+                        $terlapor->dataTambahan()->create($dataTambahan);
+                    }
+                }
+            }
+
+            // Hapus draft setelah berhasil menyimpan
+            FormDraft::where('user_id', auth()->id())
+                ->where('form_type', 'laporan_informasi')
+                ->delete();
+            
+            // Kirim event untuk membersihkan storage
+            $this->dispatch('clear-draft-storage');
+
+            Notification::make()
+                ->success()
+                ->title('Data berhasil disimpan')
+                ->duration(3000)
+                ->send();
+
+            return $laporanInformasi;
+
+        } catch (\Exception $e) {
+            Log::error('Error creating record: ' . $e->getMessage());
+            
+            Notification::make()
+                ->danger()
+                ->title('Gagal menyimpan data')
+                ->body($e->getMessage())
+                ->duration(5000)
+                ->send();
+            
+            throw $e;
         }
-        if (auth()->user()->unit_id) {
-            $data['unit_id'] = auth()->user()->unit_id;
-        }
-
-        // dd($data);
-
-        // Step 1: Simpan data utama LaporanInformasi
-        $laporanInformasi = LaporanInformasi::create($data);
-
-        // dd($data);
-
-        
-        // Step 2: Simpan data Pelapor
-        Pelapor::create([
-            'laporan_informasi_id' => $laporanInformasi->id,
-            'identity_no' => $data['pelapors']['identity_no'],
-            'usia' => $data['pelapors']['usia'],
-            'nama' => $data['pelapors']['nama'],
-            'tempat_lahir' => $data['pelapors']['tempat_lahir'],
-            'tanggal_lahir' => $data['pelapors']['tanggal_lahir'],
-            'jenis_kelamin' => $data['pelapors']['jenis_kelamin'],
-            'pekerjaan' => $data['pelapors']['pekerjaan'],
-            'kontak' => $data['pelapors']['kontak'],
-            'kontak_2' => $data['pelapors']['kontak_2'],
-            'province_id' => $data['pelapors']['province_id'] ?? null,
-            'city_id' => $data['pelapors']['city_id'] ?? null,
-            'district_id' => $data['pelapors']['district_id'] ?? null,
-            'subdistrict_id' => $data['pelapors']['subdistrict_id'] ?? null,
-            'alamat' => $data['pelapors']['alamat'],
-            'alamat_2' => $data['pelapors']['alamat_2'] ?? null,
-            'province_id_2' => $data['pelapors']['province_id_2'] ?? null,
-            'city_id_2' => $data['pelapors']['city_id_2'] ?? null,
-            'district_id_2' => $data['pelapors']['district_id_2'] ?? null,
-            'subdistrict_id_2' => $data['pelapors']['subdistrict_id_2'] ?? null,
-        ]);
-
-        // Step 3: Simpan data Korban 
-        Korban::create([
-            'laporan_informasi_id' => $laporanInformasi->id,
-            'identity_no' => $data['korbans']['identity_no'],
-            'nama' => $data['korbans']['nama'],
-            'kontak' => $data['korbans']['kontak'],
-            'usia' => $data['korbans']['usia'],
-            'tempat_lahir' => $data['korbans']['tempat_lahir'],
-            'tanggal_lahir' => $data['korbans']['tanggal_lahir'],
-            'jenis_kelamin' => $data['korbans']['jenis_kelamin'],
-            'pekerjaan' => $data['korbans']['pekerjaan'],
-            'kontak_2' => $data['korbans']['kontak_2'],
-            'province_id' => $data['korbans']['province_id'] ?? null,
-            'city_id' => $data['korbans']['city_id'] ?? null,
-            'district_id' => $data['korbans']['district_id'] ?? null,
-            'subdistrict_id' => $data['korbans']['subdistrict_id'] ?? null,
-            'alamat' => $data['korbans']['alamat'],
-            'alamat_2' => $data['korbans']['alamat_2'] ?? null,
-            'province_id_2' => $data['korbans']['province_id_2'] ?? null,
-            'city_id_2' => $data['korbans']['city_id_2'] ?? null,
-            'district_id_2' => $data['korbans']['district_id_2'] ?? null,
-            'subdistrict_id_2' => $data['korbans']['subdistrict_id_2'] ?? null,
-
-        ]);
-
-        // jika nama terlapor tidak diisi maka isi dengan null
-        if ($data['terlapors']['nama'] == '') {
-            $data['terlapors']['nama'] = 'null';
-        }
-
-        // Step 4: Simpan data Terlapor
-        Terlapor::create([
-            'laporan_informasi_id' => $laporanInformasi->id,
-            'identity_no' => $data['terlapors']['identity_no'],
-            'nama' => $data['terlapors']['nama'],
-            'kontak' => $data['terlapors']['kontak'],
-            'kontak_2' => $data['terlapors']['kontak_2'] ?? null,
-            'usia' => $data['terlapors']['usia'],
-            'jenis_kelamin' => $data['terlapors']['jenis_kelamin'],
-            'tempat_lahir' => $data['terlapors']['tempat_lahir'],
-            'tanggal_lahir' => $data['terlapors']['tanggal_lahir'],
-            'data_tambahan' => $data['terlapors']['data_tambahan'] ?? null,
-            'province_id' => $data['terlapors']['province_id'] ?? null,
-            'city_id' => $data['terlapors']['city_id'] ?? null,
-            'district_id' => $data['terlapors']['district_id'] ?? null,
-            'subdistrict_id' => $data['terlapors']['subdistrict_id'] ?? null,
-            'alamat' => $data['terlapors']['alamat'],
-            'alamat_2' => $data['terlapors']['alamat_2'] ?? null,
-            'province_id_2' => $data['terlapors']['province_id_2'] ?? null,
-            'city_id_2' => $data['terlapors']['city_id_2'] ?? null,
-            'district_id_2' => $data['terlapors']['district_id_2'] ?? null,
-            'subdistrict_id_2' => $data['terlapors']['subdistrict_id_2'] ?? null,
-        ]);
-
-        // Step 5: Update data laporan dengan pelapor, korban, dan terlapor jika diperlukan
-        return $laporanInformasi;
-    }
-
-    // hidden save button
-    protected function getFormActions(): array
-    {
-        return [
-            //$this->getSaveFormAction(),
-            $this->getCancelFormAction(),
-        ];
     }
 }

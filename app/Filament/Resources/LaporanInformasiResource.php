@@ -7,6 +7,7 @@ use Filament\Forms;
 use App\Models\Unit;
 use App\Models\User;
 use Filament\Tables;
+use App\Models\Korban;
 use App\Models\Subdit;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -19,6 +20,7 @@ use Filament\Resources\Resource;
 use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Grid;
 use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Wizard;
@@ -30,6 +32,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\ColumnGroup;
 use Filament\Forms\Components\FileUpload;
@@ -39,6 +42,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
+use App\Filament\Forms\Components\DataTambahanRepeater;
 use Coolsam\FilamentFlatpickr\Forms\Components\Flatpickr;
 use App\Filament\Resources\LaporanInformasiResource\Pages;
 use App\Notifications\LaporanInformasiAssignedNotification;
@@ -172,7 +176,11 @@ class LaporanInformasiResource extends Resource
                                             'Lainnya' => 'Lainnya',
                                         ]),
                                     ]),
-                                
+                                    // section data tambahan
+                                    Section::make('Data Tambahan')
+                                        ->schema([
+                                            DataTambahanRepeater::make('pelapors.data_tambahan'),
+                                        ]),
                                     // Alamat section
                                     Section::make('Alamat')
                                         ->schema([
@@ -270,7 +278,6 @@ class LaporanInformasiResource extends Resource
                                                     if ($get('pelapors_has_second_address')) {
                                                         return true;
                                                     }
-                                                    
                                                     // Cek apakah ada data alamat 2 yang sudah tersimpan
                                                     return $get('pelapors.alamat_2') || 
                                                            $get('pelapors.province_id_2') || 
@@ -283,71 +290,80 @@ class LaporanInformasiResource extends Resource
                         Wizard\Step::make('Korban')
                             ->description('Identitas Korban')
                             ->schema([
-                                Checkbox::make('sama_dengan_pelapor')
-                                ->label('SAMA DENGAN PELAPOR')
-                                ->reactive()  // Agar form bisa diperbarui saat checkbox dicentang
-                                ->afterStateUpdated(function ($state, callable $set, Get $get) {
-                                    // jika sama dengan pelapor maka data korban akan sama dengan pelapor
-                                    if ($state) {
-                                        $set('korbans.identity_no', $get('pelapors.identity_no'));
-                                        $set('korbans.nama', $get('pelapors.nama'));
-                                        $set('korbans.kontak', $get('pelapors.kontak'));
-                                        $set('korbans.kewarganegaraan', $get('pelapors.kewarganegaraan'));
-                                        $set('korbans.tempat_lahir', $get('pelapors.tempat_lahir'));
-                                        // Set tanggal lahir dengan format yang benar
-                                        $tanggalLahir = $get('pelapors.tanggal_lahir');
-                                        if ($tanggalLahir) {
-                                            // Pastikan format tanggal sesuai
-                                            $formattedDate = Carbon::parse($tanggalLahir)->format('Y-m-d');
-                                            $set('korbans.tanggal_lahir', $formattedDate);
+                                Repeater::make('korbans')
+                                ->schema([
+                                    Checkbox::make('sama_dengan_pelapor')
+                                        ->label('SAMA DENGAN PELAPOR')
+                                        ->hidden(function (Component $component) {
+                                            $firstItemKey = array_key_first($component->getContainer()->getParentComponent()->getState());
                                             
-                                            // Hitung dan set usia
-                                            $birthDate = Carbon::parse($tanggalLahir);
-                                            $age = $birthDate->age;
-                                            $set('korbans.usia', $age);
-                                        }
-                                        $set('korbans.jenis_kelamin', $get('pelapors.jenis_kelamin'));
-                                        $set('korbans.pekerjaan', $get('pelapors.pekerjaan'));
-                                        $set('korbans.usia', $get('pelapors.usia'));
-                                        $set('korbans.alamat', $get('pelapors.alamat'));
-                                        $set('korbans.province_id', $get('pelapors.province_id'));
-                                        $set('korbans.city_id', $get('pelapors.city_id'));
-                                        $set('korbans.district_id', $get('pelapors.district_id'));
-                                        $set('korbans.subdistrict_id', $get('pelapors.subdistrict_id'));
-                                        $set('korbans.domestic', $get('pelapors.domestic'));
-                                        $set('korbans.agama', $get('pelapors.agama'));
-                                        $set('korbans.alamat_2', $get('pelapors.alamat_2'));
-                                        $set('korbans.province_id_2', $get('pelapors.province_id_2'));
-                                        $set('korbans.city_id_2', $get('pelapors.city_id_2'));
-                                        $set('korbans.district_id_2', $get('pelapors.district_id_2'));
-                                        $set('korbans.subdistrict_id_2', $get('pelapors.subdistrict_id_2'));
-                                        $set('korbans.kontak_2', $get('pelapors.kontak_2'));
-
-                                    } else {
-                                        $set('korbans.identity_no', null);
-                                        $set('korbans.nama', null);
-                                        $set('korbans.kontak', null);
-                                        $set('korbans.kewarganegaraan', null);
-                                        $set('korbans.tempat_lahir', null);
-                                        $set('korbans.tanggal_lahir', null);
-                                        $set('korbans.jenis_kelamin', null);
-                                        $set('korbans.pekerjaan', null);
-                                        $set('korbans.usia', null);
-                                        $set('korbans.alamat', null);
-                                        $set('korbans.province_id', null);
-                                        $set('korbans.city_id', null);
-                                        $set('korbans.district_id', null);
-                                        $set('korbans.subdistrict_id', null);
-                                        $set('korbans.domestic', null);
-                                        $set('korbans.agama', null);
-                                        $set('korbans.alamat_2', null);
-                                        $set('korbans.province_id_2', null);
-                                        $set('korbans.city_id_2', null);
-                                        $set('korbans.district_id_2', null);
-                                        $set('korbans.subdistrict_id_2', null);
-                                        $set('korbans.kontak_2', null);
-                                    }
-                                }),
+                                            // Tampilkan hanya jika ini adalah item pertama
+                                            return !str_contains($component->getStatePath(), $firstItemKey);
+                                        }) // Sembunyikan jika bukan item pertama
+                                        ->reactive()  // Agar form bisa diperbarui saat checkbox dicentang
+                                        ->afterStateUpdated(function ($state, callable $set, Get $get) {
+                                            // jika sama dengan pelapor maka data korban akan sama dengan pelapor
+                                            if ($state) {
+                                                // Mengakses data pelapor dari form utama, bukan dari dalam repeater
+                                                $set('korbans.nama', $get('../../pelapors.nama'));
+                                                $set('korbans.identity_no', $get('../../pelapors.identity_no'));
+                                                $set('korbans.kontak', $get('../../pelapors.kontak'));
+                                                $set('korbans.kontak_2', $get('../../pelapors.kontak_2'));
+                                                $set('korbans.kewarganegaraan', $get('../../pelapors.kewarganegaraan'));
+                                                $set('korbans.tempat_lahir', $get('../../pelapors.tempat_lahir'));
+                                                
+                                                // Set tanggal lahir dengan format yang benar
+                                                $tanggalLahir = $get('../../pelapors.tanggal_lahir');
+                                                if ($tanggalLahir) {
+                                                    $formattedDate = Carbon::parse($tanggalLahir)->format('Y-m-d');
+                                                    $set('korbans.tanggal_lahir', $formattedDate);
+                                                    
+                                                    // Hitung dan set usia
+                                                    $birthDate = Carbon::parse($tanggalLahir);
+                                                    $age = $birthDate->age;
+                                                    $set('korbans.usia', $age);
+                                                }
+                                                
+                                                $set('korbans.jenis_kelamin', $get('../../pelapors.jenis_kelamin'));
+                                                $set('korbans.pekerjaan', $get('../../pelapors.pekerjaan'));
+                                                $set('korbans.agama', $get('../../pelapors.agama'));
+                                                $set('korbans.alamat', $get('../../pelapors.alamat'));
+                                                $set('korbans.province_id', $get('../../pelapors.province_id'));
+                                                $set('korbans.city_id', $get('../../pelapors.city_id'));
+                                                $set('korbans.district_id', $get('../../pelapors.district_id'));
+                                                $set('korbans.subdistrict_id', $get('../../pelapors.subdistrict_id'));
+                                                $set('korbans.alamat_2', $get('../../pelapors.alamat_2'));
+                                                $set('korbans.province_id_2', $get('../../pelapors.province_id_2'));
+                                                $set('korbans.city_id_2', $get('../../pelapors.city_id_2'));
+                                                $set('korbans.district_id_2', $get('../../pelapors.district_id_2'));
+                                                $set('korbans.subdistrict_id_2', $get('../../pelapors.subdistrict_id_2'));
+                                                $set('korbans.data_tambahan', $get('../../pelapors.data_tambahan'));
+                                            } else {
+                                                $set('korbans.identity_no', null);
+                                                $set('korbans.nama', null);
+                                                $set('korbans.kontak', null);
+                                                $set('korbans.kewarganegaraan', null);
+                                                $set('korbans.tempat_lahir', null);
+                                                $set('korbans.tanggal_lahir', null);
+                                                $set('korbans.jenis_kelamin', null);
+                                                $set('korbans.pekerjaan', null);
+                                                $set('korbans.usia', null);
+                                                $set('korbans.alamat', null);
+                                                $set('korbans.province_id', null);
+                                                $set('korbans.city_id', null);
+                                                $set('korbans.district_id', null);
+                                                $set('korbans.subdistrict_id', null);
+                                                $set('korbans.domestic', null);
+                                                $set('korbans.agama', null);
+                                                $set('korbans.alamat_2', null);
+                                                $set('korbans.province_id_2', null);
+                                                $set('korbans.city_id_2', null);
+                                                $set('korbans.district_id_2', null);
+                                                $set('korbans.subdistrict_id_2', null);
+                                                $set('korbans.kontak_2', null);
+                                                $set('korbans.data_tambahan', null);
+                                                }
+                                            }),
                                 Grid::make(5)
                                     ->schema([
                                         TextInput::make('korbans.nama')->label('NAMA'),
@@ -363,7 +379,7 @@ class LaporanInformasiResource extends Resource
                                         ->options([
                                             'Laki - Laki' => 'Laki - Laki',
                                             'Perempuan' => 'Perempuan'
-                                        ]),
+                                        ])->required(),
                                         TextInput::make('korbans.tempat_lahir')->label('TEMPAT LAHIR')->required(),
                                         Flatpickr::make('korbans.tanggal_lahir')
                                             ->label('TGL. LAHIR')
@@ -382,7 +398,7 @@ class LaporanInformasiResource extends Resource
                                                 }
                                             }),
                                         TextInput::make('korbans.usia')->readonly()->label('USIA'),
-                                        TextInput::make('korbans.pekerjaan')->label('PEKERJAAN'),
+                                        TextInput::make('korbans.pekerjaan')->label('PEKERJAAN')->required(),
                                         Select::make('korbans.agama')->label('AGAMA')->options([
                                             'Islam' => 'Islam',
                                             'Kristen' => 'Kristen',
@@ -393,6 +409,19 @@ class LaporanInformasiResource extends Resource
                                             'Lainnya' => 'Lainnya',
                                         ]),
                                     ]),
+                                // section data tambahan
+                                // Section::make('Data Tambahan')
+                                //     ->schema([
+                                //         DataTambahanRepeater::make('korbans.data_tambahan'),
+                                //     ]),
+                                Section::make('Data Tambahan')
+                                ->schema([
+                                    DataTambahanRepeater::make('data_tambahan')  // Hapus 'korbans.' dari path
+                                        ->mutateRelationshipDataBeforeCreateUsing(function (array $data) {
+                                            $data['datatable_type'] = Korban::class;
+                                            return $data;
+                                        }),
+                                ]),
                                 // Alamat section
                                 Section::make('Alamat')
                                 ->schema([
@@ -433,7 +462,6 @@ class LaporanInformasiResource extends Resource
                                                 ->live()
                                                 ->searchable(),
                                         ]),
-
                                     // Toggle untuk menampilkan Alamat 2
                                     Toggle::make('korbans_has_second_address')
                                         ->label('Tambah Alamat Lain?')
@@ -450,7 +478,6 @@ class LaporanInformasiResource extends Resource
                                                 $set('korbans_has_second_address', true);
                                                 return;
                                             }
-
                                             // Cek data alamat kedua korban
                                             if ($get('korbans.alamat_2') || 
                                                 $get('korbans.province_id_2') || 
@@ -475,7 +502,6 @@ class LaporanInformasiResource extends Resource
                                                      $get('pelapors.district_id_2') || 
                                                      $get('pelapors.subdistrict_id_2')));
                                         }),
-
                                     // Alamat 2 (Opsional)
                                     Section::make('Alamat Lain')
                                         ->schema([
@@ -514,19 +540,24 @@ class LaporanInformasiResource extends Resource
                                         ])
                                         ->visible(function (Get $get): bool { return (bool) $get('korbans_has_second_address');}),
                                 ])
+                                ])
+                                ->columns(1)
+                                ->columnSpanFull()
+                                ->defaultItems(1)
+                                ->addActionLabel('Tambah Korban')
+                                ->cloneable(),
                             ]),
                         Wizard\Step::make('Terlapor')
                             ->description('Identitas Terlapor')
                             ->schema([
-                                Grid::make(6)
+                                Grid::make(5)
                                     ->schema([
                                         TextInput::make('terlapors.nama')->label('NAMA'),
                                         TextInput::make('terlapors.identity_no')->label('NO IDENTITAS'),
-                                        TextInput::make('terlapors.data_tambahan')->label('DATA TAMBAHAN'),
+                                        // TextInput::make('terlapors.data_tambahan')->label('DATA TAMBAHAN'),
                                         PhoneInput::make('terlapors.kontak')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->label('KONTAK'),
                                         PhoneInput::make('terlapors.kontak_2')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->label('KONTAK LAIN'),
                                         Country::make('terlapors.kewarganegaraan')->label('KEWARGANEGARAAN')->default('Indonesia')->searchable(),
-                                        
                                     ]),
                                 Grid::make(6)
                                     ->schema([
@@ -565,6 +596,11 @@ class LaporanInformasiResource extends Resource
                                             'Konghucu' => 'Konghucu',
                                             'Lainnya' => 'Lainnya',
                                         ]),
+                                    ]),
+                                // section data tambahan
+                                Section::make('Data Tambahan')
+                                    ->schema([
+                                        DataTambahanRepeater::make('terlapors.data_tambahan'),
                                     ]),
                                 // Alamat section
                                 Section::make('Alamat')
@@ -605,12 +641,10 @@ class LaporanInformasiResource extends Resource
                                                 ->live()
                                                 ->searchable(),
                                         ]),
-
                                     // Toggle untuk menampilkan Alamat 2
                                     Toggle::make('terlapors_has_second_address')
                                         ->label('Tambah Alamat Lain?')
                                         ->live(),
-
                                     // Alamat 2 (Opsional)
                                     Section::make('Alamat Lain')
                                         ->schema([
@@ -808,14 +842,11 @@ class LaporanInformasiResource extends Resource
                             ->afterStateUpdated(function (LaporanInformasi $record, $state) {
                                 $record->update([
                                     'unit_id' => null,
-                                    // 'penyidik_id' => null
                                 ]);
-
                                 // Kirim notifikasi ke user subdit saja (yang tidak memiliki unit_id)
                                 if ($state) {
                                     $users = User::where('subdit_id', $state)
                                         ->whereNull('unit_id')  // Tambahkan filter ini
-                                        // ->whereNull('penyidik_id')  // Tambahkan filter ini
                                         ->get();
                                     foreach ($users as $user) {
                                         $user->notify(new LaporanInformasiAssignedNotification($record, 'subdit'));
@@ -936,14 +967,6 @@ class LaporanInformasiResource extends Resource
                             return $query->where('penyidik_id', $penyidikId);
                         });
                     }),
-                // // filter by penyidik
-                // SelectFilter::make('penyidik_id')
-                //     ->label('PENYIDIK')
-                //     ->options(User::whereDoesntHave('roles', function($query) {
-                //         $query->whereIn('name', ['super_admin', 'subdit', 'unit']);
-                //     })->pluck('name', 'id'))
-                //     ->searchable()
-                //     ->visible(!auth()->user()->hasRole('penyidik')),
             ])
             ->actions([
                 ActionsViewAction::make()
@@ -999,36 +1022,44 @@ class LaporanInformasiResource extends Resource
     }
 
     // Untuk form edit
-    protected function mutateFormDataBeforeFill(array $data): array
-    {
-        $record = $this->record;
-        dd($record);
+    // protected function mutateFormDataBeforeFill(array $data): array
+    // {
+    //     // test dd data record beserta data tambahan
+    //     dd($data);
+    //     $record = $this->record;
         
-        if ($record) {
-            // Load relationships jika belum dimuat
-            if (!$record->relationLoaded('pelapors')) {
-                $record->load('pelapors');
-            }
-            if (!$record->relationLoaded('korbans')) {
-                $record->load('korbans');
-            }
-            if (!$record->relationLoaded('terlapors')) {
-                $record->load('terlapors');
-            }
+    //     if ($record) {
+    //         // Load relationships jika belum dimuat
+    //         if (!$record->relationLoaded('pelapors')) {
+    //             $record->load(['pelapors']);
+    //         }
+    //         if (!$record->relationLoaded('korbans')) {
+    //             $record->load(['korbans']);
+    //         }
+    //         if (!$record->relationLoaded('terlapors')) {
+    //             $record->load(['terlapors']);
+    //         }
 
-            // Pastikan data relationship dimuat ke form
-            if ($record->pelapors) {
-                $data['pelapors'] = $record->pelapors->toArray();
-            }
-            if ($record->korbans) {
-                $data['korbans'] = $record->korbans->toArray();
-            }
-            if ($record->terlapors) {
-                $data['terlapors'] = $record->terlapors->toArray();
-            }
-        }
+    //         // Pastikan data relationship dimuat ke form
+    //         if ($record->pelapors) {
+    //             $data['pelapors'] = $record->pelapors->toArray();
+    //             $data['pelapors']['data_tambahan'] = $record->pelapors->data_tambahan ?? [];
+    //         }
+    //         if ($record->korbans) {
+    //             $data['korbans'] = $record->korbans->toArray();
+    //             $data['korbans']['data_tambahan'] = $record->korbans->data_tambahan ?? [];
+    //         }
+    //         if ($record->terlapors) {
+    //             $data['terlapors'] = $record->terlapors->toArray();
+    //             $data['terlapors']['data_tambahan'] = $record->terlapors->data_tambahan ?? [];
+    //         }
 
-        return $data;
-    }
+    //         \Log::info('Data Tambahan Pelapor:', ['data' => $data['pelapors']['data_tambahan'] ?? []]);
+    //         \Log::info('Data Tambahan Korban:', ['data' => $data['korbans']['data_tambahan'] ?? []]);
+    //         \Log::info('Data Tambahan Terlapor:', ['data' => $data['terlapors']['data_tambahan'] ?? []]);
+    //     }
+
+    //     return $data;
+    // }
 
 }
