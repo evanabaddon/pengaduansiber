@@ -291,6 +291,9 @@ class LaporanInformasiResource extends Resource
                             ->description('Identitas Korban')
                             ->schema([
                                 Repeater::make('korbans')
+                                ->columns(1)
+                                ->columnSpanFull()
+                                ->label('KORBAN')
                                 ->schema([
                                     Checkbox::make('sama_dengan_pelapor')
                                         ->label('SAMA DENGAN PELAPOR')

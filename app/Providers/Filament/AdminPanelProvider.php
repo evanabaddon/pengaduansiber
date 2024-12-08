@@ -29,6 +29,7 @@ use Illuminate\Foundation\Auth\User as AuthUser;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use App\Filament\Widgets\LatestLaporanInformasiWidget;
+use Swis\Filament\Backgrounds\ImageProviders\MyImages;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -116,7 +117,12 @@ class AdminPanelProvider extends PanelProvider
                 return 'Ditressiber Polda Jatim';
             })
             ->plugins([
-                // FilamentBackgroundsPlugin::make()->showAttribution(false)->showAttribution(false),
+                FilamentBackgroundsPlugin::make()
+                    ->imageProvider(
+                        MyImages::make()->directory('images/backgrounds')
+                    )
+                    ->showAttribution(false)
+                    ->showAttribution(false),
                 BannerPlugin::make()
                     ->navigationGroup('Setting')
                     ->bannerManagerAccessPermission('super_admin'),
