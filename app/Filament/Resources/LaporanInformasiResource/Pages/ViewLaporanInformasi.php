@@ -76,7 +76,7 @@ class ViewLaporanInformasi extends ViewRecord
         }
 
         // ambil data terlapor beserta relasi dan data tambahan
-        $terlapor = $this->record->pelapors;
+        $terlapor = $this->record->terlapors;
         $data['terlapors'] = $terlapor->toArray();
 
         // Tambahkan data wilayah ke array terlapor
@@ -111,7 +111,7 @@ class ViewLaporanInformasi extends ViewRecord
         ];
 
         // ambil data laporaninformasis
-        // dd($data);
+        dd($data);
 
         return $data;
     }
