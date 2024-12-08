@@ -439,6 +439,7 @@ class LaporanInformasiResource extends Resource
                                                 ->provinsi()
                                                 ->live()
                                                 ->searchable()
+                                                ->options(fn () => app('wilayah')->getProvinsi() ?? [])  // Langsung panggil helper
                                                 ->afterStateUpdated(function (callable $set) {
                                                     $set('korbans.city_id', null);
                                                     $set('korbans.district_id', null);
@@ -449,6 +450,10 @@ class LaporanInformasiResource extends Resource
                                                 ->kabupaten()
                                                 ->live()
                                                 ->searchable()
+                                                ->options(function (callable $get) {
+                                                    $provinceId = $get('korbans.province_id');
+                                                    return $provinceId ? (app('wilayah')->getKabupaten($provinceId) ?? []) : [];
+                                                })
                                                 ->afterStateUpdated(function (callable $set) {
                                                     $set('korbans.district_id', null);
                                                     $set('korbans.subdistrict_id', null);
@@ -458,12 +463,20 @@ class LaporanInformasiResource extends Resource
                                                 ->kecamatan()
                                                 ->live()
                                                 ->searchable()
+                                                ->options(function (callable $get) {
+                                                    $cityId = $get('korbans.city_id');
+                                                    return $cityId ? (app('wilayah')->getKecamatan($cityId) ?? []) : [];
+                                                })
                                                 ->afterStateUpdated(fn (callable $set) => $set('korbans.subdistrict_id', null)),
                                             Select::make('korbans.subdistrict_id')
                                                 ->label('KELURAHAN / DESA')
                                                 ->kelurahan()
                                                 ->live()
-                                                ->searchable(),
+                                                ->searchable()
+                                                ->options(function (callable $get) {
+                                                    $districtId = $get('korbans.district_id');
+                                                    return $districtId ? (app('wilayah')->getKelurahan($districtId) ?? []) : [];
+                                                }),
                                         ]),
                                     // Toggle untuk menampilkan Alamat 2
                                     Toggle::make('korbans_has_second_address')
