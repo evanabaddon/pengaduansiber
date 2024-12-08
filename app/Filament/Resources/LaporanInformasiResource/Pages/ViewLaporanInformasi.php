@@ -111,7 +111,7 @@ class ViewLaporanInformasi extends ViewRecord
         ];
 
         // ambil data laporaninformasis
-        dd($data);
+        // dd($data);
 
         return $data;
     }
