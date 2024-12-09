@@ -27,8 +27,8 @@ class CreateLaporanInformasi extends CreateRecord
     public function autoSaveDraft(): void
     {
         try {
-            // Check if form is initialized and has data
-            if (!$this->form || !$this->form->isValid()) {
+            // Check if form exists and has data
+            if (!$this->form || empty($this->form->getRawState())) {
                 return;
             }
 
@@ -79,8 +79,22 @@ class CreateLaporanInformasi extends CreateRecord
                     ],
                     $filteredData
                 );
+                
+                \Log::info('Draft auto-saved successfully', ['draft_id' => $this->currentDraft->id]);
+                
+                // Dispatch success event
+                $this->dispatch('draft-saved', [
+                    'message' => 'Draft berhasil disimpan'
+                ]);
+                
             } catch (\Exception $e) {
                 \Log::error('Draft save failed: ' . $e->getMessage());
+                
+                // Dispatch error event
+                $this->dispatch('draft-save-failed', [
+                    'message' => 'Gagal menyimpan draft: ' . $e->getMessage()
+                ]);
+                
                 return;
             }
 
@@ -88,6 +102,11 @@ class CreateLaporanInformasi extends CreateRecord
             \Log::error('Auto-save failed: ' . $e->getMessage(), [
                 'state' => $state ?? null,
                 'filtered_data' => $filteredData ?? null,
+            ]);
+            
+            // Dispatch error event
+            $this->dispatch('draft-save-failed', [
+                'message' => 'Auto-save gagal: ' . $e->getMessage()
             ]);
         }
     }
