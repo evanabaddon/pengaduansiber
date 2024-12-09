@@ -400,7 +400,14 @@
                                     <div class="flex items-start">
                                         <div class="w-32">TKP</div>
                                         <div class="w-4">:</div>
-                                        <div class="flex-1">{{ $record->tkp }}, {{ ucwords(strtolower($data['wilayah_tkp']['kelurahan'])) }}, {{ ucwords(strtolower($data['wilayah_tkp']['kecamatan'])) }}, {{ ucwords(strtolower($data['wilayah_tkp']['kabupaten'])) }}, {{ ucwords(strtolower($data['wilayah_tkp']['provinsi'])) }}</div>
+                                        <div class="flex-1">{{ $record->tkp }}
+                                            @if($this->data['wilayah_tkp'] ?? null)
+                                                , {{ ucwords(strtolower($this->data['wilayah_tkp']['kelurahan'] ?? '-')) }}
+                                                , {{ ucwords(strtolower($this->data['wilayah_tkp']['kecamatan'] ?? '-')) }}
+                                                , {{ ucwords(strtolower($this->data['wilayah_tkp']['kabupaten'] ?? '-')) }}
+                                                , {{ ucwords(strtolower($this->data['wilayah_tkp']['provinsi'] ?? '-')) }}
+                                            @endif
+                                        </div>
                                     </div>
                                     <div class="flex items-start">
                                         <div class="w-32">Tgl. Lapor</div>
