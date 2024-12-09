@@ -27,12 +27,18 @@ class CreateLaporanInformasi extends CreateRecord
     public function autoSaveDraft(): void
     {
         try {
-            if (!$this->form) {
+            // Check if form is initialized and has data
+            if (!$this->form || !$this->form->isValid()) {
                 return;
             }
 
             $state = $this->form->getRawState();
             
+            // Skip if state is empty
+            if (empty($state)) {
+                return;
+            }
+
             // Memory-efficient data filtering
             $filteredData = [];
             
@@ -41,20 +47,20 @@ class CreateLaporanInformasi extends CreateRecord
                 $filteredData['main_data'] = $mainData;
             }
             
-            // Process related data separately
-            if (!empty($state['pelapors'])) {
+            // Process related data separately with null checks
+            if (isset($state['pelapors'])) {
                 $filteredData['pelapor_data'] = $this->filterEmptyValues($state['pelapors']);
             }
             
-            if (!empty($state['korbans'])) {
+            if (isset($state['korbans'])) {
                 $filteredData['korban_data'] = $this->filterEmptyValues($state['korbans']);
             }
             
-            if (!empty($state['terlapors'])) {
+            if (isset($state['terlapors'])) {
                 $filteredData['terlapor_data'] = $this->filterEmptyValues($state['terlapors']);
             }
 
-            // Skip if no data to save
+            // Skip if no valid data to save
             if (empty($filteredData)) {
                 return;
             }
@@ -64,37 +70,56 @@ class CreateLaporanInformasi extends CreateRecord
             $filteredData['form_type'] = 'laporan_informasi';
             $filteredData['current_step'] = $this->getActiveStep();
 
-            // Efficient update/create
-            $this->currentDraft = FormDraft::updateOrCreate(
-                [
-                    'user_id' => auth()->id(),
-                    'form_type' => 'laporan_informasi'
-                ],
-                $filteredData
-            );
+            // Efficient update/create with error handling
+            try {
+                $this->currentDraft = FormDraft::updateOrCreate(
+                    [
+                        'user_id' => auth()->id(),
+                        'form_type' => 'laporan_informasi'
+                    ],
+                    $filteredData
+                );
+            } catch (\Exception $e) {
+                \Log::error('Draft save failed: ' . $e->getMessage());
+                return;
+            }
 
         } catch (\Exception $e) {
-            \Log::error('Auto-save failed: ' . $e->getMessage());
+            \Log::error('Auto-save failed: ' . $e->getMessage(), [
+                'state' => $state ?? null,
+                'filtered_data' => $filteredData ?? null,
+            ]);
         }
     }
 
     protected function filterEmptyValues(array $data, array $excludeKeys = []): array
     {
+        if (empty($data)) {
+            return [];
+        }
+
         return collect($data)
             ->except($excludeKeys)
-            ->filter(fn ($value) => $value !== null && $value !== '')
+            ->filter(function ($value) {
+                if (is_array($value)) {
+                    return !empty(array_filter($value));
+                }
+                return $value !== null && $value !== '';
+            })
             ->toArray();
     }
 
     public function mount(): void
     {
         parent::mount();
-        $this->loadExistingDraft();
         
-        // Reduce logging
-        \Log::info('Form mounted with auto-save');
-        
-        $this->dispatch('init-auto-save', interval: 60000);
+        try {
+            $this->loadExistingDraft();
+            \Log::info('Form mounted with auto-save');
+            $this->dispatch('init-auto-save', interval: 60000);
+        } catch (\Exception $e) {
+            \Log::error('Mount failed: ' . $e->getMessage());
+        }
     }
 
     protected function loadExistingDraft(): void
