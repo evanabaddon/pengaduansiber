@@ -33,54 +33,48 @@ class CreateLaporanInformasi extends CreateRecord
 
             $state = $this->form->getRawState();
             
-            // Simplify data filtering using a single helper function
-            $filteredData = [
-                'main_data' => $this->filterEmptyValues($state, ['pelapors', 'korbans', 'terlapors']),
-                'pelapor_data' => $this->filterEmptyValues($state['pelapors'] ?? []),
-                'korban_data' => $this->filterEmptyValues($state['korbans'] ?? []),
-                'terlapor_data' => $this->filterEmptyValues($state['terlapors'] ?? []),
-            ];
+            // Memory-efficient data filtering
+            $filteredData = [];
+            
+            // Process main data
+            if ($mainData = $this->filterEmptyValues($state, ['pelapors', 'korbans', 'terlapors'])) {
+                $filteredData['main_data'] = $mainData;
+            }
+            
+            // Process related data separately
+            if (!empty($state['pelapors'])) {
+                $filteredData['pelapor_data'] = $this->filterEmptyValues($state['pelapors']);
+            }
+            
+            if (!empty($state['korbans'])) {
+                $filteredData['korban_data'] = $this->filterEmptyValues($state['korbans']);
+            }
+            
+            if (!empty($state['terlapors'])) {
+                $filteredData['terlapor_data'] = $this->filterEmptyValues($state['terlapors']);
+            }
 
-            // Skip if all data is empty
-            if (empty(array_filter($filteredData))) {
+            // Skip if no data to save
+            if (empty($filteredData)) {
                 return;
             }
 
-            $existingDraft = FormDraft::where('user_id', auth()->id())
-                ->where('form_type', 'laporan_informasi')
-                ->first();
+            // Add required fields
+            $filteredData['user_id'] = auth()->id();
+            $filteredData['form_type'] = 'laporan_informasi';
+            $filteredData['current_step'] = $this->getActiveStep();
 
-            $draftData = [
-                'user_id' => auth()->id(),
-                'form_type' => 'laporan_informasi',
-                'main_data' => $existingDraft 
-                    ? array_merge($existingDraft->main_data ?? [], $filteredData['main_data'])
-                    : $filteredData['main_data'],
-                'pelapor_data' => $existingDraft 
-                    ? array_merge($existingDraft->pelapor_data ?? [], $filteredData['pelapor_data'])
-                    : $filteredData['pelapor_data'],
-                'korban_data' => $existingDraft 
-                    ? array_merge($existingDraft->korban_data ?? [], $filteredData['korban_data'])
-                    : $filteredData['korban_data'],
-                'terlapor_data' => $existingDraft 
-                    ? array_merge($existingDraft->terlapor_data ?? [], $filteredData['terlapor_data'])
-                    : $filteredData['terlapor_data'],
-                'current_step' => $this->getActiveStep()
-            ];
-
+            // Efficient update/create
             $this->currentDraft = FormDraft::updateOrCreate(
                 [
                     'user_id' => auth()->id(),
                     'form_type' => 'laporan_informasi'
                 ],
-                $draftData
+                $filteredData
             );
 
         } catch (\Exception $e) {
-            \Log::error('Draft auto-save failed', [
-                'message' => $e->getMessage(),
-                'user_id' => auth()->id()
-            ]);
+            \Log::error('Auto-save failed: ' . $e->getMessage());
         }
     }
 
@@ -97,44 +91,55 @@ class CreateLaporanInformasi extends CreateRecord
         parent::mount();
         $this->loadExistingDraft();
         
-        // \Log::info('Component mounted, initializing auto-save');÷
-        \Log::info('Component mounted, auto-save is active every 60 seconds');
-    
-        // Commented out auto-save initialization
-        // auto save tiap 60 detik
+        // Reduce logging
+        \Log::info('Form mounted with auto-save');
+        
         $this->dispatch('init-auto-save', interval: 60000);
     }
 
     protected function loadExistingDraft(): void
     {
         try {
-            $draft = FormDraft::where('user_id', auth()->id())
+            $draft = FormDraft::select(['id', 'current_step', 'main_data', 'pelapor_data', 'korban_data', 'terlapor_data'])
+                ->where('user_id', auth()->id())
                 ->where('form_type', 'laporan_informasi')
                 ->first();
 
-            if ($draft) {
-                $this->currentDraft = $draft;
-                $this->currentStep = $draft->current_step;
-                
-                // Pastikan data korban adalah array yang sesuai untuk repeater
-                $korbanData = is_array($draft->korban_data) 
-                    ? array_values($draft->korban_data)  // Jika array, pastikan indeks berurutan
-                    : [];                                // Jika bukan array, gunakan array kosong
-                
-                $formData = [
-                    ...$draft->main_data ?? [],
-                    'pelapors' => $draft->pelapor_data ?? [],
-                    'korbans' => $korbanData,  // Data untuk repeater
-                    'terlapors' => $draft->terlapor_data ?? [],
-                ];
-                
-                $this->form->fill($formData);
-                
-                // log
-                \Log::info('Draft loaded successfully', ['draft_id' => $draft->id]);
+            if (!$draft) {
+                return;
             }
+
+            $this->currentDraft = $draft;
+            $this->currentStep = $draft->current_step;
+            
+            // Chunk the data processing
+            $formData = [];
+            
+            if ($draft->main_data) {
+                $formData = array_merge($formData, $draft->main_data ?? []);
+            }
+            
+            if ($draft->pelapor_data) {
+                $formData['pelapors'] = $draft->pelapor_data;
+            }
+            
+            if ($draft->korban_data) {
+                $formData['korbans'] = is_array($draft->korban_data) 
+                    ? array_values($draft->korban_data) 
+                    : [];
+            }
+            
+            if ($draft->terlapor_data) {
+                $formData['terlapors'] = $draft->terlapor_data;
+            }
+            
+            $this->form->fill($formData);
+            
+            // Minimal logging
+            \Log::info('Draft loaded', ['id' => $draft->id]);
+            
         } catch (\Exception $e) {
-            Log::error('Error loading draft: ' . $e->getMessage());
+            \Log::error('Draft load failed: ' . $e->getMessage());
         }
     }
 
