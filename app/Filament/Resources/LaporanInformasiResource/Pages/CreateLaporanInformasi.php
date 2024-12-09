@@ -98,7 +98,7 @@ class CreateLaporanInformasi extends CreateRecord
         $this->loadExistingDraft();
         
         // \Log::info('Component mounted, initializing auto-save');÷
-        \Log::info('Component mounted, auto-save disabled');
+        \Log::info('Component mounted, auto-save is active every 60 seconds');
     
         // Commented out auto-save initialization
         // auto save tiap 60 detik
