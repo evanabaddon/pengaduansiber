@@ -28,51 +28,24 @@ class CreateLaporanInformasi extends CreateRecord
     {
         try {
             if (!$this->form) {
-                \Log::warning('Form belum dimount, skip auto save');
                 return;
             }
 
-            // Ambil state form tanpa validasi
             $state = $this->form->getRawState();
             
-            \Log::info('Auto save triggered', ['state' => $state]);
-            
-            // Filter data yang kosong
-            $filteredMainData = collect($state)
-                ->except(['pelapors', 'korbans', 'terlapors'])
-                ->filter(function ($value) {
-                    return $value !== null && $value !== '';
-                })
-                ->toArray();
-                
-            // Filter data pelapor yang tidak kosong
-            $pelaporData = collect($state['pelapors'] ?? [])
-                ->filter(function ($value) {
-                    return $value !== null && $value !== '';
-                })
-                ->toArray();
-                
-            // Filter data korban yang tidak kosong
-            $korbanData = collect($state['korbans'] ?? [])
-                ->filter(function ($value) {
-                    return $value !== null && $value !== '';
-                })
-                ->toArray();
-                
-            // Filter data terlapor yang tidak kosong
-            $terlaporData = collect($state['terlapors'] ?? [])
-                ->filter(function ($value) {
-                    return $value !== null && $value !== '';
-                })
-                ->toArray();
+            // Simplify data filtering using a single helper function
+            $filteredData = [
+                'main_data' => $this->filterEmptyValues($state, ['pelapors', 'korbans', 'terlapors']),
+                'pelapor_data' => $this->filterEmptyValues($state['pelapors'] ?? []),
+                'korban_data' => $this->filterEmptyValues($state['korbans'] ?? []),
+                'terlapor_data' => $this->filterEmptyValues($state['terlapors'] ?? []),
+            ];
 
-            // Jika semua data kosong, skip penyimpanan
-            if (empty($filteredMainData) && empty($pelaporData) && empty($korbanData) && empty($terlaporData)) {
-                \Log::info('Semua data kosong, skip auto save');
+            // Skip if all data is empty
+            if (empty(array_filter($filteredData))) {
                 return;
             }
 
-            // Gabungkan dengan data draft yang sudah ada
             $existingDraft = FormDraft::where('user_id', auth()->id())
                 ->where('form_type', 'laporan_informasi')
                 ->first();
@@ -81,21 +54,19 @@ class CreateLaporanInformasi extends CreateRecord
                 'user_id' => auth()->id(),
                 'form_type' => 'laporan_informasi',
                 'main_data' => $existingDraft 
-                    ? array_merge($existingDraft->main_data ?? [], $filteredMainData)
-                    : $filteredMainData,
+                    ? array_merge($existingDraft->main_data ?? [], $filteredData['main_data'])
+                    : $filteredData['main_data'],
                 'pelapor_data' => $existingDraft 
-                    ? array_merge($existingDraft->pelapor_data ?? [], $pelaporData)
-                    : $pelaporData,
+                    ? array_merge($existingDraft->pelapor_data ?? [], $filteredData['pelapor_data'])
+                    : $filteredData['pelapor_data'],
                 'korban_data' => $existingDraft 
-                    ? array_merge($existingDraft->korban_data ?? [], $korbanData)
-                    : $korbanData,
+                    ? array_merge($existingDraft->korban_data ?? [], $filteredData['korban_data'])
+                    : $filteredData['korban_data'],
                 'terlapor_data' => $existingDraft 
-                    ? array_merge($existingDraft->terlapor_data ?? [], $terlaporData)
-                    : $terlaporData,
+                    ? array_merge($existingDraft->terlapor_data ?? [], $filteredData['terlapor_data'])
+                    : $filteredData['terlapor_data'],
                 'current_step' => $this->getActiveStep()
             ];
-
-            \Log::info('Saving draft data', ['draft' => $draftData]);
 
             $this->currentDraft = FormDraft::updateOrCreate(
                 [
@@ -105,26 +76,20 @@ class CreateLaporanInformasi extends CreateRecord
                 $draftData
             );
 
-            // Notification::make()
-            //     ->success()
-            //     ->title('Draft tersimpan ' . now()->format('H:i:s'))
-            //     ->duration(3000)
-            //     ->send();
-            
-            \Log::info('Draft saved successfully', ['draft_id' => $this->currentDraft->id]);
         } catch (\Exception $e) {
-            \Log::error('Error saving draft: ' . $e->getMessage(), [
-                'exception' => $e,
-                'trace' => $e->getTraceAsString()
+            \Log::error('Draft auto-save failed', [
+                'message' => $e->getMessage(),
+                'user_id' => auth()->id()
             ]);
-            
-            Notification::make()
-                ->danger()
-                ->title('Gagal menyimpan draft')
-                ->body($e->getMessage())
-                ->duration(5000)
-                ->send();
         }
+    }
+
+    protected function filterEmptyValues(array $data, array $excludeKeys = []): array
+    {
+        return collect($data)
+            ->except($excludeKeys)
+            ->filter(fn ($value) => $value !== null && $value !== '')
+            ->toArray();
     }
 
     public function mount(): void
