@@ -130,10 +130,11 @@ class CreateLaporanInformasi extends CreateRecord
                 
                 $this->form->fill($formData);
                 
-                $this->notify('success', 'Draft terakhir berhasil dimuat');
+                // log
+                \Log::info('Draft loaded successfully', ['draft_id' => $draft->id]);
             }
         } catch (\Exception $e) {
-            Log::error('Error loading draft');
+            Log::error('Error loading draft: ' . $e->getMessage());
         }
     }
 
