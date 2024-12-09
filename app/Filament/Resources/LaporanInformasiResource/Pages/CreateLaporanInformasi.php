@@ -27,71 +27,77 @@ class CreateLaporanInformasi extends CreateRecord
     public function autoSaveDraft(): void
     {
         try {
-            // Basic validation
             if (!$this->form) {
                 return;
             }
 
-            // Get state with memory limit
+            // Ambil state form
             $state = $this->form->getRawState();
             if (empty($state)) {
                 return;
             }
 
-            // Initialize filtered data array
-            $filteredData = [
+            // Persiapkan data untuk disimpan
+            $draftData = [
                 'user_id' => auth()->id(),
                 'form_type' => 'laporan_informasi',
-                'current_step' => $this->getActiveStep()
+                'current_step' => $this->getActiveStep(),
+                'main_data' => null,
+                'pelapor_data' => null,
+                'korban_data' => null,
+                'terlapor_data' => null
             ];
 
-            // Process main data with chunk
-            $mainFields = array_diff_key($state, array_flip(['pelapors', 'korbans', 'terlapors']));
-            if (!empty($mainFields)) {
-                $filteredData['main_data'] = array_filter($mainFields, function ($value) {
-                    return $value !== null && $value !== '';
-                });
+            // Filter dan simpan main data
+            $mainData = collect($state)
+                ->except(['pelapors', 'korbans', 'terlapors'])
+                ->filter(fn($value) => $value !== null && $value !== '')
+                ->toArray();
+            
+            if (!empty($mainData)) {
+                $draftData['main_data'] = $mainData;
             }
 
-            // Process related data efficiently
-            foreach (['pelapors', 'korbans', 'terlapors'] as $relation) {
-                if (!empty($state[$relation])) {
-                    $filteredData["{$relation}_data"] = array_filter($state[$relation], function ($value) {
-                        return $value !== null && $value !== '';
-                    });
-                }
+            // Simpan data pelapor
+            if (!empty($state['pelapors'])) {
+                $draftData['pelapor_data'] = json_encode($state['pelapors']);
             }
 
-            // Skip if no data to save
-            if (count($filteredData) <= 3) { // Only has default fields
-                return;
+            // Simpan data korban
+            if (!empty($state['korbans'])) {
+                $draftData['korban_data'] = json_encode($state['korbans']);
             }
 
-            // Save draft with memory-efficient approach
+            // Simpan data terlapor
+            if (!empty($state['terlapors'])) {
+                $draftData['terlapor_data'] = json_encode($state['terlapors']);
+            }
+
+            // Simpan draft
             $this->currentDraft = FormDraft::updateOrCreate(
                 [
                     'user_id' => auth()->id(),
                     'form_type' => 'laporan_informasi'
                 ],
-                $filteredData
+                $draftData
             );
 
-            // Log success
-            \Log::info('Draft auto-saved successfully', [
-                'draft_id' => $this->currentDraft->id
-            ]);
-
-            // Notify success
-            $this->dispatch('draft-saved', [
-                'message' => 'Draft berhasil disimpan'
-            ]);
+            // Notifikasi sukses tanpa logging
+            Notification::make()
+                ->title('Draft berhasil disimpan')
+                ->success()
+                ->send();
 
         } catch (\Exception $e) {
-            \Log::error('Auto-save failed: ' . $e->getMessage());
+            // Log error minimal
+            \Log::error('Draft save error: ' . $e->getMessage());
             
-            $this->dispatch('draft-save-failed', [
-                'message' => 'Auto-save gagal: ' . $e->getMessage()
-            ]);
+            // Notifikasi error
+            Notification::make()
+                ->title('Gagal menyimpan draft')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
         }
     }
 
@@ -118,11 +124,11 @@ class CreateLaporanInformasi extends CreateRecord
         }
     }
 
+    
     protected function loadExistingDraft(): void
     {
         try {
-            $draft = FormDraft::select(['id', 'current_step', 'main_data', 'pelapor_data', 'korban_data', 'terlapor_data'])
-                ->where('user_id', auth()->id())
+            $draft = FormDraft::where('user_id', auth()->id())
                 ->where('form_type', 'laporan_informasi')
                 ->first();
 
@@ -133,34 +139,32 @@ class CreateLaporanInformasi extends CreateRecord
             $this->currentDraft = $draft;
             $this->currentStep = $draft->current_step;
             
-            // Chunk the data processing
             $formData = [];
             
+            // Load main data
             if ($draft->main_data) {
                 $formData = array_merge($formData, $draft->main_data ?? []);
             }
             
+            // Load pelapor data
             if ($draft->pelapor_data) {
-                $formData['pelapors'] = $draft->pelapor_data;
+                $formData['pelapors'] = json_decode($draft->pelapor_data, true);
             }
             
+            // Load korban data
             if ($draft->korban_data) {
-                $formData['korbans'] = is_array($draft->korban_data) 
-                    ? array_values($draft->korban_data) 
-                    : [];
+                $formData['korbans'] = json_decode($draft->korban_data, true);
             }
             
+            // Load terlapor data
             if ($draft->terlapor_data) {
-                $formData['terlapors'] = $draft->terlapor_data;
+                $formData['terlapors'] = json_decode($draft->terlapor_data, true);
             }
             
             $this->form->fill($formData);
-            
-            // Minimal logging
-            \Log::info('Draft loaded', ['id' => $draft->id]);
-            
+
         } catch (\Exception $e) {
-            \Log::error('Draft load failed: ' . $e->getMessage());
+            \Log::error('Draft load error: ' . $e->getMessage());
         }
     }
 

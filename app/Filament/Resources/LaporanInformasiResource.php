@@ -371,7 +371,7 @@ class LaporanInformasiResource extends Resource
                                     ->schema([
                                         TextInput::make('korbans.nama')->label('NAMA'),
                                         TextInput::make('korbans.identity_no')->label('NO IDENTITAS'),
-                                        PhoneInput::make('korbans.kontak')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->label('KONTAK'),
+                                        PhoneInput::make('korbans.kontak')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->label('KONTAK')->required(),
                                         PhoneInput::make('korbans.kontak_2')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->label('KONTAK LAIN'),
                                         Country::make('korbans.kewarganegaraan')->label('KEWARGANEGARAAN')->default('Indonesia')->searchable(),
                                     ]),
