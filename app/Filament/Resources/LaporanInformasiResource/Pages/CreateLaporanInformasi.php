@@ -83,10 +83,10 @@ class CreateLaporanInformasi extends CreateRecord
             );
 
             // Notifikasi sukses tanpa logging
-            Notification::make()
-                ->title('Draft berhasil disimpan')
-                ->success()
-                ->send();
+            // Notification::make()
+            //     ->title('Draft berhasil disimpan')
+            //     ->success()
+            //     ->send();
 
         } catch (\Exception $e) {
             // Log error minimal
@@ -264,11 +264,11 @@ class CreateLaporanInformasi extends CreateRecord
             // Kirim event untuk membersihkan storage
             $this->dispatch('clear-draft-storage');
 
-            Notification::make()
-                ->success()
-                ->title('Data berhasil disimpan')
-                ->duration(3000)
-                ->send();
+            // Notification::make()
+            //     ->success()
+            //     ->title('Data berhasil disimpan')
+            //     ->duration(3000)
+            //     ->send();
 
             return $laporanInformasi;
 
