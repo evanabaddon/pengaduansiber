@@ -27,105 +27,82 @@ class CreateLaporanInformasi extends CreateRecord
     public function autoSaveDraft(): void
     {
         try {
-            // Check if form exists and has data
-            if (!$this->form || empty($this->form->getRawState())) {
+            // Basic validation
+            if (!$this->form) {
                 return;
             }
 
+            // Get state with memory limit
             $state = $this->form->getRawState();
-            
-            // Skip if state is empty
             if (empty($state)) {
                 return;
             }
 
-            // Memory-efficient data filtering
-            $filteredData = [];
-            
-            // Process main data
-            if ($mainData = $this->filterEmptyValues($state, ['pelapors', 'korbans', 'terlapors'])) {
-                $filteredData['main_data'] = $mainData;
-            }
-            
-            // Process related data separately with null checks
-            if (isset($state['pelapors'])) {
-                $filteredData['pelapor_data'] = $this->filterEmptyValues($state['pelapors']);
-            }
-            
-            if (isset($state['korbans'])) {
-                $filteredData['korban_data'] = $this->filterEmptyValues($state['korbans']);
-            }
-            
-            if (isset($state['terlapors'])) {
-                $filteredData['terlapor_data'] = $this->filterEmptyValues($state['terlapors']);
+            // Initialize filtered data array
+            $filteredData = [
+                'user_id' => auth()->id(),
+                'form_type' => 'laporan_informasi',
+                'current_step' => $this->getActiveStep()
+            ];
+
+            // Process main data with chunk
+            $mainFields = array_diff_key($state, array_flip(['pelapors', 'korbans', 'terlapors']));
+            if (!empty($mainFields)) {
+                $filteredData['main_data'] = array_filter($mainFields, function ($value) {
+                    return $value !== null && $value !== '';
+                });
             }
 
-            // Skip if no valid data to save
-            if (empty($filteredData)) {
+            // Process related data efficiently
+            foreach (['pelapors', 'korbans', 'terlapors'] as $relation) {
+                if (!empty($state[$relation])) {
+                    $filteredData["{$relation}_data"] = array_filter($state[$relation], function ($value) {
+                        return $value !== null && $value !== '';
+                    });
+                }
+            }
+
+            // Skip if no data to save
+            if (count($filteredData) <= 3) { // Only has default fields
                 return;
             }
 
-            // Add required fields
-            $filteredData['user_id'] = auth()->id();
-            $filteredData['form_type'] = 'laporan_informasi';
-            $filteredData['current_step'] = $this->getActiveStep();
+            // Save draft with memory-efficient approach
+            $this->currentDraft = FormDraft::updateOrCreate(
+                [
+                    'user_id' => auth()->id(),
+                    'form_type' => 'laporan_informasi'
+                ],
+                $filteredData
+            );
 
-            // Efficient update/create with error handling
-            try {
-                $this->currentDraft = FormDraft::updateOrCreate(
-                    [
-                        'user_id' => auth()->id(),
-                        'form_type' => 'laporan_informasi'
-                    ],
-                    $filteredData
-                );
-                
-                \Log::info('Draft auto-saved successfully', ['draft_id' => $this->currentDraft->id]);
-                
-                // Dispatch success event
-                $this->dispatch('draft-saved', [
-                    'message' => 'Draft berhasil disimpan'
-                ]);
-                
-            } catch (\Exception $e) {
-                \Log::error('Draft save failed: ' . $e->getMessage());
-                
-                // Dispatch error event
-                $this->dispatch('draft-save-failed', [
-                    'message' => 'Gagal menyimpan draft: ' . $e->getMessage()
-                ]);
-                
-                return;
-            }
+            // Log success
+            \Log::info('Draft auto-saved successfully', [
+                'draft_id' => $this->currentDraft->id
+            ]);
+
+            // Notify success
+            $this->dispatch('draft-saved', [
+                'message' => 'Draft berhasil disimpan'
+            ]);
 
         } catch (\Exception $e) {
-            \Log::error('Auto-save failed: ' . $e->getMessage(), [
-                'state' => $state ?? null,
-                'filtered_data' => $filteredData ?? null,
-            ]);
+            \Log::error('Auto-save failed: ' . $e->getMessage());
             
-            // Dispatch error event
             $this->dispatch('draft-save-failed', [
                 'message' => 'Auto-save gagal: ' . $e->getMessage()
             ]);
         }
     }
 
-    protected function filterEmptyValues(array $data, array $excludeKeys = []): array
+    protected function filterEmptyValues(array $data): array
     {
-        if (empty($data)) {
-            return [];
-        }
-
-        return collect($data)
-            ->except($excludeKeys)
-            ->filter(function ($value) {
-                if (is_array($value)) {
-                    return !empty(array_filter($value));
-                }
-                return $value !== null && $value !== '';
-            })
-            ->toArray();
+        return array_filter($data, function ($value) {
+            if (is_array($value)) {
+                return !empty(array_filter($value));
+            }
+            return $value !== null && $value !== '';
+        });
     }
 
     public function mount(): void
