@@ -133,7 +133,7 @@ class CreateLaporanInformasi extends CreateRecord
                 $this->notify('success', 'Draft terakhir berhasil dimuat');
             }
         } catch (\Exception $e) {
-            Log::error('Error loading draft: ' . $e->getMessage());
+            Log::error('Error loading draft');
         }
     }
 
