@@ -103,8 +103,7 @@ class CreateLaporanInformasi extends CreateRecord
     protected function loadExistingDraft(): void
     {
         try {
-            // Only load essential fields initially
-            $draft = FormDraft::select('id', 'current_step')
+            $draft = FormDraft::select(['id', 'current_step', 'main_data', 'pelapor_data', 'korban_data', 'terlapor_data'])
                 ->where('user_id', auth()->id())
                 ->where('form_type', 'laporan_informasi')
                 ->first();
@@ -115,57 +114,35 @@ class CreateLaporanInformasi extends CreateRecord
 
             $this->currentDraft = $draft;
             $this->currentStep = $draft->current_step;
-
-            // Load data in chunks
+            
+            // Chunk the data processing
             $formData = [];
             
-            // Load main data separately
-            $mainData = FormDraft::select('main_data')
-                ->where('id', $draft->id)
-                ->value('main_data');
-            if ($mainData) {
-                $formData = $mainData;
+            if ($draft->main_data) {
+                $formData = array_merge($formData, $draft->main_data ?? []);
             }
-
-            // Load related data separately with minimal memory usage
-            $relatedData = FormDraft::select('pelapor_data', 'korban_data', 'terlapor_data')
-                ->where('id', $draft->id)
-                ->first();
-
-            if ($relatedData) {
-                if (!empty($relatedData->pelapor_data)) {
-                    $formData['pelapors'] = $relatedData->pelapor_data;
-                }
-                
-                if (!empty($relatedData->korban_data)) {
-                    // Handle korban data more efficiently
-                    $formData['korbans'] = is_array($relatedData->korban_data) 
-                        ? array_values($relatedData->korban_data)
-                        : [];
-                }
-                
-                if (!empty($relatedData->terlapor_data)) {
-                    $formData['terlapors'] = $relatedData->terlapor_data;
-                }
+            
+            if ($draft->pelapor_data) {
+                $formData['pelapors'] = $draft->pelapor_data;
             }
-
-            // Fill form in chunks if data is large
-            if (count($formData) > 1000) {
-                collect($formData)->chunk(500)->each(function ($chunk) {
-                    $this->form->fill($chunk->toArray());
-                });
-            } else {
-                $this->form->fill($formData);
+            
+            if ($draft->korban_data) {
+                $formData['korbans'] = is_array($draft->korban_data) 
+                    ? array_values($draft->korban_data) 
+                    : [];
             }
-
-            // Minimize logging
+            
+            if ($draft->terlapor_data) {
+                $formData['terlapors'] = $draft->terlapor_data;
+            }
+            
+            $this->form->fill($formData);
+            
+            // Minimal logging
             \Log::info('Draft loaded', ['id' => $draft->id]);
             
         } catch (\Exception $e) {
-            \Log::error('Draft load failed', [
-                'message' => $e->getMessage(),
-                'user_id' => auth()->id()
-            ]);
+            \Log::error('Draft load failed: ' . $e->getMessage());
         }
     }
 
