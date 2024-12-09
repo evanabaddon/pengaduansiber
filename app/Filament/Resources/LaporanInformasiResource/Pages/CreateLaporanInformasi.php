@@ -135,8 +135,8 @@ class CreateLaporanInformasi extends CreateRecord
         // \Log::info('Component mounted, initializing auto-save');÷
         \Log::info('Component mounted, auto-save disabled');
     
-    // Commented out auto-save initialization
-        $this->dispatch('init-auto-save', interval: 10000);
+        // Commented out auto-save initialization
+        // $this->dispatch('init-auto-save', interval: 10000);
     }
 
     protected function loadExistingDraft(): void
