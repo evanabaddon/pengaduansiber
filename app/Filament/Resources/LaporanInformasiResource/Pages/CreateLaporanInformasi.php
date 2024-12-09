@@ -80,23 +80,20 @@ class CreateLaporanInformasi extends CreateRecord
 
     protected function filterEmptyValues(array $data, array $excludeKeys = []): array
     {
-        // More memory efficient filtering
-        $filtered = [];
-        foreach ($data as $key => $value) {
-            if (in_array($key, $excludeKeys)) {
-                continue;
-            }
-            if ($value !== null && $value !== '') {
-                $filtered[$key] = $value;
-            }
-        }
-        return $filtered;
+        return collect($data)
+            ->except($excludeKeys)
+            ->filter(fn ($value) => $value !== null && $value !== '')
+            ->toArray();
     }
 
     public function mount(): void
     {
-        // Disable any unnecessary parent initialization
+        parent::mount();
         $this->loadExistingDraft();
+        
+        // Reduce logging
+        \Log::info('Form mounted with auto-save');
+        
         $this->dispatch('init-auto-save', interval: 60000);
     }
 
