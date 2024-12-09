@@ -80,27 +80,31 @@ class CreateLaporanInformasi extends CreateRecord
 
     protected function filterEmptyValues(array $data, array $excludeKeys = []): array
     {
-        return collect($data)
-            ->except($excludeKeys)
-            ->filter(fn ($value) => $value !== null && $value !== '')
-            ->toArray();
+        // More memory efficient filtering
+        $filtered = [];
+        foreach ($data as $key => $value) {
+            if (in_array($key, $excludeKeys)) {
+                continue;
+            }
+            if ($value !== null && $value !== '') {
+                $filtered[$key] = $value;
+            }
+        }
+        return $filtered;
     }
 
     public function mount(): void
     {
-        parent::mount();
+        // Disable any unnecessary parent initialization
         $this->loadExistingDraft();
-        
-        // Reduce logging
-        \Log::info('Form mounted with auto-save');
-        
         $this->dispatch('init-auto-save', interval: 60000);
     }
 
     protected function loadExistingDraft(): void
     {
         try {
-            $draft = FormDraft::select(['id', 'current_step', 'main_data', 'pelapor_data', 'korban_data', 'terlapor_data'])
+            // Only load essential fields initially
+            $draft = FormDraft::select('id', 'current_step')
                 ->where('user_id', auth()->id())
                 ->where('form_type', 'laporan_informasi')
                 ->first();
@@ -111,35 +115,57 @@ class CreateLaporanInformasi extends CreateRecord
 
             $this->currentDraft = $draft;
             $this->currentStep = $draft->current_step;
-            
-            // Chunk the data processing
+
+            // Load data in chunks
             $formData = [];
             
-            if ($draft->main_data) {
-                $formData = array_merge($formData, $draft->main_data ?? []);
+            // Load main data separately
+            $mainData = FormDraft::select('main_data')
+                ->where('id', $draft->id)
+                ->value('main_data');
+            if ($mainData) {
+                $formData = $mainData;
             }
-            
-            if ($draft->pelapor_data) {
-                $formData['pelapors'] = $draft->pelapor_data;
+
+            // Load related data separately with minimal memory usage
+            $relatedData = FormDraft::select('pelapor_data', 'korban_data', 'terlapor_data')
+                ->where('id', $draft->id)
+                ->first();
+
+            if ($relatedData) {
+                if (!empty($relatedData->pelapor_data)) {
+                    $formData['pelapors'] = $relatedData->pelapor_data;
+                }
+                
+                if (!empty($relatedData->korban_data)) {
+                    // Handle korban data more efficiently
+                    $formData['korbans'] = is_array($relatedData->korban_data) 
+                        ? array_values($relatedData->korban_data)
+                        : [];
+                }
+                
+                if (!empty($relatedData->terlapor_data)) {
+                    $formData['terlapors'] = $relatedData->terlapor_data;
+                }
             }
-            
-            if ($draft->korban_data) {
-                $formData['korbans'] = is_array($draft->korban_data) 
-                    ? array_values($draft->korban_data) 
-                    : [];
+
+            // Fill form in chunks if data is large
+            if (count($formData) > 1000) {
+                collect($formData)->chunk(500)->each(function ($chunk) {
+                    $this->form->fill($chunk->toArray());
+                });
+            } else {
+                $this->form->fill($formData);
             }
-            
-            if ($draft->terlapor_data) {
-                $formData['terlapors'] = $draft->terlapor_data;
-            }
-            
-            $this->form->fill($formData);
-            
-            // Minimal logging
+
+            // Minimize logging
             \Log::info('Draft loaded', ['id' => $draft->id]);
             
         } catch (\Exception $e) {
-            \Log::error('Draft load failed: ' . $e->getMessage());
+            \Log::error('Draft load failed', [
+                'message' => $e->getMessage(),
+                'user_id' => auth()->id()
+            ]);
         }
     }
 
