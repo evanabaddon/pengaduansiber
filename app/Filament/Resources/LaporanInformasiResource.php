@@ -1069,10 +1069,11 @@ class LaporanInformasiResource extends Resource
                             ->searchable()
                             ->afterStateUpdated(function (LaporanInformasi $record, $state) {
                                 // Kirim notifikasi ke user penyidik
-                                if ($state) {
-                                    $user = User::find($state);
-                                    $user->notify(new LaporanInformasiAssignedNotification($record, 'penyidik'));
-                                }
+                                // TODO
+                                // if ($state) {
+                                //     $user = User::find($state);
+                                //     $user->notify(new LaporanInformasiAssignedNotification($record, 'penyidik'));
+                                // }
                             }),
                     ]),
                 // barang bukti
