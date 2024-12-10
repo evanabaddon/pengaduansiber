@@ -337,287 +337,287 @@ class LaporanInformasiResource extends Resource
                             })
                             ->schema([
                                 Repeater::make('korbans')
-                                ->columns(1)
-                                ->columnSpanFull()
-                                ->label('KORBAN')
-                                ->schema([
-                                    Checkbox::make('sama_dengan_pelapor')
-                                        ->label('SAMA DENGAN PELAPOR')
-                                        ->hidden(function (Component $component) {
-                                            $firstItemKey = array_key_first($component->getContainer()->getParentComponent()->getState());
-                                            
-                                            // Tampilkan hanya jika ini adalah item pertama
-                                            return !str_contains($component->getStatePath(), $firstItemKey);
-                                        }) // Sembunyikan jika bukan item pertama
-                                        ->reactive()  // Agar form bisa diperbarui saat checkbox dicentang
-                                        ->afterStateUpdated(function ($state, callable $set, Get $get) {
-                                            // jika sama dengan pelapor maka data korban akan sama dengan pelapor
-                                            
-                                            if ($state) {
-                                                // Mengakses data pelapor dari form utama, bukan dari dalam repeater
-                                                $set('korbans.nama', $get('../../pelapors.nama'));
-                                                $set('korbans.identity_no', $get('../../pelapors.identity_no'));
-                                                $set('korbans.kontak', $get('../../pelapors.kontak'));
-                                                $set('korbans.kontak_2', $get('../../pelapors.kontak_2'));
-                                                $set('korbans.kewarganegaraan', $get('../../pelapors.kewarganegaraan'));
-                                                $set('korbans.tempat_lahir', $get('../../pelapors.tempat_lahir'));
-                                                
-                                                // Set tanggal lahir dengan format yang benar
-                                                $tanggalLahir = $get('../../pelapors.tanggal_lahir');
-                                                if ($tanggalLahir) {
-                                                    $formattedDate = Carbon::parse($tanggalLahir)->format('Y-m-d');
-                                                    $set('korbans.tanggal_lahir', $formattedDate);
-                                                    
-                                                    // Hitung dan set usia
-                                                    $birthDate = Carbon::parse($tanggalLahir);
-                                                    $age = $birthDate->age;
-                                                    $set('korbans.usia', $age);
-                                                }
-                                                
-                                                $set('korbans.jenis_kelamin', $get('../../pelapors.jenis_kelamin'));
-                                                $set('korbans.pekerjaan', $get('../../pelapors.pekerjaan'));
-                                                $set('korbans.agama', $get('../../pelapors.agama'));
-                                                $set('korbans.alamat', $get('../../pelapors.alamat'));
-                                                $set('korbans.province_id', $get('../../pelapors.province_id'));
-                                                $set('korbans.city_id', $get('../../pelapors.city_id'));
-                                                $set('korbans.district_id', $get('../../pelapors.district_id'));
-                                                $set('korbans.subdistrict_id', $get('../../pelapors.subdistrict_id'));
-                                                $set('korbans.alamat_2', $get('../../pelapors.alamat_2'));
-                                                $set('korbans.province_id_2', $get('../../pelapors.province_id_2'));
-                                                $set('korbans.city_id_2', $get('../../pelapors.city_id_2'));
-                                                $set('korbans.district_id_2', $get('../../pelapors.district_id_2'));
-                                                $set('korbans.subdistrict_id_2', $get('../../pelapors.subdistrict_id_2'));
-                                                $set('data_tambahan', collect($get('../../pelapors.data_tambahan'))
-                                                                    ->map(function ($item) {
-                                                                        return [
-                                                                            'nama_data' => $item['nama_data'],
-                                                                            'keterangan' => $item['keterangan'],
-                                                                        ];
-                                                                    })
-                                                                    ->toArray()
-                                                                );
-
-                                            } else {
-                                                $set('korbans.identity_no', null);
-                                                $set('korbans.nama', null);
-                                                $set('korbans.kontak', null);
-                                                $set('korbans.kewarganegaraan', null);
-                                                $set('korbans.tempat_lahir', null);
-                                                $set('korbans.tanggal_lahir', null);
-                                                $set('korbans.jenis_kelamin', null);
-                                                $set('korbans.pekerjaan', null);
-                                                $set('korbans.usia', null);
-                                                $set('korbans.alamat', null);
-                                                $set('korbans.province_id', null);
-                                                $set('korbans.city_id', null);
-                                                $set('korbans.district_id', null);
-                                                $set('korbans.subdistrict_id', null);
-                                                $set('korbans.domestic', null);
-                                                $set('korbans.agama', null);
-                                                $set('korbans.alamat_2', null);
-                                                $set('korbans.province_id_2', null);
-                                                $set('korbans.city_id_2', null);
-                                                $set('korbans.district_id_2', null);
-                                                $set('korbans.subdistrict_id_2', null);
-                                                $set('korbans.kontak_2', null);
-                                                $set('korbans.data_tambahan', null);
-                                                }
-                                            }),
-                                Grid::make(5)
+                                    ->columns(1)
+                                    ->defaultItems(1)
+                                    ->addActionLabel('Tambah Korban')
+                                    ->columnSpanFull()
+                                    ->label('KORBAN')
                                     ->schema([
-                                        TextInput::make('korbans.nama')->label('NAMA'),
-                                        TextInput::make('korbans.identity_no')->label('NO IDENTITAS'),
-                                        PhoneInput::make('korbans.kontak')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->label('KONTAK')->required(),
-                                        PhoneInput::make('korbans.kontak_2')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->label('KONTAK LAIN'),
-                                        Country::make('korbans.kewarganegaraan')->label('KEWARGANEGARAAN')->default('Indonesia')->searchable(),
-                                    ]),
-                                Grid::make(6)
-                                    ->schema([
-                                        Select::make('korbans.jenis_kelamin')
-                                        ->label('JENIS KELAMIN')
-                                        ->options([
-                                            'Laki - Laki' => 'Laki - Laki',
-                                            'Perempuan' => 'Perempuan'
-                                        ])->required(),
-                                        TextInput::make('korbans.tempat_lahir')->label('TEMPAT LAHIR')->required(),
-                                        Flatpickr::make('korbans.tanggal_lahir')
-                                            ->label('TGL. LAHIR')
-                                            ->required()
-                                            ->allowInput()
-                                            ->dateFormat('d F Y')
-                                            ->altFormat('d F Y')
-                                            ->live()
-                                            ->afterStateUpdated(function ($state, callable $set) {
+                                        Checkbox::make('sama_dengan_pelapor')
+                                            ->label('SAMA DENGAN PELAPOR')
+                                            ->hidden(function (Component $component) {
+                                                $firstItemKey = array_key_first($component->getContainer()->getParentComponent()->getState());
+                                                // Tampilkan hanya jika ini adalah item pertama
+                                                return !str_contains($component->getStatePath(), $firstItemKey);
+                                            }) // Sembunyikan jika bukan item pertama
+                                            ->reactive()  // Agar form bisa diperbarui saat checkbox dicentang
+                                            ->afterStateUpdated(function ($state, callable $set, Get $get) {
+                                                // jika sama dengan pelapor maka data korban akan sama dengan pelapor
+                                                
                                                 if ($state) {
-                                                    $birthDate = Carbon::parse($state);
-                                                    $age = $birthDate->age;
-                                                    $set('korbans.usia', $age);
+                                                    // Mengakses data pelapor dari form utama, bukan dari dalam repeater
+                                                    $set('korbans.nama', $get('../../pelapors.nama'));
+                                                    $set('korbans.identity_no', $get('../../pelapors.identity_no'));
+                                                    $set('korbans.kontak', $get('../../pelapors.kontak'));
+                                                    $set('korbans.kontak_2', $get('../../pelapors.kontak_2'));
+                                                    $set('korbans.kewarganegaraan', $get('../../pelapors.kewarganegaraan'));
+                                                    $set('korbans.tempat_lahir', $get('../../pelapors.tempat_lahir'));
+                                                    
+                                                    // Set tanggal lahir dengan format yang benar
+                                                    $tanggalLahir = $get('../../pelapors.tanggal_lahir');
+                                                    if ($tanggalLahir) {
+                                                        $formattedDate = Carbon::parse($tanggalLahir)->format('Y-m-d');
+                                                        $set('korbans.tanggal_lahir', $formattedDate);
+                                                        
+                                                        // Hitung dan set usia
+                                                        $birthDate = Carbon::parse($tanggalLahir);
+                                                        $age = $birthDate->age;
+                                                        $set('korbans.usia', $age);
+                                                    }
+                                                    
+                                                    $set('korbans.jenis_kelamin', $get('../../pelapors.jenis_kelamin'));
+                                                    $set('korbans.pekerjaan', $get('../../pelapors.pekerjaan'));
+                                                    $set('korbans.agama', $get('../../pelapors.agama'));
+                                                    $set('korbans.alamat', $get('../../pelapors.alamat'));
+                                                    $set('korbans.province_id', $get('../../pelapors.province_id'));
+                                                    $set('korbans.city_id', $get('../../pelapors.city_id'));
+                                                    $set('korbans.district_id', $get('../../pelapors.district_id'));
+                                                    $set('korbans.subdistrict_id', $get('../../pelapors.subdistrict_id'));
+                                                    $set('korbans.alamat_2', $get('../../pelapors.alamat_2'));
+                                                    $set('korbans.province_id_2', $get('../../pelapors.province_id_2'));
+                                                    $set('korbans.city_id_2', $get('../../pelapors.city_id_2'));
+                                                    $set('korbans.district_id_2', $get('../../pelapors.district_id_2'));
+                                                    $set('korbans.subdistrict_id_2', $get('../../pelapors.subdistrict_id_2'));
+                                                    $set('data_tambahan', collect($get('../../pelapors.data_tambahan'))
+                                                                        ->map(function ($item) {
+                                                                            return [
+                                                                                'nama_data' => $item['nama_data'],
+                                                                                'keterangan' => $item['keterangan'],
+                                                                            ];
+                                                                        })
+                                                                        ->toArray()
+                                                                    );
+
                                                 } else {
+                                                    $set('korbans.identity_no', null);
+                                                    $set('korbans.nama', null);
+                                                    $set('korbans.kontak', null);
+                                                    $set('korbans.kewarganegaraan', null);
+                                                    $set('korbans.tempat_lahir', null);
+                                                    $set('korbans.tanggal_lahir', null);
+                                                    $set('korbans.jenis_kelamin', null);
+                                                    $set('korbans.pekerjaan', null);
                                                     $set('korbans.usia', null);
-                                                }
-                                            }),
-                                        TextInput::make('korbans.usia')->readonly()->label('USIA'),
-                                        TextInput::make('korbans.pekerjaan')->label('PEKERJAAN')->required(),
-                                        Select::make('korbans.agama')->label('AGAMA')->options([
-                                            'Islam' => 'Islam',
-                                            'Kristen' => 'Kristen',
-                                            'Katolik' => 'Katolik',
-                                            'Hindu' => 'Hindu',
-                                            'Budha' => 'Budha',
-                                            'Konghucu' => 'Konghucu',
-                                            'Lainnya' => 'Lainnya',
-                                        ]),
-                                    ]),
-                                // section data tambahan
-                                // Section::make('Data Tambahan')
-                                //     ->schema([
-                                //         DataTambahanRepeater::make('korbans.data_tambahan'),
-                                //     ]),
-                                Section::make('Data Tambahan')
-                                ->schema([
-                                    DataTambahanRepeater::make('data_tambahan')  // Hapus 'korbans.' dari path
-                                        ->mutateRelationshipDataBeforeCreateUsing(function (array $data) {
-                                            $data['datatable_type'] = Korban::class;
-                                            return $data;
-                                        }),
-                                ]),
-                                // Alamat section
-                                Section::make('Alamat')
-                                ->schema([
-                                    // Alamat 1 (Utama)
-                                    Section::make('Alamat Utama')
-                                        ->schema([
-                                            Textarea::make('korbans.alamat')
-                                                ->label('ALAMAT')
-                                                ->required(),
-                                            Select::make('korbans.province_id')
-                                                ->label('PROVINSI')
-                                                ->provinsi()
-                                                ->live()
-                                                ->searchable()
-                                                ->options(fn () => app('wilayah')->getProvinsi() ?? [])  // Langsung panggil helper
-                                                ->afterStateUpdated(function (callable $set) {
+                                                    $set('korbans.alamat', null);
+                                                    $set('korbans.province_id', null);
                                                     $set('korbans.city_id', null);
                                                     $set('korbans.district_id', null);
                                                     $set('korbans.subdistrict_id', null);
-                                                }),
-                                            Select::make('korbans.city_id')
-                                                ->label('KABUPATEN / KOTA')
-                                                ->kabupaten()
-                                                ->live()
-                                                ->searchable()
-                                                ->options(function (callable $get) {
-                                                    $provinceId = $get('korbans.province_id');
-                                                    return $provinceId ? (app('wilayah')->getKabupaten($provinceId) ?? []) : [];
-                                                })
-                                                ->afterStateUpdated(function (callable $set) {
-                                                    $set('korbans.district_id', null);
-                                                    $set('korbans.subdistrict_id', null);
-                                                }),
-                                            Select::make('korbans.district_id')
-                                                ->label('KECAMATAN')
-                                                ->kecamatan()
-                                                ->live()
-                                                ->searchable()
-                                                ->options(function (callable $get) {
-                                                    $cityId = $get('korbans.city_id');
-                                                    return $cityId ? (app('wilayah')->getKecamatan($cityId) ?? []) : [];
-                                                })
-                                                ->afterStateUpdated(fn (callable $set) => $set('korbans.subdistrict_id', null)),
-                                            Select::make('korbans.subdistrict_id')
-                                                ->label('KELURAHAN / DESA')
-                                                ->kelurahan()
-                                                ->live()
-                                                ->searchable()
-                                                ->options(function (callable $get) {
-                                                    $districtId = $get('korbans.district_id');
-                                                    return $districtId ? (app('wilayah')->getKelurahan($districtId) ?? []) : [];
-                                                }),
-                                        ]),
-                                    // Toggle untuk menampilkan Alamat 2
-                                    Toggle::make('korbans_has_second_address')
-                                        ->label('Tambah Alamat Lain?')
-                                        ->live()
-                                        ->dehydrated(false)
-                                        ->afterStateHydrated(function (Get $get, Set $set, $state) {
-                                            // Cek jika ada data alamat kedua dari pelapor ketika checkbox sama_dengan_pelapor aktif
-                                            if ($get('sama_dengan_pelapor') && 
-                                                ($get('pelapors.alamat_2') || 
-                                                 $get('pelapors.province_id_2') || 
-                                                 $get('pelapors.city_id_2') || 
-                                                 $get('pelapors.district_id_2') || 
-                                                 $get('pelapors.subdistrict_id_2'))) {
-                                                $set('korbans_has_second_address', true);
-                                                return;
-                                            }
-                                            // Cek data alamat kedua korban
-                                            if ($get('korbans.alamat_2') || 
-                                                $get('korbans.province_id_2') || 
-                                                $get('korbans.city_id_2') || 
-                                                $get('korbans.district_id_2') || 
-                                                $get('korbans.subdistrict_id_2')) {
-                                                $set('korbans_has_second_address', true);
-                                                return;
-                                            }
-                                        })
-                                        ->default(function (Get $get) {
-                                            // Tambahkan default state sebagai backup
-                                            return $get('korbans.alamat_2') || 
-                                                   $get('korbans.province_id_2') || 
-                                                   $get('korbans.city_id_2') || 
-                                                   $get('korbans.district_id_2') || 
-                                                   $get('korbans.subdistrict_id_2') ||
-                                                   ($get('sama_dengan_pelapor') && 
-                                                    ($get('pelapors.alamat_2') || 
-                                                     $get('pelapors.province_id_2') || 
-                                                     $get('pelapors.city_id_2') || 
-                                                     $get('pelapors.district_id_2') || 
-                                                     $get('pelapors.subdistrict_id_2')));
-                                        }),
-                                    // Alamat 2 (Opsional)
-                                    Section::make('Alamat Lain')
-                                        ->schema([
-                                            Textarea::make('korbans.alamat_2')
-                                                ->label('ALAMAT LAIN'),
-                                            Select::make('korbans.province_id_2')
-                                                ->label('PROVINSI')
-                                                ->provinsi()
-                                                ->live()
-                                                ->searchable()
-                                                ->afterStateUpdated(function (callable $set) {
+                                                    $set('korbans.domestic', null);
+                                                    $set('korbans.agama', null);
+                                                    $set('korbans.alamat_2', null);
+                                                    $set('korbans.province_id_2', null);
                                                     $set('korbans.city_id_2', null);
                                                     $set('korbans.district_id_2', null);
                                                     $set('korbans.subdistrict_id_2', null);
+                                                    $set('korbans.kontak_2', null);
+                                                    $set('korbans.data_tambahan', null);
+                                                    }
                                                 }),
-                                            Select::make('korbans.city_id_2')
-                                                ->label('KABUPATEN / KOTA')
-                                                ->kabupaten(fn (Get $get): ?string => $get('korbans.province_id_2'))
+                                        Grid::make(5)
+                                            ->schema([
+                                                TextInput::make('korbans.nama')->label('NAMA'),
+                                                TextInput::make('korbans.identity_no')->label('NO IDENTITAS'),
+                                                PhoneInput::make('korbans.kontak')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->label('KONTAK')->required(),
+                                                PhoneInput::make('korbans.kontak_2')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->label('KONTAK LAIN'),
+                                                Country::make('korbans.kewarganegaraan')->label('KEWARGANEGARAAN')->default('Indonesia')->searchable(),
+                                            ]),
+                                        Grid::make(6)
+                                            ->schema([
+                                                Select::make('korbans.jenis_kelamin')
+                                                ->label('JENIS KELAMIN')
+                                                ->options([
+                                                    'Laki - Laki' => 'Laki - Laki',
+                                                    'Perempuan' => 'Perempuan'
+                                                ])->required(),
+                                                TextInput::make('korbans.tempat_lahir')->label('TEMPAT LAHIR')->required(),
+                                                Flatpickr::make('korbans.tanggal_lahir')
+                                                    ->label('TGL. LAHIR')
+                                                    ->required()
+                                                    ->allowInput()
+                                                    ->dateFormat('d F Y')
+                                                    ->altFormat('d F Y')
+                                                    ->live()
+                                                    ->afterStateUpdated(function ($state, callable $set) {
+                                                        if ($state) {
+                                                            $birthDate = Carbon::parse($state);
+                                                            $age = $birthDate->age;
+                                                            $set('korbans.usia', $age);
+                                                        } else {
+                                                            $set('korbans.usia', null);
+                                                        }
+                                                    }),
+                                                TextInput::make('korbans.usia')->readonly()->label('USIA'),
+                                                TextInput::make('korbans.pekerjaan')->label('PEKERJAAN')->required(),
+                                                Select::make('korbans.agama')->label('AGAMA')->options([
+                                                    'Islam' => 'Islam',
+                                                    'Kristen' => 'Kristen',
+                                                    'Katolik' => 'Katolik',
+                                                    'Hindu' => 'Hindu',
+                                                    'Budha' => 'Budha',
+                                                    'Konghucu' => 'Konghucu',
+                                                    'Lainnya' => 'Lainnya',
+                                                ]),
+                                            ]),
+                                        Section::make('Data Tambahan')
+                                            ->schema([
+                                                DataTambahanRepeater::make('data_tambahan')  // Hapus 'korbans.' dari path
+                                                    ->mutateRelationshipDataBeforeCreateUsing(function (array $data) {
+                                                        $data['datatable_type'] = Korban::class;
+                                                        return $data;
+                                                    }),
+                                            ]),
+                                        // Alamat section
+                                        Section::make('Alamat')
+                                        ->schema([
+                                            // Alamat 1 (Utama)
+                                            Section::make('Alamat Utama')
+                                                ->schema([
+                                                    Textarea::make('korbans.alamat')
+                                                        ->label('ALAMAT')
+                                                        ->required(),
+                                                    Select::make('korbans.province_id')
+                                                        ->label('PROVINSI')
+                                                        ->provinsi()
+                                                        ->live()
+                                                        ->searchable()
+                                                        ->options(fn () => app('wilayah')->getProvinsi() ?? [])  // Langsung panggil helper
+                                                        ->afterStateUpdated(function (callable $set) {
+                                                            $set('korbans.city_id', null);
+                                                            $set('korbans.district_id', null);
+                                                            $set('korbans.subdistrict_id', null);
+                                                        }),
+                                                    Select::make('korbans.city_id')
+                                                        ->label('KABUPATEN / KOTA')
+                                                        ->kabupaten()
+                                                        ->live()
+                                                        ->searchable()
+                                                        ->options(function (callable $get) {
+                                                            $provinceId = $get('korbans.province_id');
+                                                            return $provinceId ? (app('wilayah')->getKabupaten($provinceId) ?? []) : [];
+                                                        })
+                                                        ->afterStateUpdated(function (callable $set) {
+                                                            $set('korbans.district_id', null);
+                                                            $set('korbans.subdistrict_id', null);
+                                                        }),
+                                                    Select::make('korbans.district_id')
+                                                        ->label('KECAMATAN')
+                                                        ->kecamatan()
+                                                        ->live()
+                                                        ->searchable()
+                                                        ->options(function (callable $get) {
+                                                            $cityId = $get('korbans.city_id');
+                                                            return $cityId ? (app('wilayah')->getKecamatan($cityId) ?? []) : [];
+                                                        })
+                                                        ->afterStateUpdated(fn (callable $set) => $set('korbans.subdistrict_id', null)),
+                                                    Select::make('korbans.subdistrict_id')
+                                                        ->label('KELURAHAN / DESA')
+                                                        ->kelurahan()
+                                                        ->live()
+                                                        ->searchable()
+                                                        ->options(function (callable $get) {
+                                                            $districtId = $get('korbans.district_id');
+                                                            return $districtId ? (app('wilayah')->getKelurahan($districtId) ?? []) : [];
+                                                        }),
+                                                ]),
+                                            // Toggle untuk menampilkan Alamat 2
+                                            Toggle::make('korbans_has_second_address')
+                                                ->label('Tambah Alamat Lain?')
                                                 ->live()
-                                                ->searchable()
-                                                ->afterStateUpdated(function (callable $set) {
-                                                    $set('korbans.district_id_2', null);
-                                                    $set('korbans.subdistrict_id_2', null);
+                                                ->dehydrated(false)
+                                                ->afterStateHydrated(function (Get $get, Set $set, $state) {
+                                                    // Cek jika ada data alamat kedua dari pelapor ketika checkbox sama_dengan_pelapor aktif
+                                                    if ($get('sama_dengan_pelapor') && 
+                                                        ($get('pelapors.alamat_2') || 
+                                                        $get('pelapors.province_id_2') || 
+                                                        $get('pelapors.city_id_2') || 
+                                                        $get('pelapors.district_id_2') || 
+                                                        $get('pelapors.subdistrict_id_2'))) {
+                                                        $set('korbans_has_second_address', true);
+                                                        return;
+                                                    }
+                                                    // Cek data alamat kedua korban
+                                                    if ($get('korbans.alamat_2') || 
+                                                        $get('korbans.province_id_2') || 
+                                                        $get('korbans.city_id_2') || 
+                                                        $get('korbans.district_id_2') || 
+                                                        $get('korbans.subdistrict_id_2')) {
+                                                        $set('korbans_has_second_address', true);
+                                                        return;
+                                                    }
+                                                })
+                                                ->default(function (Get $get) {
+                                                    // Tambahkan default state sebagai backup
+                                                    return $get('korbans.alamat_2') || 
+                                                        $get('korbans.province_id_2') || 
+                                                        $get('korbans.city_id_2') || 
+                                                        $get('korbans.district_id_2') || 
+                                                        $get('korbans.subdistrict_id_2') ||
+                                                        ($get('sama_dengan_pelapor') && 
+                                                            ($get('pelapors.alamat_2') || 
+                                                            $get('pelapors.province_id_2') || 
+                                                            $get('pelapors.city_id_2') || 
+                                                            $get('pelapors.district_id_2') || 
+                                                            $get('pelapors.subdistrict_id_2')));
                                                 }),
-                                            Select::make('korbans.district_id_2')
-                                                ->label('KECAMATAN')
-                                                ->kecamatan(fn (Get $get): ?string => $get('korbans.city_id_2'))
-                                                ->live()
-                                                ->searchable()
-                                                ->afterStateUpdated(fn (callable $set) => $set('korbans.subdistrict_id_2', null)),
-                                            Select::make('korbans.subdistrict_id_2')
-                                                ->label('KELURAHAN / DESA')
-                                                ->kelurahan(fn (Get $get): ?string => $get('korbans.district_id_2'))
-                                                ->live()
-                                                ->searchable(),
+                                            // Alamat 2 (Opsional)
+                                            Section::make('Alamat Lain')
+                                            ->visible(fn (Get $get): bool => (bool) $get('korbans_has_second_address'))
+                                            ->schema([
+                                                Textarea::make('korbans.alamat_2')
+                                                    ->label('ALAMAT LAIN'),
+                                                Select::make('korbans.province_id_2')
+                                                    ->label('PROVINSI')
+                                                    ->options(fn () => app('wilayah')->getProvinsi() ?? []) // Tambahkan options
+                                                    ->live()
+                                                    ->searchable()
+                                                    ->afterStateUpdated(function (callable $set) {
+                                                        $set('korbans.city_id_2', null);
+                                                        $set('korbans.district_id_2', null);
+                                                        $set('korbans.subdistrict_id_2', null);
+                                                    }),
+                                                Select::make('korbans.city_id_2')
+                                                    ->label('KABUPATEN / KOTA')
+                                                    ->options(function (callable $get) {
+                                                        $provinceId = $get('korbans.province_id_2');
+                                                        return $provinceId ? (app('wilayah')->getKabupaten($provinceId) ?? []) : [];
+                                                    })
+                                                    ->live()
+                                                    ->searchable()
+                                                    ->afterStateUpdated(function (callable $set) {
+                                                        $set('korbans.district_id_2', null);
+                                                        $set('korbans.subdistrict_id_2', null);
+                                                    }),
+                                                Select::make('korbans.district_id_2')
+                                                    ->label('KECAMATAN') 
+                                                    ->options(function (callable $get) {
+                                                        $cityId = $get('korbans.city_id_2');
+                                                        return $cityId ? (app('wilayah')->getKecamatan($cityId) ?? []) : [];
+                                                    })
+                                                    ->live()
+                                                    ->searchable()
+                                                    ->afterStateUpdated(fn (callable $set) => $set('korbans.subdistrict_id_2', null)),
+                                                Select::make('korbans.subdistrict_id_2')
+                                                    ->label('KELURAHAN / DESA')
+                                                    ->options(function (callable $get) {
+                                                        $districtId = $get('korbans.district_id_2');
+                                                        return $districtId ? (app('wilayah')->getKelurahan($districtId) ?? []) : [];
+                                                    })
+                                                    ->live()
+                                                    ->searchable(),
+                                            ])
                                         ])
-                                        ->visible(function (Get $get): bool { return (bool) $get('korbans_has_second_address');}),
-                                ])
-                                ])
-                                ->columns(1)
-                                ->columnSpanFull()
-                                ->defaultItems(1)
-                                ->addActionLabel('Tambah Korban')
-                                ->cloneable(),
+                                    ])
                             ]),
                         Wizard\Step::make('Terlapor')
                             ->description('Identitas Terlapor')
