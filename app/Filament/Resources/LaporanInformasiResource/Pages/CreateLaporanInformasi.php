@@ -24,6 +24,15 @@ class CreateLaporanInformasi extends CreateRecord
     
     protected $listeners = ['autoSaveDraft' => 'autoSaveDraft'];
 
+    // hidden save button
+    protected function getFormActions(): array
+    {
+        return [
+            //$this->getSaveFormAction(),
+            $this->getCancelFormAction(),
+        ];
+    }
+
     // public function autoSaveDraft(): void
     // {
     //     try {
