@@ -180,10 +180,10 @@ class CreateLaporanInformasi extends CreateRecord
         }
     }
 
-    protected function getActiveStep(): int
-    {
-        return $this->currentStep ?? 1;
-    }
+    // protected function getActiveStep(): int
+    // {
+    //     return $this->currentStep ?? 1;
+    // }
 
     public function handleRecordCreation(array $data): LaporanInformasi
     {
@@ -266,6 +266,11 @@ class CreateLaporanInformasi extends CreateRecord
                         $terlapor->dataTambahan()->create($dataTambahan);
                     }
                 }
+            }
+
+            // simpan barang bukti, saya menggunakan morphMany
+            if (isset($data['barangBuktis'])) {
+                $laporanInformasi->barangBuktis()->createMany($data['barangBuktis']);
             }
 
             // Hapus draft setelah berhasil menyimpan

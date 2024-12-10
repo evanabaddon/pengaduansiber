@@ -6,6 +6,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use App\Filament\Resources\LaporanInformasiResource;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\FormDraft;
 
 class EditLaporanInformasi extends EditRecord
 {
@@ -203,6 +204,17 @@ class EditLaporanInformasi extends EditRecord
             }
         }
 
+        // Update data barang bukti
+        if (!empty($data['barangBuktis'])) {
+            $record->barangBuktis()->delete();
+            $record->barangBuktis()->createMany($data['barangBuktis']);
+        }
+
+        // Hapus draft setelah berhasil menyimpan
+        FormDraft::where('user_id', auth()->id())
+            ->where('form_type', 'laporan_informasi')
+            ->delete();
+
         return $record;
     }
 
@@ -265,11 +277,8 @@ class EditLaporanInformasi extends EditRecord
             $data['terlapors']['data_tambahan'] = $dataTambahanTerlapor->toArray();
         }
 
-        // Debug final data structure
-        // dd([
-        //     'Final data structure:' => $data,
-        //     'Korbans data:' => $data['korbans'] ?? null,
-        // ]);
+        // load barang bukti
+        $data['barangBuktis'] = $this->record->barangBuktis->toArray();
 
         return $data;
     }
