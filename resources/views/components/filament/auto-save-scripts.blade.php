@@ -1,4 +1,4 @@
-<script>
+{{-- <script>
     // Inisialisasi auto-save
     window.addEventListener('init-auto-save', (event) => {
         console.log('Auto-save initialized with interval:', event.detail.interval);
@@ -38,4 +38,4 @@
             });
         });
     });
-</script>
+</script> --}}
