@@ -995,7 +995,7 @@ class LaporanInformasiResource extends Resource
                 // terlapor
                 TextColumn::make('terlapors.nama')->label('TERLAPOR')->toggleable()->searchable(),
                 TextColumn::make('tkp')->label('TKP')->toggleable()->searchable(),
-                TextColumn::make('perkara')->label('PERKARA')->toggleable()->searchable(),
+                TextColumn::make('perkara')->label('PERKARA')->toggleable()->searchable()->sortable(),
                 TextColumn::make('uraian_peristiwa')->label('URAIAN PERISTIWA')->limit(15)->toggleable(isToggledHiddenByDefault: true)->searchable()->wrap(),
                 TextColumn::make('kerugian')
                     ->sortable()
@@ -1090,6 +1090,21 @@ class LaporanInformasiResource extends Resource
                     ->rules(['required']),
             ])
             ->filters([
+                // filter by perkara
+                SelectFilter::make('perkara')
+                    ->label('PERKARA')
+                    ->options(function() {
+                        return LaporanInformasi::distinct()
+                            ->pluck('perkara', 'perkara')
+                            ->filter()
+                            ->toArray();
+                    })
+                    ->searchable()
+                    ->query(function (Builder $query, $state) {
+                        if (!empty($state['value'])) {
+                            $query->where('perkara', $state['value']);
+                        }
+                    }),
                 // filter by status
                 SelectFilter::make('status')
                     ->label('STATUS')
