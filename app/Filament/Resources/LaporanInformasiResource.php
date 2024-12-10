@@ -110,6 +110,19 @@ class LaporanInformasiResource extends Resource
                                 // Extract only pelapors data and convert to JSON string
                                 $pelaporData = json_encode($state['pelapors'] ?? []);
 
+                                // Get existing draft
+                                $draft = FormDraft::firstWhere([
+                                    'user_id' => auth()->id(),
+                                    'form_type' => 'laporan_informasi'
+                                ]);
+
+                                // Decode existing main_data or initialize empty array
+                                $mainData = json_decode($draft?->main_data ?? '{}', true) ?: [];
+
+                                // Add or update tanggal_lapor and tanggal_kejadian
+                                $mainData['tanggal_lapor'] = $state['tanggal_lapor'];
+                                $mainData['tanggal_kejadian'] = $state['tanggal_kejadian'];
+
                                 FormDraft::updateOrCreate(
                                     [
                                         'user_id' => auth()->id(),
@@ -117,7 +130,8 @@ class LaporanInformasiResource extends Resource
                                     ],
                                     [
                                         'current_step' => 1,
-                                        'pelapor_data' => $pelaporData
+                                        'pelapor_data' => $pelaporData,
+                                        'main_data' => json_encode($mainData)
                                     ]
                                 );
                             })
@@ -338,6 +352,7 @@ class LaporanInformasiResource extends Resource
                                         ->reactive()  // Agar form bisa diperbarui saat checkbox dicentang
                                         ->afterStateUpdated(function ($state, callable $set, Get $get) {
                                             // jika sama dengan pelapor maka data korban akan sama dengan pelapor
+                                            
                                             if ($state) {
                                                 // Mengakses data pelapor dari form utama, bukan dari dalam repeater
                                                 $set('korbans.nama', $get('../../pelapors.nama'));
@@ -372,7 +387,16 @@ class LaporanInformasiResource extends Resource
                                                 $set('korbans.city_id_2', $get('../../pelapors.city_id_2'));
                                                 $set('korbans.district_id_2', $get('../../pelapors.district_id_2'));
                                                 $set('korbans.subdistrict_id_2', $get('../../pelapors.subdistrict_id_2'));
-                                                $set('korbans.data_tambahan', $get('../../pelapors.data_tambahan'));
+                                                $set('data_tambahan', collect($get('../../pelapors.data_tambahan'))
+                                                                    ->map(function ($item) {
+                                                                        return [
+                                                                            'nama_data' => $item['nama_data'],
+                                                                            'keterangan' => $item['keterangan'],
+                                                                        ];
+                                                                    })
+                                                                    ->toArray()
+                                                                );
+
                                             } else {
                                                 $set('korbans.identity_no', null);
                                                 $set('korbans.nama', null);
@@ -860,22 +884,28 @@ class LaporanInformasiResource extends Resource
                         Wizard\Step::make('Barang Bukti')
                             ->label('BARANG BUKTI')
                             ->description('Barang Bukti')
+                            ->afterStateHydrated(function ($state, $component) {
+                                $draft = FormDraft::firstWhere([
+                                    'user_id' => auth()->id(),
+                                    'form_type' => 'laporan_informasi'
+                                ]);
+                                if ($draft && $draft->main_data) {
+                                    $mainData = json_decode($draft->main_data, true);
+                                    $state['barangBuktis'] = $mainData['barangBuktis'] ?? [];
+                                }
+                            })
                             ->afterValidation(function ($state, $component) {
-                                // ambil draft yang sudah ada
                                 $draft = FormDraft::firstWhere([
                                     'user_id' => auth()->id(),
                                     'form_type' => 'laporan_informasi'
                                 ]);
 
-                                // Decode main_data yang ada atau gunakan array kosong jika belum ada
                                 $existingMainData = json_decode($draft?->main_data ?? '{}', true) ?: [];
 
-                                // Merge data yang ada dengan data baru
                                 $updatedMainData = array_merge($existingMainData, [
                                     'barangBuktis' => $state['barangBuktis'] ?? [],
                                 ]);
 
-                                // Update draft dengan data yang sudah di-merge
                                 FormDraft::updateOrCreate(
                                     [
                                         'user_id' => auth()->id(),
@@ -890,7 +920,6 @@ class LaporanInformasiResource extends Resource
                             ->schema([
                                 Repeater::make('barangBuktis')
                                     ->label('BARANG BUKTI')
-                                    ->relationship('barangBuktis')
                                     ->schema([
                                         Grid::make(3)
                                             ->schema([

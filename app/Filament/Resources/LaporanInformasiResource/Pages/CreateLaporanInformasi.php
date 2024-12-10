@@ -143,6 +143,18 @@ class CreateLaporanInformasi extends CreateRecord
             // Load main data - decode JSON string to array first
             if ($draft->main_data) {
                 $mainData = is_string($draft->main_data) ? json_decode($draft->main_data, true) : $draft->main_data;
+                
+                // Handle barangBuktis specifically if it exists in main data
+                if (isset($mainData['barangBuktis'])) {
+                    $formData['barangBuktis'] = array_map(function($item) {
+                        return [
+                            'jumlah' => $item['jumlah'] ?? null,
+                            'satuan' => $item['satuan'] ?? null,
+                            'nama_barang' => $item['nama_barang'] ?? null,
+                        ];
+                    }, $mainData['barangBuktis']);
+                }
+                
                 $formData = array_merge($formData, $mainData ?? []);
             }
             

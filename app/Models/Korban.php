@@ -26,7 +26,7 @@ class Korban extends Model
         'city_id',
         'district_id',
         'subdistrict_id',
-        'domestic',
+        // 'domestic',
         'identity_no',
         'alamat_2',
         'kontak_2',
