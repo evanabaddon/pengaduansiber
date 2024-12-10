@@ -24,82 +24,82 @@ class CreateLaporanInformasi extends CreateRecord
     
     protected $listeners = ['autoSaveDraft' => 'autoSaveDraft'];
 
-    public function autoSaveDraft(): void
-    {
-        try {
-            if (!$this->form) {
-                return;
-            }
+    // public function autoSaveDraft(): void
+    // {
+    //     try {
+    //         if (!$this->form) {
+    //             return;
+    //         }
 
-            // Ambil state form
-            $state = $this->form->getRawState();
-            if (empty($state)) {
-                return;
-            }
+    //         // Ambil state form
+    //         $state = $this->form->getRawState();
+    //         if (empty($state)) {
+    //             return;
+    //         }
 
-            // Persiapkan data untuk disimpan
-            $draftData = [
-                'user_id' => auth()->id(),
-                'form_type' => 'laporan_informasi',
-                'current_step' => $this->getActiveStep(),
-                'main_data' => null,
-                'pelapor_data' => null,
-                'korban_data' => null,
-                'terlapor_data' => null
-            ];
+    //         // Persiapkan data untuk disimpan
+    //         $draftData = [
+    //             'user_id' => auth()->id(),
+    //             'form_type' => 'laporan_informasi',
+    //             'current_step' => $this->getActiveStep(),
+    //             'main_data' => null,
+    //             'pelapor_data' => null,
+    //             'korban_data' => null,
+    //             'terlapor_data' => null
+    //         ];
 
-            // Filter dan simpan main data
-            $mainData = collect($state)
-                ->except(['pelapors', 'korbans', 'terlapors'])
-                ->filter(fn($value) => $value !== null && $value !== '')
-                ->toArray();
+    //         // Filter dan simpan main data
+    //         $mainData = collect($state)
+    //             ->except(['pelapors', 'korbans', 'terlapors'])
+    //             ->filter(fn($value) => $value !== null && $value !== '')
+    //             ->toArray();
             
-            if (!empty($mainData)) {
-                $draftData['main_data'] = $mainData;
-            }
+    //         if (!empty($mainData)) {
+    //             $draftData['main_data'] = $mainData;
+    //         }
 
-            // Simpan data pelapor
-            if (!empty($state['pelapors'])) {
-                $draftData['pelapor_data'] = json_encode($state['pelapors']);
-            }
+    //         // Simpan data pelapor
+    //         if (!empty($state['pelapors'])) {
+    //             $draftData['pelapor_data'] = json_encode($state['pelapors']);
+    //         }
 
-            // Simpan data korban
-            if (!empty($state['korbans'])) {
-                $draftData['korban_data'] = json_encode($state['korbans']);
-            }
+    //         // Simpan data korban
+    //         if (!empty($state['korbans'])) {
+    //             $draftData['korban_data'] = json_encode($state['korbans']);
+    //         }
 
-            // Simpan data terlapor
-            if (!empty($state['terlapors'])) {
-                $draftData['terlapor_data'] = json_encode($state['terlapors']);
-            }
+    //         // Simpan data terlapor
+    //         if (!empty($state['terlapors'])) {
+    //             $draftData['terlapor_data'] = json_encode($state['terlapors']);
+    //         }
 
-            // Simpan draft
-            $this->currentDraft = FormDraft::updateOrCreate(
-                [
-                    'user_id' => auth()->id(),
-                    'form_type' => 'laporan_informasi'
-                ],
-                $draftData
-            );
+    //         // Simpan draft
+    //         $this->currentDraft = FormDraft::updateOrCreate(
+    //             [
+    //                 'user_id' => auth()->id(),
+    //                 'form_type' => 'laporan_informasi'
+    //             ],
+    //             $draftData
+    //         );
 
-            // Notifikasi sukses tanpa logging
-            // Notification::make()
-            //     ->title('Draft berhasil disimpan')
-            //     ->success()
-            //     ->send();
+    //         // Notifikasi sukses tanpa logging
+    //         // Notification::make()
+    //         //     ->title('Draft berhasil disimpan')
+    //         //     ->success()
+    //         //     ->send();
 
-        } catch (\Exception $e) {
-            // Log error minimal
-            \Log::error('Draft save error: ' . $e->getMessage());
+    //     } catch (\Exception $e) {
+    //         // Log error minimal
+    //         \Log::error('Draft save error: ' . $e->getMessage());
             
-            // Notifikasi error
-            Notification::make()
-                ->title('Gagal menyimpan draft')
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
-        }
-    }
+    //         // Notifikasi error
+    //         Notification::make()
+    //             ->title('Gagal menyimpan draft')
+    //             ->body($e->getMessage())
+    //             ->danger()
+    //             ->send();
+    //     }
+    // }
 
     protected function filterEmptyValues(array $data): array
     {
@@ -117,8 +117,7 @@ class CreateLaporanInformasi extends CreateRecord
         
         try {
             $this->loadExistingDraft();
-            \Log::info('Form mounted with auto-save');
-            $this->dispatch('init-auto-save', interval: 60000);
+            \Log::info('Form mounted successfully');
         } catch (\Exception $e) {
             \Log::error('Mount failed: ' . $e->getMessage());
         }
@@ -141,9 +140,10 @@ class CreateLaporanInformasi extends CreateRecord
             
             $formData = [];
             
-            // Load main data
+            // Load main data - decode JSON string to array first
             if ($draft->main_data) {
-                $formData = array_merge($formData, $draft->main_data ?? []);
+                $mainData = is_string($draft->main_data) ? json_decode($draft->main_data, true) : $draft->main_data;
+                $formData = array_merge($formData, $mainData ?? []);
             }
             
             // Load pelapor data
@@ -283,6 +283,97 @@ class CreateLaporanInformasi extends CreateRecord
                 ->send();
             
             throw $e;
+        }
+    }
+
+    protected function configureNavigationActions(): array
+    {
+        return [
+            'nextAction' => fn() => $this->nextStepAndSaveDraft(),
+            'previousAction' => fn() => $this->previousStep(),
+        ];
+    }
+
+    protected function nextStepAndSaveDraft(): void 
+    {
+        try {
+            // Save draft first
+            $this->saveDraft();
+            
+            // Then proceed to next step
+            $this->nextStep();
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to save draft while moving to next step: ' . $e->getMessage());
+            
+            $this->dispatch('draft-save-failed', [
+                'message' => 'Gagal menyimpan progress: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    protected function saveDraft(): void
+    {
+        try {
+            if (!$this->form) {
+                return;
+            }
+
+            $state = $this->form->getRawState();
+            if (empty($state)) {
+                return;
+            }
+
+            // Initialize filtered data array
+            $filteredData = [
+                'user_id' => auth()->id(),
+                'form_type' => 'laporan_informasi',
+                'current_step' => $this->getActiveStep()
+            ];
+
+            // Process main data
+            $mainFields = array_diff_key($state, array_flip(['pelapors', 'korbans', 'terlapors']));
+            if (!empty($mainFields)) {
+                $filteredData['main_data'] = array_filter($mainFields, function ($value) {
+                    return $value !== null && $value !== '';
+                });
+            }
+
+            // Process related data efficiently
+            foreach (['pelapors', 'korbans', 'terlapors'] as $relation) {
+                if (!empty($state[$relation])) {
+                    $filteredData["{$relation}_data"] = array_filter($state[$relation], function ($value) {
+                        return $value !== null && $value !== '';
+                    });
+                }
+            }
+
+            // Skip if no data to save
+            if (count($filteredData) <= 3) { // Only has default fields
+                return;
+            }
+
+            // Save draft
+            $this->currentDraft = FormDraft::updateOrCreate(
+                [
+                    'user_id' => auth()->id(),
+                    'form_type' => 'laporan_informasi'
+                ],
+                $filteredData
+            );
+
+            \Log::info('Draft saved on step change', [
+                'draft_id' => $this->currentDraft->id,
+                'step' => $this->getActiveStep()
+            ]);
+
+            $this->dispatch('draft-saved', [
+                'message' => 'Progress berhasil disimpan'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to save draft: ' . $e->getMessage());
+            throw $e; // Re-throw to be handled by parent
         }
     }
 }
