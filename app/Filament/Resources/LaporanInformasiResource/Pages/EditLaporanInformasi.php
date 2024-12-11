@@ -158,31 +158,58 @@ class EditLaporanInformasi extends EditRecord
         }
 
         // Update data Terlapor
-        $terlapor = $record->terlapors;
-        $terlapor->update([
-            'identity_no' => $data['terlapors']['identity_no'],
-            'nama' => $data['terlapors']['nama'],
-            'kontak' => $data['terlapors']['kontak'],
-            'kontak_2' => $data['terlapors']['kontak_2'] ?? null,
-            'jenis_kelamin' => $data['terlapors']['jenis_kelamin'],
-            'tempat_lahir' => $data['terlapors']['tempat_lahir'],
-            'tanggal_lahir' => $data['terlapors']['tanggal_lahir'],
-            'usia' => $data['terlapors']['usia'],
-            'agama' => $data['terlapors']['agama'],
-            'kewarganegaraan' => $data['terlapors']['kewarganegaraan'],
-            'pekerjaan' => $data['terlapors']['pekerjaan'],
-            'data_tambahan' => $data['terlapors']['data_tambahan'] ?? null,
-            'province_id' => $data['terlapors']['province_id'] ?? null,
-            'city_id' => $data['terlapors']['city_id'] ?? null,
-            'district_id' => $data['terlapors']['district_id'] ?? null,
-            'subdistrict_id' => $data['terlapors']['subdistrict_id'] ?? null,
-            'alamat' => $data['terlapors']['alamat'],
-            'alamat_2' => $data['terlapors']['alamat_2'] ?? null,
-            'province_id_2' => $data['terlapors']['province_id_2'] ?? null,
-            'city_id_2' => $data['terlapors']['city_id_2'] ?? null,
-            'district_id_2' => $data['terlapors']['district_id_2'] ?? null,
-            'subdistrict_id_2' => $data['terlapors']['subdistrict_id_2'] ?? null,
-        ]);
+        if ($record->terlapors) {
+            // Update terlapor yang sudah ada
+            $record->terlapors->update([
+                'identity_no' => $data['terlapors']['identity_no'],
+                'nama' => $data['terlapors']['nama'],
+                'kontak' => $data['terlapors']['kontak'],
+                'kontak_2' => $data['terlapors']['kontak_2'] ?? null,
+                'jenis_kelamin' => $data['terlapors']['jenis_kelamin'],
+                'tempat_lahir' => $data['terlapors']['tempat_lahir'],
+                'tanggal_lahir' => $data['terlapors']['tanggal_lahir'],
+                'usia' => $data['terlapors']['usia'],
+                'agama' => $data['terlapors']['agama'],
+                'kewarganegaraan' => $data['terlapors']['kewarganegaraan'],
+                'pekerjaan' => $data['terlapors']['pekerjaan'],
+                'data_tambahan' => $data['terlapors']['data_tambahan'] ?? null,
+                'province_id' => $data['terlapors']['province_id'] ?? null,
+                'city_id' => $data['terlapors']['city_id'] ?? null,
+                'district_id' => $data['terlapors']['district_id'] ?? null,
+                'subdistrict_id' => $data['terlapors']['subdistrict_id'] ?? null,
+                'alamat' => $data['terlapors']['alamat'],
+                'alamat_2' => $data['terlapors']['alamat_2'] ?? null,
+                'province_id_2' => $data['terlapors']['province_id_2'] ?? null,
+                'city_id_2' => $data['terlapors']['city_id_2'] ?? null,
+                'district_id_2' => $data['terlapors']['district_id_2'] ?? null,
+                'subdistrict_id_2' => $data['terlapors']['subdistrict_id_2'] ?? null,
+            ]);
+        } else {
+            // Buat terlapor baru
+            $record->terlapors()->create([
+                'identity_no' => $data['terlapors']['identity_no'],
+                'nama' => $data['terlapors']['nama'],
+                'kontak' => $data['terlapors']['kontak'],
+                'kontak_2' => $data['terlapors']['kontak_2'] ?? null,
+                'jenis_kelamin' => $data['terlapors']['jenis_kelamin'],
+                'tempat_lahir' => $data['terlapors']['tempat_lahir'],
+                'tanggal_lahir' => $data['terlapors']['tanggal_lahir'],
+                'usia' => $data['terlapors']['usia'],
+                'agama' => $data['terlapors']['agama'],
+                'kewarganegaraan' => $data['terlapors']['kewarganegaraan'],
+                'pekerjaan' => $data['terlapors']['pekerjaan'],
+                'province_id' => $data['terlapors']['province_id'] ?? null,
+                'city_id' => $data['terlapors']['city_id'] ?? null,
+                'district_id' => $data['terlapors']['district_id'] ?? null,
+                'subdistrict_id' => $data['terlapors']['subdistrict_id'] ?? null,
+                'alamat' => $data['terlapors']['alamat'],
+                'alamat_2' => $data['terlapors']['alamat_2'] ?? null,
+                'province_id_2' => $data['terlapors']['province_id_2'] ?? null,
+                'city_id_2' => $data['terlapors']['city_id_2'] ?? null,
+                'district_id_2' => $data['terlapors']['district_id_2'] ?? null,
+                'subdistrict_id_2' => $data['terlapors']['subdistrict_id_2'] ?? null,
+            ]);
+        }
 
         // Update data tambahan Terlapor
         if (!empty($data['terlapors']['data_tambahan'])) {
