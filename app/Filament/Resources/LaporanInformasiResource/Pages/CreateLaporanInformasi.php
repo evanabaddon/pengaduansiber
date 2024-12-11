@@ -33,83 +33,6 @@ class CreateLaporanInformasi extends CreateRecord
         ];
     }
 
-    // public function autoSaveDraft(): void
-    // {
-    //     try {
-    //         if (!$this->form) {
-    //             return;
-    //         }
-
-    //         // Ambil state form
-    //         $state = $this->form->getRawState();
-    //         if (empty($state)) {
-    //             return;
-    //         }
-
-    //         // Persiapkan data untuk disimpan
-    //         $draftData = [
-    //             'user_id' => auth()->id(),
-    //             'form_type' => 'laporan_informasi',
-    //             'current_step' => $this->getActiveStep(),
-    //             'main_data' => null,
-    //             'pelapor_data' => null,
-    //             'korban_data' => null,
-    //             'terlapor_data' => null
-    //         ];
-
-    //         // Filter dan simpan main data
-    //         $mainData = collect($state)
-    //             ->except(['pelapors', 'korbans', 'terlapors'])
-    //             ->filter(fn($value) => $value !== null && $value !== '')
-    //             ->toArray();
-            
-    //         if (!empty($mainData)) {
-    //             $draftData['main_data'] = $mainData;
-    //         }
-
-    //         // Simpan data pelapor
-    //         if (!empty($state['pelapors'])) {
-    //             $draftData['pelapor_data'] = json_encode($state['pelapors']);
-    //         }
-
-    //         // Simpan data korban
-    //         if (!empty($state['korbans'])) {
-    //             $draftData['korban_data'] = json_encode($state['korbans']);
-    //         }
-
-    //         // Simpan data terlapor
-    //         if (!empty($state['terlapors'])) {
-    //             $draftData['terlapor_data'] = json_encode($state['terlapors']);
-    //         }
-
-    //         // Simpan draft
-    //         $this->currentDraft = FormDraft::updateOrCreate(
-    //             [
-    //                 'user_id' => auth()->id(),
-    //                 'form_type' => 'laporan_informasi'
-    //             ],
-    //             $draftData
-    //         );
-
-    //         // Notifikasi sukses tanpa logging
-    //         // Notification::make()
-    //         //     ->title('Draft berhasil disimpan')
-    //         //     ->success()
-    //         //     ->send();
-
-    //     } catch (\Exception $e) {
-    //         // Log error minimal
-    //         \Log::error('Draft save error: ' . $e->getMessage());
-            
-    //         // Notifikasi error
-    //         Notification::make()
-    //             ->title('Gagal menyimpan draft')
-    //             ->body($e->getMessage())
-    //             ->danger()
-    //             ->send();
-    //     }
-    // }
-
     protected function filterEmptyValues(array $data): array
     {
         return array_filter($data, function ($value) {
@@ -189,11 +112,6 @@ class CreateLaporanInformasi extends CreateRecord
         }
     }
 
-    // protected function getActiveStep(): int
-    // {
-    //     return $this->currentStep ?? 1;
-    // }
-
     public function handleRecordCreation(array $data): LaporanInformasi
     {
         try {
@@ -223,23 +141,6 @@ class CreateLaporanInformasi extends CreateRecord
                     }
                 }
             }
-
-            // Simpan Korban dengan data tambahan
-            // if (isset($data['korbans'])) {
-            //     $korbanData = collect($data['korbans'])->except('data_tambahan')->toArray();
-            //     $korban = Korban::create([
-            //         'laporan_informasi_id' => $laporanInformasi->id,
-            //         ...$korbanData
-            //     ]);
-                
-            //     if (!empty($data['korbans']['data_tambahan'])) {
-            //         foreach ($data['korbans']['data_tambahan'] as $dataTambahan) {
-            //             $korban->dataTambahan()->create($dataTambahan);
-            //         }
-            //     }
-            // }
-
-            // dd($data['korbans']);
 
             // Simpan multiple Korban dengan data tambahan
             if (isset($data['korbans']) && is_array($data['korbans'])) {

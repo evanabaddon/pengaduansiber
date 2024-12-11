@@ -625,6 +625,11 @@ class LaporanInformasiResource extends Resource
                                 // Extract only terlapors data and convert to JSON string
                                 $terlaporData = json_encode($state['terlapors'] ?? []);
 
+                                // jika nama terlapor tidak ada maka set nama terlapor menjadi 'Belum ada nama'
+                                if (!isset($state['terlapors']['nama'])) {
+                                    $state['terlapors']['nama'] = 'Belum ada nama';
+                                }
+
                                 FormDraft::updateOrCreate(
                                     [
                                         'user_id' => auth()->id(),
