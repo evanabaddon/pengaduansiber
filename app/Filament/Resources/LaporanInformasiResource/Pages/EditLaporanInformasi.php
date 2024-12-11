@@ -162,7 +162,7 @@ class EditLaporanInformasi extends EditRecord
             // Update terlapor yang sudah ada
             $record->terlapors->update([
                 'identity_no' => $data['terlapors']['identity_no'],
-                'nama' => $data['terlapors']['nama'],
+                'nama' => $data['terlapors']['nama'] ?? 'Belum ada nama',
                 'kontak' => $data['terlapors']['kontak'],
                 'kontak_2' => $data['terlapors']['kontak_2'] ?? null,
                 'jenis_kelamin' => $data['terlapors']['jenis_kelamin'],
@@ -188,7 +188,7 @@ class EditLaporanInformasi extends EditRecord
             // Buat terlapor baru
             $record->terlapors()->create([
                 'identity_no' => $data['terlapors']['identity_no'],
-                'nama' => $data['terlapors']['nama'],
+                'nama' => $data['terlapors']['nama'] ?? 'Belum ada nama',
                 'kontak' => $data['terlapors']['kontak'],
                 'kontak_2' => $data['terlapors']['kontak_2'] ?? null,
                 'jenis_kelamin' => $data['terlapors']['jenis_kelamin'],
