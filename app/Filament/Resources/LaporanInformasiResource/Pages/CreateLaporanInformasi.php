@@ -24,6 +24,21 @@ class CreateLaporanInformasi extends CreateRecord
     
     protected $listeners = ['autoSaveDraft' => 'autoSaveDraft'];
 
+    // tambahkan tombol untuk clear history form draft
+    protected function getActions(): array
+    {
+        return [
+            Actions\Action::make('clearHistory')
+                ->label('Bersihkan Draft')
+                ->color('danger')
+                ->icon('heroicon-o-trash')
+                ->action(function() {
+                    FormDraft::where('user_id', auth()->id())->delete();
+                    redirect(request()->header('Referer'));
+                })
+        ];
+    }
+
     // hidden save button
     protected function getFormActions(): array
     {
