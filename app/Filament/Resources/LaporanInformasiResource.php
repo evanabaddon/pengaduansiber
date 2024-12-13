@@ -1181,6 +1181,7 @@ class LaporanInformasiResource extends Resource
                 Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
+            ->recordUrl(null)
             ->emptyStateActions([]);
     }
 
