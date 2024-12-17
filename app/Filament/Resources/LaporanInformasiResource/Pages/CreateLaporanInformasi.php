@@ -95,7 +95,7 @@ class CreateLaporanInformasi extends CreateRecord
                 if (isset($mainData['barangBuktis'])) {
                     $formData['barangBuktis'] = array_map(function($item) {
                         return [
-                            'jumlah' => $item['jumlah'] ?? null,
+                            'jumlah' => is_numeric($item['jumlah']) ? (int)$item['jumlah'] : 1,
                             'satuan' => $item['satuan'] ?? null,
                             'nama_barang' => $item['nama_barang'] ?? null,
                         ];
