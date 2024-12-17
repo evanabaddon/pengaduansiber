@@ -12,6 +12,7 @@ class Terlapor extends Model
         'nama',
         'laporan_id',
         'laporan_informasi_id',
+        'pengaduan_id',
         'nama',
         'jenis_kelamin',
         'kewarganegaraan',
@@ -50,6 +51,11 @@ class Terlapor extends Model
     public function laporanInformasi()
     {
         return $this->belongsTo(LaporanInformasi::class, 'laporan_informasi_id');
+    }
+
+    public function pengaduan()
+    {
+        return $this->belongsTo(Pengaduan::class, 'pengaduan_id');
     }
 
     public function dataTambahan(): MorphMany

@@ -74,10 +74,13 @@ class LaporanResource extends Resource
     // sort navigation
     protected static ?int $navigationSort = -10;
 
+    // hidden at sidebar
+    protected static bool $shouldRegisterNavigation = false;
+
     // navigation label
     public static function getNavigationLabel(): string
     {
-        return 'Laporan / Pengaduan Masyarakat (LPM)';
+        return 'Laporan';
     }
 
     // navigation group
@@ -95,7 +98,7 @@ class LaporanResource extends Resource
     // judul form
     public static function getLabel(): string
     {
-        return 'Laporan / Pengaduan Masyarakat (LPM)';
+        return 'Laporan';
     }
 
     // widget

@@ -11,6 +11,7 @@ class Korban extends Model
         'nama',
         'laporan_id',
         'laporan_informasi_id',
+        'pengaduan_id',
         'nama',
         'tempat_lahir',
         'tanggal_lahir',
@@ -26,7 +27,6 @@ class Korban extends Model
         'city_id',
         'district_id',
         'subdistrict_id',
-        // 'domestic',
         'identity_no',
         'alamat_2',
         'kontak_2',
@@ -49,6 +49,11 @@ class Korban extends Model
     public function laporanInformasi()
     {
         return $this->belongsTo(LaporanInformasi::class, 'laporan_informasi_id');
+    }
+
+    public function pengaduan()
+    {
+        return $this->belongsTo(Pengaduan::class, 'pengaduan_id');
     }
 
     public function dataTambahan(): MorphMany
