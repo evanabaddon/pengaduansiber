@@ -63,6 +63,11 @@ class CreateLaporanInformasi extends CreateRecord
         parent::mount();
         
         try {
+            // Hapus semua draft yang lebih lama dari 24 jam
+            FormDraft::where('user_id', auth()->id())
+                ->where('updated_at', '<', now()->subHours(24))
+                ->delete();
+            
             $this->loadExistingDraft();
             \Log::info('Form mounted successfully');
         } catch (\Exception $e) {

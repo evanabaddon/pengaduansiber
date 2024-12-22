@@ -107,33 +107,36 @@ class LaporanInformasiResource extends Resource
                             ->description('Identitas Pelapor')
                             // auto save ketika next
                             ->afterValidation(function ($state, $component) {
-                                // Extract only pelapors data and convert to JSON string
-                                $pelaporData = json_encode($state['pelapors'] ?? []);
+                                // cek apakah sedang di halaman create
+                                if ($component->getLivewire() instanceof Pages\CreateLaporanInformasi) {
+                                    // Extract only pelapors data and convert to JSON string
+                                    $pelaporData = json_encode($state['pelapors'] ?? []);
 
-                                // Get existing draft
-                                $draft = FormDraft::firstWhere([
-                                    'user_id' => auth()->id(),
-                                    'form_type' => 'laporan_informasi'
-                                ]);
-
-                                // Decode existing main_data or initialize empty array
-                                $mainData = json_decode($draft?->main_data ?? '{}', true) ?: [];
-
-                                // Add or update tanggal_lapor and tanggal_kejadian
-                                $mainData['tanggal_lapor'] = $state['tanggal_lapor'];
-                                $mainData['tanggal_kejadian'] = $state['tanggal_kejadian'];
-
-                                FormDraft::updateOrCreate(
-                                    [
+                                    // Get existing draft
+                                    $draft = FormDraft::firstWhere([
                                         'user_id' => auth()->id(),
                                         'form_type' => 'laporan_informasi'
-                                    ],
-                                    [
-                                        'current_step' => 1,
-                                        'pelapor_data' => $pelaporData,
-                                        'main_data' => json_encode($mainData)
-                                    ]
-                                );
+                                    ]);
+
+                                    // Decode existing main_data or initialize empty array
+                                    $mainData = json_decode($draft?->main_data ?? '{}', true) ?: [];
+
+                                    // Add or update tanggal_lapor and tanggal_kejadian
+                                    $mainData['tanggal_lapor'] = $state['tanggal_lapor'];
+                                    $mainData['tanggal_kejadian'] = $state['tanggal_kejadian'];
+
+                                    FormDraft::updateOrCreate(
+                                        [
+                                            'user_id' => auth()->id(),
+                                            'form_type' => 'laporan_informasi'
+                                        ],
+                                        [
+                                            'current_step' => 1,
+                                            'pelapor_data' => $pelaporData,
+                                            'main_data' => json_encode($mainData)
+                                        ]
+                                    );
+                                }
                             })
                             ->schema([
                                 Grid::make(2)
@@ -321,19 +324,22 @@ class LaporanInformasiResource extends Resource
                         Wizard\Step::make('Korban')
                             ->description('Identitas Korban')
                             ->afterValidation(function ($state, $component) {
-                                // Extract only korbans data and convert to JSON string
-                                $korbansData = json_encode($state['korbans'] ?? []);
+                                // cek apakah sedang di halaman create
+                                if ($component->getLivewire() instanceof Pages\CreateLaporanInformasi) {
+                                    // Extract only korbans data and convert to JSON string
+                                    $korbansData = json_encode($state['korbans'] ?? []);
 
-                                FormDraft::updateOrCreate(
-                                    [
-                                        'user_id' => auth()->id(),
-                                        'form_type' => 'laporan_informasi'
-                                    ],
-                                    [
-                                        'current_step' => 2,
-                                        'korban_data' => $korbansData
-                                    ]
-                                );
+                                    FormDraft::updateOrCreate(
+                                        [
+                                            'user_id' => auth()->id(),
+                                            'form_type' => 'laporan_informasi'
+                                        ],
+                                        [
+                                            'current_step' => 2,
+                                            'korban_data' => $korbansData
+                                        ]
+                                    );
+                                }
                             })
                             ->schema([
                                 Repeater::make('korbans')
@@ -622,24 +628,27 @@ class LaporanInformasiResource extends Resource
                         Wizard\Step::make('Terlapor')
                             ->description('Identitas Terlapor')
                             ->afterValidation(function ($state, $component) {
-                                // Extract only terlapors data and convert to JSON string
-                                $terlaporData = json_encode($state['terlapors'] ?? []);
+                                // cek apakah sedang di halaman create
+                                if (request()->routeIs('filament.resources.laporan-informasis.create')) {
+                                    // Extract only terlapors data and convert to JSON string
+                                    $terlaporData = json_encode($state['terlapors'] ?? []);
 
-                                // jika nama terlapor tidak ada maka set nama terlapor menjadi 'Belum ada nama'
-                                if (!isset($state['terlapors']['nama'])) {
-                                    $state['terlapors']['nama'] = 'Belum ada nama';
+                                    // jika nama terlapor tidak ada maka set nama terlapor menjadi 'Belum ada nama'
+                                    if (!isset($state['terlapors']['nama'])) {
+                                        $state['terlapors']['nama'] = 'Belum ada nama';
+                                    }
+
+                                    FormDraft::updateOrCreate(
+                                        [
+                                            'user_id' => auth()->id(),
+                                            'form_type' => 'laporan_informasi'
+                                        ],
+                                        [
+                                            'current_step' => 2,
+                                            'terlapor_data' => $terlaporData
+                                        ]
+                                    );
                                 }
-
-                                FormDraft::updateOrCreate(
-                                    [
-                                        'user_id' => auth()->id(),
-                                        'form_type' => 'laporan_informasi'
-                                    ],
-                                    [
-                                        'current_step' => 2,
-                                        'terlapor_data' => $terlaporData
-                                    ]
-                                );
                             })
                             ->schema([
                                 Grid::make(5)
@@ -779,32 +788,35 @@ class LaporanInformasiResource extends Resource
                         Wizard\Step::make('TKP')
                             ->description('Tempat Kejadian Perkara')
                             ->afterValidation(function ($state, $component) {
-                                // Extract relevant data
-                                $draftData = [
-                                    'tkp' => $state['tkp'] ?? null,
-                                    'city_id' => $state['city_id'] ?? null,
-                                    'perkara' => $state['perkara'] ?? null,
-                                    'kerugian' => $state['kerugian'] ?? null,
-                                    'district_id' => $state['district_id'] ?? null,
-                                    'province_id' => $state['province_id'] ?? null,
-                                    'barangBuktis' => $state['barangBuktis'] ?? [],
-                                    'tanggal_lapor' => $state['tanggal_lapor'] ?? null,
-                                    'subdistrict_id' => $state['subdistrict_id'] ?? null,
-                                    'tanggal_kejadian' => $state['tanggal_kejadian'] ?? null,
-                                    'uraian_peristiwa' => $state['uraian_peristiwa'] ?? null,
-                                    'media' => $state['media'] ?? null,
-                                ];
+                                // cek apakah sedang di halaman create
+                                if (request()->routeIs('filament.resources.laporan-informasis.create')) {
+                                    // Extract relevant data
+                                    $draftData = [
+                                        'tkp' => $state['tkp'] ?? null,
+                                        'city_id' => $state['city_id'] ?? null,
+                                        'perkara' => $state['perkara'] ?? null,
+                                        'kerugian' => $state['kerugian'] ?? null,
+                                        'district_id' => $state['district_id'] ?? null,
+                                        'province_id' => $state['province_id'] ?? null,
+                                        'barangBuktis' => $state['barangBuktis'] ?? [],
+                                        'tanggal_lapor' => $state['tanggal_lapor'] ?? null,
+                                        'subdistrict_id' => $state['subdistrict_id'] ?? null,
+                                        'tanggal_kejadian' => $state['tanggal_kejadian'] ?? null,
+                                        'uraian_peristiwa' => $state['uraian_peristiwa'] ?? null,
+                                        'media' => $state['media'] ?? null,
+                                    ];
 
-                                FormDraft::updateOrCreate(
-                                    [
-                                        'user_id' => auth()->id(),
-                                        'form_type' => 'laporan_informasi'
-                                    ],
-                                    [
-                                        'current_step' => 3, // Adjust this number based on your step sequence
-                                        'main_data' => json_encode($draftData)
-                                    ]
-                                );
+                                    FormDraft::updateOrCreate(
+                                        [
+                                            'user_id' => auth()->id(),
+                                            'form_type' => 'laporan_informasi'
+                                        ],
+                                        [
+                                            'current_step' => 3, // Adjust this number based on your step sequence
+                                            'main_data' => json_encode($draftData)
+                                        ]
+                                    );
+                                }
                             })
                             ->schema([
                                 Textarea::make('tkp')
@@ -846,33 +858,36 @@ class LaporanInformasiResource extends Resource
                         Wizard\Step::make('Perkara')
                             ->description('Informasi Perkara')
                             ->afterValidation(function ($state, $component) {
-                                // Ambil draft yang ada
-                                $draft = FormDraft::firstWhere([
-                                    'user_id' => auth()->id(),
-                                    'form_type' => 'laporan_informasi'
-                                ]);
-
-                                // Decode main_data yang ada atau gunakan array kosong jika belum ada
-                                $existingMainData = json_decode($draft?->main_data ?? '{}', true) ?: [];
-
-                                // Merge data yang ada dengan data baru
-                                $updatedMainData = array_merge($existingMainData, [
-                                    'perkara' => $state['perkara'] ?? null,
-                                    'uraian_peristiwa' => $state['uraian_peristiwa'] ?? null,
-                                    'kerugian' => $state['kerugian'] ?? null,
-                                ]);
-
-                                // Update draft dengan data yang sudah di-merge
-                                FormDraft::updateOrCreate(
-                                    [
+                                // cek apakah sedang di halaman create
+                                if (request()->routeIs('filament.resources.laporan-informasis.create')) {
+                                    // Ambil draft yang ada
+                                    $draft = FormDraft::firstWhere([
                                         'user_id' => auth()->id(),
                                         'form_type' => 'laporan_informasi'
-                                    ],
-                                    [
-                                        'current_step' => 4,
-                                        'main_data' => json_encode($updatedMainData)
-                                    ]
-                                );
+                                    ]);
+
+                                    // Decode main_data yang ada atau gunakan array kosong jika belum ada
+                                    $existingMainData = json_decode($draft?->main_data ?? '{}', true) ?: [];
+
+                                    // Merge data yang ada dengan data baru
+                                    $updatedMainData = array_merge($existingMainData, [
+                                        'perkara' => $state['perkara'] ?? null,
+                                        'uraian_peristiwa' => $state['uraian_peristiwa'] ?? null,
+                                        'kerugian' => $state['kerugian'] ?? null,
+                                    ]);
+
+                                    // Update draft dengan data yang sudah di-merge
+                                    FormDraft::updateOrCreate(
+                                        [
+                                            'user_id' => auth()->id(),
+                                            'form_type' => 'laporan_informasi'
+                                        ],
+                                        [
+                                            'current_step' => 4,
+                                            'main_data' => json_encode($updatedMainData)
+                                        ]
+                                    );
+                                }
                             })
                             ->schema([
                                 TextInput::make('perkara')
@@ -900,27 +915,30 @@ class LaporanInformasiResource extends Resource
                                 }
                             })
                             ->afterValidation(function ($state, $component) {
-                                $draft = FormDraft::firstWhere([
-                                    'user_id' => auth()->id(),
-                                    'form_type' => 'laporan_informasi'
-                                ]);
-
-                                $existingMainData = json_decode($draft?->main_data ?? '{}', true) ?: [];
-
-                                $updatedMainData = array_merge($existingMainData, [
-                                    'barangBuktis' => $state['barangBuktis'] ?? [],
-                                ]);
-
-                                FormDraft::updateOrCreate(
-                                    [
+                                // cek apakah sedang di halaman create
+                                if (request()->routeIs('filament.resources.laporan-informasis.create')) {
+                                    $draft = FormDraft::firstWhere([
                                         'user_id' => auth()->id(),
                                         'form_type' => 'laporan_informasi'
-                                    ],
-                                    [
-                                        'current_step' => 5,
-                                        'main_data' => json_encode($updatedMainData)
-                                    ]
-                                );
+                                    ]);
+
+                                    $existingMainData = json_decode($draft?->main_data ?? '{}', true) ?: [];
+
+                                    $updatedMainData = array_merge($existingMainData, [
+                                        'barangBuktis' => $state['barangBuktis'] ?? [],
+                                    ]);
+
+                                    FormDraft::updateOrCreate(
+                                        [
+                                            'user_id' => auth()->id(),
+                                            'form_type' => 'laporan_informasi'
+                                        ],
+                                        [
+                                            'current_step' => 5,
+                                            'main_data' => json_encode($updatedMainData)
+                                        ]
+                                    );
+                                }
                             })
                             ->schema([
                                 Repeater::make('barangBuktis')

@@ -213,6 +213,7 @@ class EditLaporanInformasi extends EditRecord
 
         // Update data tambahan Terlapor
         if (!empty($data['terlapors']['data_tambahan'])) {
+            $terlapor = $record->terlapors;
             foreach ($data['terlapors']['data_tambahan'] as $dataTambahan) {
                 if (isset($dataTambahan['created_at'])) {
                     $dataTambahan['created_at'] = \Carbon\Carbon::parse($dataTambahan['created_at'])->format('Y-m-d H:i:s');
@@ -237,10 +238,10 @@ class EditLaporanInformasi extends EditRecord
             $record->barangBuktis()->createMany($data['barangBuktis']);
         }
 
-        // Hapus draft setelah berhasil menyimpan
-        FormDraft::where('user_id', auth()->id())
-            ->where('form_type', 'laporan_informasi')
-            ->delete();
+        // // Hapus draft setelah berhasil menyimpan
+        // FormDraft::where('user_id', auth()->id())
+        //     ->where('form_type', 'laporan_informasi')
+        //     ->delete();
 
         return $record;
     }
