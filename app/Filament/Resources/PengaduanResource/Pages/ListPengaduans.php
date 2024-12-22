@@ -11,7 +11,7 @@ class ListPengaduans extends ListRecords
     protected static string $resource = PengaduanResource::class;
 
     // buat view coming soon
-    // protected static string $view = 'filament.pages.coming-soon';
+    protected static string $view = 'filament.pages.coming-soon';
 
     protected function getHeaderActions(): array
     {
