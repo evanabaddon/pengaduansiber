@@ -6,7 +6,6 @@ use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use App\Filament\Resources\LaporanInformasiResource;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\FormDraft;
 
 class EditLaporanInformasi extends EditRecord
 {

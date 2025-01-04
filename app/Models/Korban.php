@@ -11,6 +11,8 @@ class Korban extends Model
         'nama',
         'laporan_id',
         'laporan_informasi_id',
+        'laporan_info_id',
+        'laporan_polisi_id',
         'pengaduan_id',
         'nama',
         'tempat_lahir',
@@ -49,6 +51,16 @@ class Korban extends Model
     public function laporanInformasi()
     {
         return $this->belongsTo(LaporanInformasi::class, 'laporan_informasi_id');
+    }
+
+    public function laporanInfo()
+    {
+        return $this->belongsTo(LaporanInfo::class, 'laporan_info_id');
+    }
+
+    public function laporanPolisi()
+    {
+        return $this->belongsTo(LaporanPolisi::class, 'laporan_polisi_id');
     }
 
     public function pengaduan()

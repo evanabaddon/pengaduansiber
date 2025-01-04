@@ -17,7 +17,7 @@ class ListLaporanInfos extends ListRecords
     }
 
     // buat view coming soon
-    protected static string $view = 'filament.pages.coming-soon';
+    // protected static string $view = 'filament.pages.coming-soon';
 
     protected function getHeaderWidgets(): array
     {
