@@ -20,6 +20,7 @@ use App\Models\LaporanInformasi;
 use Filament\Resources\Resource;
 use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Grid;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
@@ -50,6 +51,10 @@ use App\Notifications\LaporanInformasiAssignedNotification;
 use Filament\Tables\Actions\ViewAction as ActionsViewAction;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Parfaitementweb\FilamentCountryField\Forms\Components\Country;
+use App\Services\OllamaService;
+use Filament\Notifications\Notification;
+use App\Filament\Resources\LaporanInformasiResource\Pages\ViewAnalysis;
+use Filament\Tables\Actions\ActionGroup;
 
 class LaporanInformasiResource extends Resource
 {
@@ -1184,6 +1189,144 @@ class LaporanInformasiResource extends Resource
                     }),
             ])
             ->actions([
+                ActionGroup::make([
+                    Action::make('Analyze')
+                        ->visible(fn (LaporanInformasi $record): bool => env('AI_ANALYZER', false))
+                        ->action(function (LaporanInformasi $record, OllamaService $ollamaService) {
+                            try {
+                                // Persiapkan data untuk analisis
+                                $data = [
+                                    'pelapor' => $record->pelapors->nama ?? 'Tidak ada',
+                                    'korban' => $record->korbans->pluck('nama')->join(', ') ?? 'Tidak ada',
+                                    'terlapor' => $record->terlapors->nama ?? 'Tidak ada',
+                                    'uraian_peristiwa' => $record->uraian_peristiwa,
+                                    'tkp' => $record->tkp,
+                                    'kerugian' => $record->kerugian,
+                                    'perkara' => $record->perkara,
+                                ];
+
+                                // Dapatkan analisis dari Ollama
+                                $analysis = $ollamaService->analyze($data);
+
+                                if ($analysis['success']) {
+                                    $data = $analysis['data'];
+
+                                    // jika format tidak sesuai, maka lakukan analisis kembali
+                                    if (!isset($data['ringkasan_kronologi']) || !isset($data['analisis_hukum']) || !isset($data['langkah_penyidikan']) || !isset($data['tingkat_urgensi'])) {
+                                        throw new \Exception('Format analisis tidak sesuai');
+                                        // lakukan analisis kembali
+                                        $analysis = $ollamaService->analyze($data);
+                                    }
+                                    
+                                    try {
+                                        // Format data untuk disimpan
+                                        $kronologiAnalysis = [
+                                            'ringkasan' => trim($data['ringkasan_kronologi'])
+                                        ];
+
+                                        $possibleLaws = [
+                                            'pidana_umum' => trim($data['analisis_hukum']['pidana_umum']),
+                                            'teknologi_informasi' => trim($data['analisis_hukum']['teknologi_informasi']),
+                                            'perundangan_lain' => trim($data['analisis_hukum']['perundangan_lain'])
+                                        ];
+
+                                        $investigationSteps = [
+                                            'barang_bukti_digital' => $data['langkah_penyidikan']['barang_bukti_digital'],
+                                            'analisis_forensik' => $data['langkah_penyidikan']['analisis_forensik'],
+                                            'penelusuran_pelaku' => $data['langkah_penyidikan']['penelusuran_pelaku'],
+                                            'tindakan_penyidikan' => $data['langkah_penyidikan']['tindakan_penyidikan']
+                                        ];
+
+                                        // Tentukan priority level berdasarkan tingkat urgensi
+                                        $priorityLevels = [
+                                            $data['tingkat_urgensi']['dampak_kejadian']['level'] ?? 'Sedang',
+                                            $data['tingkat_urgensi']['nilai_kerugian']['level'] ?? 'Sedang',
+                                            $data['tingkat_urgensi']['tingkat_kompleksitas']['level'] ?? 'Sedang',
+                                            $data['tingkat_urgensi']['potensi_dampak']['level'] ?? 'Sedang'
+                                        ];
+                                        
+                                        // Hitung level prioritas berdasarkan mayoritas
+                                        $levelCounts = array_count_values($priorityLevels);
+                                        arsort($levelCounts);
+                                        $majorityLevel = key($levelCounts);
+
+                                        // Format priority level dan tingkat urgensi
+                                        $priorityData = [
+                                            'calculated_level' => $majorityLevel,
+                                            'level_counts' => $levelCounts,
+                                            'urgensi' => $data['tingkat_urgensi']
+                                        ];
+
+                                        // Persiapkan data yang akan disimpan
+                                        $dataToSave = [
+                                            'laporan_id' => $record->id,
+                                            'kronologi_analysis' => json_encode($kronologiAnalysis, JSON_PRETTY_PRINT),
+                                            'possible_laws' => json_encode($possibleLaws, JSON_PRETTY_PRINT),
+                                            'investigation_steps' => json_encode($investigationSteps, JSON_PRETTY_PRINT),
+                                            'priority_level' => json_encode($priorityData, JSON_PRETTY_PRINT),
+                                            'raw_response' => json_encode($data, JSON_PRETTY_PRINT)
+                                        ];
+
+                                        // tambahkan created_at dan updated_at
+                                        $dataToSave['created_at'] = now();
+                                        $dataToSave['updated_at'] = now();
+
+                                        // Log data yang akan disimpan
+                                        \Log::info('Data yang akan disimpan:', $dataToSave);
+
+                                        // Simpan data
+                                        $saved = $record->analysis()->updateOrCreate(
+                                            ['laporan_id' => $record->id],
+                                            $dataToSave
+                                        );
+
+                                        if (!$saved) {
+                                            throw new \Exception('Gagal menyimpan data analisis');
+                                        }
+
+                                        
+                                        Notification::make()
+                                        ->title('Analisis Berhasil')
+                                        ->success()
+                                        ->body('Laporan berhasil dianalisis')
+                                        ->send();
+                                        
+                                        // redirect ke view-analysis
+                                        return redirect()->to(LaporanInformasiResource::getUrl('view-analysis', ['record' => $record]));
+                                    } catch (\Exception $e) {
+                                        \Log::error('Error saat menyimpan analisis:', [
+                                            'error' => $e->getMessage(),
+                                            'trace' => $e->getTraceAsString(),
+                                            'data' => $data ?? null
+                                        ]);
+                                        
+                                        throw new \Exception('Gagal menyimpan hasil analisis: ' . $e->getMessage());
+                                    }
+                                } else {
+                                    throw new \Exception('Gagal mendapatkan analisis dari AI');
+                                    // lakukan analisis kembali
+                                    $analysis = $ollamaService->analyze($data);
+                                }
+                            } catch (\Exception $e) {
+                                Notification::make()
+                                    ->title('Gagal Menganalisis')
+                                    ->danger()
+                                    ->body($e->getMessage())
+                                    ->send();
+                            }
+                        })
+                        ->color('success')
+                        ->icon('heroicon-o-cpu-chip')
+                        ->requiresConfirmation()
+                        ->modalHeading('Analisis Laporan')
+                        ->modalDescription('Apakah Anda yakin ingin menganalisis laporan ini menggunakan AI SiberBot?')
+                        ->modalSubmitActionLabel('Ya, Analisis'),
+                    Action::make('viewAnalysis')
+                        ->label('Lihat Analisis')
+                        ->icon('heroicon-o-document-magnifying-glass')
+                        ->url(fn (LaporanInformasi $record): string => static::getUrl('view-analysis', ['record' => $record]))
+                        ->visible(fn (LaporanInformasi $record): bool => $record->analysis()->exists()),
+                ]),
                 ActionsViewAction::make()
                     ->label(false)
                     ->modalContent(fn (LaporanInformasi $record): View => view(
@@ -1193,6 +1336,7 @@ class LaporanInformasiResource extends Resource
                     ->modalWidth('7xl'), 
                 EditAction::make()->label(false),
                 DeleteAction::make()->label(false),
+                
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -1232,8 +1376,9 @@ class LaporanInformasiResource extends Resource
         return [
             'index' => Pages\ListLaporanInformasis::route('/'),
             'create' => Pages\CreateLaporanInformasi::route('/create'),
-            'view' => Pages\ViewLaporanInformasi::route('/{record}'),
             'edit' => Pages\EditLaporanInformasi::route('/{record}/edit'),
+            'view' => Pages\ViewLaporanInformasi::route('/{record}'),
+            'view-analysis' => Pages\ViewAnalysis::route('/{record}/analysis'),
         ];
     }
 

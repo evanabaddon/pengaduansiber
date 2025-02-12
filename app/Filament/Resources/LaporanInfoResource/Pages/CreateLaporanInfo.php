@@ -22,6 +22,11 @@ class CreateLaporanInfo extends CreateRecord
     protected ?FormDraft $currentDraft = null;
     public $currentStep = 1;
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
     protected $listeners = ['autoSaveDraft' => 'autoSaveDraft'];
 
     // tambahkan tombol untuk clear history form draft

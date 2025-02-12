@@ -10,6 +10,7 @@ use App\Models\Pelapor;
 use App\Models\Penyidik;
 use App\Models\Terlapor;
 use App\Models\BarangBukti;
+use App\Models\LaporanAnalysis;
 use Illuminate\Database\Eloquent\Model;
 
 class LaporanInformasi extends Model
@@ -19,6 +20,7 @@ class LaporanInformasi extends Model
     protected $appends = ['tanggal_lapor', 'tanggal_kejadian'];
 
     protected $fillable = [
+        'no_laporan',
         'tanggal_lapor',
         'tanggal_kejadian',
         'perkara',
@@ -74,6 +76,11 @@ class LaporanInformasi extends Model
     public function barangBuktis()
     {
         return $this->morphMany(BarangBukti::class, 'buktiable');
+    }
+
+    public function analysis()
+    {
+        return $this->hasOne(LaporanAnalysis::class, 'laporan_id');
     }
 
     protected static function booted()

@@ -135,8 +135,9 @@ class LaporanInfoResource extends Resource
                                             ->altInput(true),
                                     ]),
                                 // identitas pelapor
-                                Grid::make(5)
+                                Grid::make(6)
                                 ->schema([
+                                    TextInput::make('no_laporan')->label('NO LAPORAN')->required(),
                                     TextInput::make('pelapors.nama')->label('NAMA')->required(),
                                     TextInput::make('pelapors.identity_no')->label('NO IDENTITAS')->required(),
                                     PhoneInput::make('pelapors.kontak')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->required()->label('KONTAK'),
@@ -965,6 +966,7 @@ class LaporanInfoResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('no_laporan')->label('NO LAPORAN')->toggleable()->searchable()->sortable(),
                 TextColumn::make('tanggal_lapor')
                 ->wrapHeader()
                     ->sortable()

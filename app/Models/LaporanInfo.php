@@ -19,6 +19,7 @@ class LaporanInfo extends Model
     protected $appends = ['tanggal_lapor', 'tanggal_kejadian'];
 
     protected $fillable = [
+        'no_laporan',
         'tanggal_lapor',
         'tanggal_kejadian',
         'perkara',

@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'ollama' => [
+        'url' => env('OLLAMA_URL', 'http://192.168.1.x:11434'), // Sesuaikan dengan IP Ollama
+        'model' => env('OLLAMA_MODEL', 'llama3.1'),
+    ],
+
 ];
