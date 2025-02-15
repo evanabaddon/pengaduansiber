@@ -4,6 +4,7 @@ namespace App\Filament\Resources\LaporanPolisiResource\Pages;
 
 use App\Filament\Resources\LaporanPolisiResource;
 use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 
 class ListLaporanPolisis extends ListRecords
