@@ -19,10 +19,20 @@ class ListLaporanPolisis extends ListRecords
     // buat view coming soon
     // protected static string $view = 'filament.pages.coming-soon';
 
+    // protected function getHeaderActions(): array
+    // {
+    //     return [
+    //         Actions\CreateAction::make(),
+    //     ];
+    // }
+
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Action::make('create')
+                ->label('Buat Laporan Polisi')
+                ->url(self::$resource::getUrl('create'))
+                ->button(),
         ];
     }
 }
