@@ -14,6 +14,7 @@ use Kenepa\Banner\BannerPlugin;
 use App\Settings\GeneralSetting;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
+use Illuminate\Support\HtmlString;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
@@ -24,14 +25,15 @@ use Filament\Notifications\Actions\Action;
 use App\Filament\Pages\Profile\EditProfile;
 use App\Filament\Widgets\LatestLaporanWidget;
 use Illuminate\Session\Middleware\StartSession;
+use Devonab\FilamentEasyFooter\EasyFooterPlugin;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use App\Filament\Widgets\LatestLaporanInformasiWidget;
-use Swis\Filament\Backgrounds\ImageProviders\MyImages;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Swis\Filament\Backgrounds\ImageProviders\MyImages;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -91,7 +93,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
-                    
+                EasyFooterPlugin::make()
+                    ->withFooterPosition('footer')
+                    ->hiddenFromPagesEnabled()
+                    ->hiddenFromPages(['admin/login'])
+                    ->withSentence(new HtmlString('<img src="'.asset('images/logo-siber-polri.png').'" alt="Ditressiber Polda Jatim" style="width: 20px; height: 20px;"> <b>Ditressiber Polda Jatim</b>'))
+                    ->withBorder(),
                 // \JoaoPaulolndev\FilamentEditProfile\FilamentEditProfilePlugin::make()
                 // ->editProfileComponents([
                 //     'editProfile' => EditProfile::class

@@ -9,6 +9,7 @@
         "bezhansalleh/filament-language-switch": "^3.1",
         "bezhansalleh/filament-shield": "^3.3",
         "coolsam/flatpickr": "^3.1",
+        "devonab/filament-easy-footer": "^1.0",
         "filament/filament": "^3.2.0",
         "filament/infolists": "^3.2",
         "filament/notifications": "^3.2",
