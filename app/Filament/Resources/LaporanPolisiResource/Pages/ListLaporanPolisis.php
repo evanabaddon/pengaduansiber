@@ -4,6 +4,7 @@ namespace App\Filament\Resources\LaporanPolisiResource\Pages;
 
 use App\Filament\Resources\LaporanPolisiResource;
 use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 
 class ListLaporanPolisis extends ListRecords
@@ -19,10 +20,20 @@ class ListLaporanPolisis extends ListRecords
     // buat view coming soon
     // protected static string $view = 'filament.pages.coming-soon';
 
+    // protected function getHeaderActions(): array
+    // {
+    //     return [
+    //         Actions\CreateAction::make(),
+    //     ];
+    // }
+
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Action::make('create')
+                ->label('Buat Laporan Polisi')
+                ->url(self::$resource::getUrl('create'))
+                ->button(),
         ];
     }
 }

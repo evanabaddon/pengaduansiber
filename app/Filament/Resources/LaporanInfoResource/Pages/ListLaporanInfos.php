@@ -34,7 +34,7 @@ class ListLaporanInfos extends ListRecords
     {
         return [
             Action::make('create')
-                ->label('Buat Laporan')
+                ->label('Buat Laporan Informasi')
                 ->url(self::$resource::getUrl('create'))
                 ->button(),
         ];
