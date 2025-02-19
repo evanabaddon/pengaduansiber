@@ -12,7 +12,7 @@
                     'JAMBI' => 'id-ja',
                     'SUMATERA SELATAN' => 'id-sl',
                     'BENGKULU' => 'id-be',
-                    'LAMPUNG' => 'id-la',
+                    'LAMPUNG' => 'id-1024',
                     'KEPULAUAN BANGKA BELITUNG' => 'id-bb',
                     'KEPULAUAN RIAU' => 'id-kr',
                     'DKI JAKARTA' => 'id-jk',
@@ -36,15 +36,75 @@
                     'GORONTALO' => 'id-go',
                     'SULAWESI BARAT' => 'id-sr',
                     'MALUKU' => 'id-ma',
-                    'MALUKU UTARA' => 'id-mu',
-                    'PAPUA BARAT' => 'id-pb',
-                    'P A P U A' => 'id-pp'
+                    'MALUKU UTARA' => 'id-la',        // Diubah dari 'id-mu' ke 'id-la'
+                    'PAPUA BARAT' => 'id-ib',         // Diubah dari 'id-pb' ke 'id-ib'
+                    'P A P U A' => 'id-pa',                // Menghapus spasi di 'P A P U A'
                 ]),
 
                 init() {
                     this.initializeMap();
                     this.$wire.$on('updateMap', () => {
                         this.updateMapData(@js($this->getData()));
+                    });
+
+                    // Tambahkan observer untuk dark mode
+                    const observer = new MutationObserver((mutations) => {
+                        mutations.forEach((mutation) => {
+                            if (mutation.attributeName === 'class') {
+                                const isDarkMode = document.documentElement.classList.contains('dark');
+                                if (this.chart) {
+                                    // Simpan posisi dan zoom level saat ini
+                                    const currentZoom = this.chart.mapView && this.chart.mapView.zoom;
+                                    const currentCenter = this.chart.mapView && this.chart.mapView.center;
+
+                                    // Update chart dengan konfigurasi baru
+                                    this.chart.update({
+                                        title: {
+                                            style: {
+                                                color: isDarkMode ? '#fff' : '#000'
+                                            }
+                                        },
+                                        subtitle: {
+                                            style: {
+                                                color: isDarkMode ? '#ccc' : '#666'
+                                            }
+                                        },
+                                        legend: {
+                                            itemStyle: {
+                                                color: isDarkMode ? '#fff' : '#000'
+                                            }
+                                        },
+                                        colorAxis: {
+                                            stops: isDarkMode ? [
+                                                [0, '#1a1a3a'],
+                                                [0.5, '#4444FF'],
+                                                [1, '#8888FF']
+                                            ] : [
+                                                [0, '#EFEFFF'],
+                                                [0.5, '#4444FF'],
+                                                [1, '#000044']
+                                            ]
+                                        }
+                                    }, false);
+
+                                    // Redraw chart dengan animasi false
+                                    this.chart.redraw(false);
+
+                                    // Kembalikan posisi dan zoom level
+                                    if (currentZoom && currentCenter) {
+                                        this.chart.mapView.update({
+                                            zoom: currentZoom,
+                                            center: currentCenter
+                                        }, false);
+                                    }
+                                }
+                            }
+                        });
+                    });
+
+                    observer.observe(document.documentElement, {
+                        attributes: true,
+                        attributeFilter: ['class']
                     });
                 },
 
@@ -78,10 +138,12 @@
                         return;
                     }
 
+                    const isDarkMode = document.documentElement.classList.contains('dark');
+
                     this.chart = Highcharts.mapChart('map-container', {
                         chart: {
                             map: 'countries/id/id-all',
-                            backgroundColor: '#fff',
+                            backgroundColor: 'none',
                             height: '600',
                             style: {
                                 fontFamily: getComputedStyle(document.body).getPropertyValue('--font-family')
@@ -106,13 +168,15 @@
                             text: 'Sebaran TKP Laporan Per Provinsi',
                             style: {
                                 fontSize: '1.5rem',
-                                fontWeight: '600'
+                                fontWeight: '600',
+                                color: isDarkMode ? '#fff' : '#000',
                             }
                         },
                         subtitle: {
                             text: 'Sumber: Data Laporan Ditressiber Polda Jatim',
                             style: {
-                                fontSize: '1rem'
+                                fontSize: '1rem',
+                                color: isDarkMode ? '#ccc' : '#666'
                             }
                         },
                         mapNavigation: {
@@ -129,7 +193,11 @@
                         },
                         colorAxis: {
                             min: 0,
-                            stops: [
+                            stops: isDarkMode ? [
+                                [0, '#1a1a3a'],
+                                [0.5, '#4444FF'],
+                                [1, '#8888FF']
+                            ] : [
                                 [0, '#EFEFFF'],
                                 [0.5, '#4444FF'],
                                 [1, '#000044']
@@ -153,7 +221,8 @@
                             name: 'Total Laporan',
                             states: {
                                 hover: {
-                                    {{-- color: '#BADA55' --}}
+                                    brightness: 0.2,
+                                    borderColor: isDarkMode ? '#ffffff' : '#000000'
                                 }
                             },
                             dataLabels: {
