@@ -48,6 +48,7 @@ use App\Filament\Resources\LaporanInfoResource\Widgets\LaporanInfoStatusOverview
 use App\Filament\Resources\LaporanPolisiResource\Widgets\LaporanPolisiStatusOverview;
 use App\Filament\Resources\LaporanInformasiResource\Widgets\LaporanInformasiStatusOverview;
 use Filament\Support\Assets\Js;
+use Filament\Support\Assets\Css;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -59,7 +60,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->darkMode(false)
             ->login(Login::class)
-            ->brandName('Ditressiber Polda Jatim') 
+            ->brandName('Ditressiber Polda Jatim')
             // ->brandLogo(asset('images/logo-siber-polri.png')) // Logo berada di folder public/images/
             ->brandLogoHeight('5rem') // Atur tinggi logo
             // ->profile(isSimple:false)
@@ -172,6 +173,10 @@ class AdminPanelProvider extends PanelProvider
                 
                 // Additional modules can be loaded last
                 Js::make('highcharts-exporting', asset('js/highcharts/exporting.js')),
+
+                Css::make('highcharts-dashboard', 'https://code.highcharts.com/dashboards/css/dashboards.css'),
+
+                Css::make('highcharts-custom', asset('css/highcharts-custom.css')),
             ]);
     }
 }

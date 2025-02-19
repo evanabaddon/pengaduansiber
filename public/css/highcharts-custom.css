@@ -1,0 +1,41 @@
+/* Light mode */
+.highcharts-data-label text {
+    fill: #000 !important;
+    text-shadow: 1px 1px 0 #fff, -1px 1px 0 #fff, 1px -1px 0 #fff, -1px -1px 0 #fff !important;
+}
+
+/* Dark mode */
+.highcharts-dark .highcharts-data-label text {
+    fill: #fff !important;
+    text-shadow: 1px 1px 0 #000, -1px 1px 0 #000, 1px -1px 0 #000, -1px -1px 0 #000 !important;
+}
+
+.highcharts-dark .highcharts-title,
+.highcharts-dark .highcharts-subtitle,
+.highcharts-dark .highcharts-axis-title,
+.highcharts-dark .highcharts-axis-labels text {
+    fill: #fff !important;
+}
+
+.highcharts-dark .highcharts-tooltip {
+    filter: brightness(0.8);
+}
+
+.highcharts-dark .highcharts-tooltip text {
+    fill: #fff !important;
+}
+
+/* Improve text contrast */
+.highcharts-dark .highcharts-data-label-connector {
+    stroke: #fff;
+}
+
+.highcharts-dark .highcharts-legend-item text {
+    fill: #fff !important;
+}
+
+/* Better visibility for map borders */
+.highcharts-dark .highcharts-map-series .highcharts-point {
+    stroke: #4b5563;
+    stroke-width: 0.5;
+} 

@@ -153,7 +153,7 @@
                             name: 'Total Laporan',
                             states: {
                                 hover: {
-                                    color: '#BADA55'
+                                    {{-- color: '#BADA55' --}}
                                 }
                             },
                             dataLabels: {
