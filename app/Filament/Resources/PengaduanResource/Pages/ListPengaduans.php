@@ -5,6 +5,7 @@ namespace App\Filament\Resources\PengaduanResource\Pages;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Resources\PengaduanResource;
+use App\Filament\Resources\PengaduanResource\Widgets\PengaduanStatusOverview;
 
 class ListPengaduans extends ListRecords
 {
@@ -20,6 +21,13 @@ class ListPengaduans extends ListRecords
                 ->label('Buat Pengaduan')
                 ->url(self::$resource::getUrl('create'))
                 ->button(),
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            PengaduanStatusOverview::class,
         ];
     }
 }

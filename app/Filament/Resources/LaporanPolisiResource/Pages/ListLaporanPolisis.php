@@ -2,10 +2,11 @@
 
 namespace App\Filament\Resources\LaporanPolisiResource\Pages;
 
-use App\Filament\Resources\LaporanPolisiResource;
 use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\LaporanPolisiResource;
+use App\Filament\Resources\LaporanPolisiResource\Widgets\LaporanPolisiStatusOverview;
 
 class ListLaporanPolisis extends ListRecords
 {
@@ -34,6 +35,13 @@ class ListLaporanPolisis extends ListRecords
                 ->label('Buat Laporan Polisi')
                 ->url(self::$resource::getUrl('create'))
                 ->button(),
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            LaporanPolisiStatusOverview::class,
         ];
     }
 }

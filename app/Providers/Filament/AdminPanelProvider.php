@@ -16,10 +16,12 @@ use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use Illuminate\Support\HtmlString;
 use Filament\View\PanelsRenderHook;
+use App\Filament\Widgets\MapsWidget;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Notifications\Notification;
 use Orion\FilamentGreeter\GreeterPlugin;
+use App\Filament\Widgets\AllLaporanWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Notifications\Actions\Action;
 use App\Filament\Pages\Profile\EditProfile;
@@ -41,7 +43,11 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
 use App\Filament\Resources\LaporanResource\Widgets\LaporanStatusOverview;
+use App\Filament\Resources\PengaduanResource\Widgets\PengaduanStatusOverview;
+use App\Filament\Resources\LaporanInfoResource\Widgets\LaporanInfoStatusOverview;
+use App\Filament\Resources\LaporanPolisiResource\Widgets\LaporanPolisiStatusOverview;
 use App\Filament\Resources\LaporanInformasiResource\Widgets\LaporanInformasiStatusOverview;
+use Filament\Support\Assets\Js;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -71,10 +77,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                LaporanInformasiStatusOverview::class,
-                LatestLaporanInformasiWidget::class,
-                // LaporanStatusOverview::class,
-                // LatestLaporanWidget::class,
+                // all laporan full width
+                AllLaporanWidget::class,
+                // maps widget full width
+                MapsWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -146,10 +152,26 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 // custom footer
                 PanelsRenderHook::FOOTER,
-                // function () {
-                //     return view('customFooter');
-                // }
                 fn () => view('components.filament.auto-save-scripts')
-            );
+            )
+            ->assets([
+                // Load Proj4js first
+                Js::make('proj4', asset('js/highcharts/proj4.js')),
+                
+                // Then load Highcharts core
+                Js::make('highcharts', asset('js/highcharts/highcharts.js')),
+                
+                // Load accessibility module
+                Js::make('highcharts-accessibility', asset('js/highcharts/accessibility.js')),
+                
+                // Then load the map module
+                Js::make('highcharts-map', asset('js/highcharts/map.js')),
+                
+                // Then load the Indonesia map data
+                Js::make('highcharts-id-map', asset('js/highcharts/id-all.js')),
+                
+                // Additional modules can be loaded last
+                Js::make('highcharts-exporting', asset('js/highcharts/exporting.js')),
+            ]);
     }
 }
