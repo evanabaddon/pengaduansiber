@@ -176,7 +176,7 @@ class AdminPanelProvider extends PanelProvider
 
                 Css::make('highcharts-dashboard', 'https://code.highcharts.com/dashboards/css/dashboards.css'),
 
-                Css::make('highcharts-custom', asset('css/highcharts-custom.css')),
+                Css::make('highcharts-custom', '/css/highcharts-custom.css'),
             ]);
     }
 }
