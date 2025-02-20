@@ -157,22 +157,22 @@ class AdminPanelProvider extends PanelProvider
             )
             ->assets([
                 // Load Proj4js first
-                Js::make('proj4', 'js/highcharts/proj4.js'),
+                Js::make('proj4', '/js/highcharts/proj4.js'),
                 
                 // Then load Highcharts core
-                Js::make('highcharts', 'js/highcharts/highcharts.js'),
+                Js::make('highcharts', '/js/highcharts/highcharts.js'),
                 
                 // Load accessibility module
-                Js::make('highcharts-accessibility', 'js/highcharts/accessibility.js'),
+                Js::make('highcharts-accessibility', '/js/highcharts/accessibility.js'),
                 
                 // Then load the map module
-                Js::make('highcharts-map', 'js/highcharts/map.js'),
+                Js::make('highcharts-map', '/js/highcharts/map.js'),
                 
                 // Then load the Indonesia map data
-                Js::make('highcharts-id-map', 'js/highcharts/id-all.js'),
+                Js::make('highcharts-id-map', '/js/highcharts/id-all.js'),
                 
                 // Additional modules can be loaded last
-                Js::make('highcharts-exporting', 'js/highcharts/exporting.js'),
+                Js::make('highcharts-exporting', '/js/highcharts/exporting.js'),
 
                 Css::make('highcharts-dashboard', 'https://code.highcharts.com/dashboards/css/dashboards.css'),
 
