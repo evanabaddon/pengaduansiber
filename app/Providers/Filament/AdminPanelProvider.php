@@ -123,7 +123,7 @@ class AdminPanelProvider extends PanelProvider
             // })
             ->sidebarWidth('25rem')
             ->sidebarCollapsibleOnDesktop()
-            ->favicon(asset('images/favicon.ico'))
+            ->favicon(secure_asset('images/favicon.ico'))
             ->brandName(function() {
                 if (Schema::hasTable('settings')) {
                     return GeneralSetting::getBrandName() ?? 'Ditressiber Polda Jatim';
