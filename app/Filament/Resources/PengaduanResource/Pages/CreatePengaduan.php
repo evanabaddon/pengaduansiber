@@ -27,6 +27,39 @@ class CreatePengaduan extends CreateRecord
         $this->loadExistingDraft();
     }
 
+    // Tombol untuk clear history form draft
+    protected function getActions(): array
+    {
+        return [
+            Actions\Action::make('clearHistory')
+                ->label('Bersihkan Draft')
+                ->color('danger')
+                ->icon('heroicon-o-trash')
+                ->action(function() {
+                    FormDraft::where('user_id', auth()->id())->delete();
+                    redirect(request()->header('Referer'));
+                })
+        ];
+    }
+
+    // hidden save button
+    protected function getFormActions(): array
+    {
+        return [
+            //$this->getSaveFormAction(),
+            $this->getCancelFormAction(),
+        ];
+    }
+
+    // filter empty values
+    protected function filterEmptyValues(array $data): array
+    {
+        return array_filter($data, function ($value) {
+            return !empty($value);
+        });
+    }
+
+    // load existing draft
     protected function loadExistingDraft(): void
     {
         try {
@@ -175,5 +208,6 @@ class CreatePengaduan extends CreateRecord
             throw $e;
         }
     }
+
 }
 
