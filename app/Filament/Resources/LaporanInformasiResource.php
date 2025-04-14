@@ -52,6 +52,7 @@ use Filament\Tables\Actions\ViewAction as ActionsViewAction;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Parfaitementweb\FilamentCountryField\Forms\Components\Country;
 use App\Services\OllamaService;
+use App\Services\DeepSeekService;
 use Filament\Notifications\Notification;
 use App\Filament\Resources\LaporanInformasiResource\Pages\ViewAnalysis;
 use Filament\Tables\Actions\ActionGroup;
@@ -1192,7 +1193,7 @@ class LaporanInformasiResource extends Resource
                 ActionGroup::make([
                     Action::make('Analyze')
                         ->visible(fn (LaporanInformasi $record): bool => env('AI_ANALYZER', false))
-                        ->action(function (LaporanInformasi $record, OllamaService $ollamaService) {
+                        ->action(function (LaporanInformasi $record, OllamaService $ollamaService, DeepSeekService $deepSeekService) {
                             try {
                                 // Persiapkan data untuk analisis
                                 $data = [
@@ -1205,107 +1206,115 @@ class LaporanInformasiResource extends Resource
                                     'perkara' => $record->perkara,
                                 ];
 
-                                // Dapatkan analisis dari Ollama
-                                $analysis = $ollamaService->analyze($data);
+                                if (env('AI_SERVICE') == 'ollama') {
+                                    // Dapatkan analisis dari Ollama
+                                    $analysis = $ollamaService->analyze($data);
+                                } else {
+                                    // Dapatkan analisis dari DeepSeek
+                                    $analysis = $deepSeekService->analyze($data);
+                                }
 
-                                if ($analysis['success']) {
+                                if (isset($analysis['data'])) {
                                     $data = $analysis['data'];
-
-                                    // jika format tidak sesuai, maka lakukan analisis kembali
-                                    if (!isset($data['ringkasan_kronologi']) || !isset($data['analisis_hukum']) || !isset($data['langkah_penyidikan']) || !isset($data['tingkat_urgensi'])) {
-                                        throw new \Exception('Format analisis tidak sesuai');
-                                        // lakukan analisis kembali
-                                        $analysis = $ollamaService->analyze($data);
-                                    }
                                     
-                                    try {
-                                        // Format data untuk disimpan
-                                        $kronologiAnalysis = [
-                                            'ringkasan' => trim($data['ringkasan_kronologi'])
-                                        ];
-
-                                        $possibleLaws = [
-                                            'pidana_umum' => trim($data['analisis_hukum']['pidana_umum']),
-                                            'teknologi_informasi' => trim($data['analisis_hukum']['teknologi_informasi']),
-                                            'perundangan_lain' => trim($data['analisis_hukum']['perundangan_lain'])
-                                        ];
-
-                                        $investigationSteps = [
-                                            'barang_bukti_digital' => $data['langkah_penyidikan']['barang_bukti_digital'],
-                                            'analisis_forensik' => $data['langkah_penyidikan']['analisis_forensik'],
-                                            'penelusuran_pelaku' => $data['langkah_penyidikan']['penelusuran_pelaku'],
-                                            'tindakan_penyidikan' => $data['langkah_penyidikan']['tindakan_penyidikan']
-                                        ];
-
-                                        // Tentukan priority level berdasarkan tingkat urgensi
-                                        $priorityLevels = [
-                                            $data['tingkat_urgensi']['dampak_kejadian']['level'] ?? 'Sedang',
-                                            $data['tingkat_urgensi']['nilai_kerugian']['level'] ?? 'Sedang',
-                                            $data['tingkat_urgensi']['tingkat_kompleksitas']['level'] ?? 'Sedang',
-                                            $data['tingkat_urgensi']['potensi_dampak']['level'] ?? 'Sedang'
-                                        ];
+                                    // Make sure we have proper data structure before proceeding
+                                    if (is_array($data) && 
+                                        isset($data['ringkasan_kronologi']) && 
+                                        isset($data['analisis_hukum']) && 
+                                        isset($data['langkah_penyidikan']) && 
+                                        isset($data['tingkat_urgensi'])) {
                                         
-                                        // Hitung level prioritas berdasarkan mayoritas
-                                        $levelCounts = array_count_values($priorityLevels);
-                                        arsort($levelCounts);
-                                        $majorityLevel = key($levelCounts);
-
-                                        // Format priority level dan tingkat urgensi
-                                        $priorityData = [
-                                            'calculated_level' => $majorityLevel,
-                                            'level_counts' => $levelCounts,
-                                            'urgensi' => $data['tingkat_urgensi']
-                                        ];
-
-                                        // Persiapkan data yang akan disimpan
-                                        $dataToSave = [
-                                            'laporan_id' => $record->id,
-                                            'kronologi_analysis' => json_encode($kronologiAnalysis, JSON_PRETTY_PRINT),
-                                            'possible_laws' => json_encode($possibleLaws, JSON_PRETTY_PRINT),
-                                            'investigation_steps' => json_encode($investigationSteps, JSON_PRETTY_PRINT),
-                                            'priority_level' => json_encode($priorityData, JSON_PRETTY_PRINT),
-                                            'raw_response' => json_encode($data, JSON_PRETTY_PRINT)
-                                        ];
-
-                                        // tambahkan created_at dan updated_at
-                                        $dataToSave['created_at'] = now();
-                                        $dataToSave['updated_at'] = now();
-
-                                        // Log data yang akan disimpan
-                                        \Log::info('Data yang akan disimpan:', $dataToSave);
-
-                                        // Simpan data
-                                        $saved = $record->analysis()->updateOrCreate(
-                                            ['laporan_id' => $record->id],
-                                            $dataToSave
-                                        );
-
-                                        if (!$saved) {
-                                            throw new \Exception('Gagal menyimpan data analisis');
+                                        try {
+                                            // Format data for kronologi_analysis
+                                            $kronologiAnalysis = [
+                                                'ringkasan' => trim($data['ringkasan_kronologi'])
+                                            ];
+                                            
+                                            // Format data for possible_laws
+                                            $possibleLaws = [
+                                                'pidana_umum' => trim($data['analisis_hukum']['pidana_umum'] ?? ''),
+                                                'teknologi_informasi' => trim($data['analisis_hukum']['teknologi_informasi'] ?? ''),
+                                                'perundangan_lain' => trim($data['analisis_hukum']['perundangan_lain'] ?? '')
+                                            ];
+                                            
+                                            // Format data for investigation_steps
+                                            $investigationSteps = [
+                                                'barang_bukti_digital' => $data['langkah_penyidikan']['barang_bukti_digital'] ?? [],
+                                                'analisis_forensik' => $data['langkah_penyidikan']['analisis_forensik'] ?? [],
+                                                'penelusuran_pelaku' => $data['langkah_penyidikan']['penelusuran_pelaku'] ?? [],
+                                                'tindakan_penyidikan' => $data['langkah_penyidikan']['tindakan_penyidikan'] ?? []
+                                            ];
+                                            
+                                            // Tentukan priority level berdasarkan tingkat urgensi
+                                            $priorityLevels = [
+                                                $data['tingkat_urgensi']['dampak_kejadian']['level'] ?? 'Sedang',
+                                                $data['tingkat_urgensi']['nilai_kerugian']['level'] ?? 'Sedang',
+                                                $data['tingkat_urgensi']['tingkat_kompleksitas']['level'] ?? 'Sedang',
+                                                $data['tingkat_urgensi']['potensi_dampak']['level'] ?? 'Sedang'
+                                            ];
+                                            
+                                            // Hitung level prioritas berdasarkan mayoritas
+                                            $levelCounts = array_count_values($priorityLevels);
+                                            arsort($levelCounts);
+                                            $majorityLevel = key($levelCounts);
+                                            
+                                            // Format priority level dan tingkat urgensi
+                                            $priorityData = [
+                                                'calculated_level' => $majorityLevel,
+                                                'level_counts' => $levelCounts,
+                                                'urgensi' => $data['tingkat_urgensi']
+                                            ];
+                                            
+                                            // Persiapkan data yang akan disimpan
+                                            $dataToSave = [
+                                                'laporan_id' => $record->id,
+                                                'kronologi_analysis' => json_encode($kronologiAnalysis, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+                                                'possible_laws' => json_encode($possibleLaws, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+                                                'investigation_steps' => json_encode($investigationSteps, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+                                                'priority_level' => json_encode($priorityData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+                                                'raw_response' => json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+                                            ];
+                                            
+                                            // Tambahkan created_at dan updated_at
+                                            $dataToSave['created_at'] = now();
+                                            $dataToSave['updated_at'] = now();
+                                            
+                                            // Log data yang akan disimpan
+                                            \Log::info('Data yang akan disimpan:', $dataToSave);
+                                            
+                                            // Simpan data
+                                            $saved = $record->analysis()->updateOrCreate(
+                                                ['laporan_id' => $record->id],
+                                                $dataToSave
+                                            );
+                                            
+                                            if (!$saved) {
+                                                throw new \Exception('Gagal menyimpan data analisis');
+                                            }
+                                            
+                                            Notification::make()
+                                                ->title('Analisis Berhasil')
+                                                ->success()
+                                                ->body('Laporan berhasil dianalisis')
+                                                ->send();
+                                            
+                                            // Redirect ke view-analysis
+                                            return redirect()->to(LaporanInformasiResource::getUrl('view-analysis', ['record' => $record]));
+                                            
+                                        } catch (\Exception $e) {
+                                            \Log::error('Error saat menyimpan analisis:', [
+                                                'error' => $e->getMessage(),
+                                                'trace' => $e->getTraceAsString(),
+                                                'data' => $data ?? null
+                                            ]);
+                                            
+                                            throw new \Exception('Gagal menyimpan hasil analisis: ' . $e->getMessage());
                                         }
-
-                                        
-                                        Notification::make()
-                                        ->title('Analisis Berhasil')
-                                        ->success()
-                                        ->body('Laporan berhasil dianalisis')
-                                        ->send();
-                                        
-                                        // redirect ke view-analysis
-                                        return redirect()->to(LaporanInformasiResource::getUrl('view-analysis', ['record' => $record]));
-                                    } catch (\Exception $e) {
-                                        \Log::error('Error saat menyimpan analisis:', [
-                                            'error' => $e->getMessage(),
-                                            'trace' => $e->getTraceAsString(),
-                                            'data' => $data ?? null
-                                        ]);
-                                        
-                                        throw new \Exception('Gagal menyimpan hasil analisis: ' . $e->getMessage());
+                                    } else {
+                                        throw new \Exception('Format analisis tidak sesuai: Data tidak lengkap');
                                     }
                                 } else {
-                                    throw new \Exception('Gagal mendapatkan analisis dari AI');
-                                    // lakukan analisis kembali
-                                    $analysis = $ollamaService->analyze($data);
+                                    throw new \Exception('Format analisis tidak sesuai: Tidak ada data dalam respons');
                                 }
                             } catch (\Exception $e) {
                                 Notification::make()

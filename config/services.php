@@ -40,4 +40,10 @@ return [
         'model' => env('OLLAMA_MODEL', 'llama3.1'),
     ],
 
+    'deepseek' => [
+        'url' => env('DEEPSEEK_API_URL'),
+        'model' => env('DEEPSEEK_MODEL'),
+        'api_key' => env('DEEPSEEK_API_KEY'),
+    ],
+
 ];

@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('laporan_analyses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('laporan_id')->constrained('laporan_informasis')->onDelete('cascade');
-            $table->text('kronologi_analysis');
-            $table->text('possible_laws');
-            $table->text('investigation_steps');
-            $table->string('priority_level');
+            $table->longText('kronologi_analysis');
+            $table->longText('possible_laws');
+            $table->longText('investigation_steps');
+            $table->longText('priority_level');
             $table->json('raw_response')->nullable();
             $table->timestamps();
         });

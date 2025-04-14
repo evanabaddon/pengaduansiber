@@ -25,12 +25,6 @@ class ViewAnalysis extends Page
         $this->record = $this->resolveRecord($record);
         $this->record->load('analysis');
 
-        // Tambahkan dd() di sini untuk memeriksa data analisis
-        // dd([
-        //     'record' => $this->record,
-        //     'analysis' => $this->record->analysis,
-        // ]);
-
         // Redirect jika belum ada analisis
         if (!$this->record->analysis()->exists()) {
             $this->redirect($this->getResource()::getUrl('view', ['record' => $record]));
