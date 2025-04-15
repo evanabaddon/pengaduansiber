@@ -2,6 +2,10 @@
     <div class="space-y-6">
         {{-- informasi laporan --}}
         <x-filament::section>
+            @if($record->no_laporan)
+                <x-slot name="heading">Nomor Laporan</x-slot>
+                <p class="text-gray-600">{{ $record->no_laporan }}</p>
+            @endif
             <x-slot name="heading">Uraian Peristiwa Asli</x-slot>
             <p class="text-gray-600">{{ $record->uraian_peristiwa }}</p>
         </x-filament::section>
