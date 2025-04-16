@@ -29,6 +29,7 @@
         "spatie/laravel-medialibrary": "^11.10",
         "swisnl/filament-backgrounds": "^1.1",
         "teguh02/indonesia-territory-forms": "^1.1",
+        "torgodly/html2media": "^1.1",
         "ysfkaya/filament-phone-input": "^3.1"
     },
     "require-dev": {

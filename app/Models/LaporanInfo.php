@@ -77,6 +77,11 @@ class LaporanInfo extends Model
         return $this->morphMany(BarangBukti::class, 'buktiable');
     }
 
+    public function analysis()
+    {
+        return $this->hasOne(LaporanInfoAnalysis::class, 'laporan_id');
+    }
+
     protected static function booted()
     {
         static::deleting(function ($laporanInfo) {

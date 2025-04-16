@@ -17,9 +17,12 @@ use App\Models\Pengaduan;
 use Illuminate\View\View;
 use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
+use App\Services\OllamaService;
 use Filament\Resources\Resource;
+use App\Services\DeepSeekService;
 use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Grid;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
@@ -28,15 +31,17 @@ use Filament\Support\Enums\Alignment;
 use Illuminate\Support\Facades\Blade;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Checkbox;
-use Filament\Tables\Actions\EditAction;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\ColumnGroup;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
@@ -46,16 +51,16 @@ use Filament\Tables\Actions\DeleteBulkAction;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use App\Filament\Resources\PengaduanResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Notifications\PengaduanAssignedNotification;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 use App\Filament\Forms\Components\DataTambahanRepeater;
 use Coolsam\FilamentFlatpickr\Forms\Components\Flatpickr;
+use Filament\Tables\Actions\ViewAction as ActionsViewAction;
 use App\Filament\Resources\PengaduanResource\RelationManagers;
 use App\Filament\Resources\PengaduanResource\Pages\EditPengaduan;
 use App\Filament\Resources\PengaduanResource\Pages\ListPengaduans;
-use Filament\Tables\Actions\ViewAction as ActionsViewAction;
 use Parfaitementweb\FilamentCountryField\Forms\Components\Country;
 use App\Filament\Resources\PengaduanResource\Pages\CreatePengaduan;
-use App\Notifications\PengaduanAssignedNotification;
 
 class PengaduanResource extends Resource
 {
@@ -1161,6 +1166,152 @@ class PengaduanResource extends Resource
                     }),
             ])
             ->actions([
+                ActionGroup::make([
+                    Action::make('Analyze')
+                        ->visible(fn (Pengaduan $record): bool => env('AI_ANALYZER', false))
+                        ->action(function (Pengaduan $record, OllamaService $ollamaService, DeepSeekService $deepSeekService) {
+                            try {
+                                // Persiapkan data untuk analisis
+                                $data = [
+                                    'pelapor' => $record->pelapors->nama ?? 'Tidak ada',
+                                    'korban' => $record->korbans->pluck('nama')->join(', ') ?? 'Tidak ada',
+                                    'terlapor' => $record->terlapors->nama ?? 'Tidak ada',
+                                    'uraian_peristiwa' => $record->uraian_peristiwa,
+                                    'tkp' => $record->tkp,
+                                    'kerugian' => $record->kerugian,
+                                    'perkara' => $record->perkara,
+                                ];
+
+                                if (env('AI_SERVICE') == 'ollama') {
+                                    // Dapatkan analisis dari Ollama
+                                    $analysis = $ollamaService->analyze($data);
+                                } else {
+                                    // Dapatkan analisis dari DeepSeek
+                                    $analysis = $deepSeekService->analyze($data);
+                                }
+
+                                if (isset($analysis['data'])) {
+                                    $data = $analysis['data'];
+                                    
+                                    // Make sure we have proper data structure before proceeding
+                                    if (is_array($data) && 
+                                        isset($data['ringkasan_kronologi']) && 
+                                        isset($data['analisis_hukum']) && 
+                                        isset($data['langkah_penyidikan']) && 
+                                        isset($data['tingkat_urgensi'])) {
+                                        
+                                        try {
+                                            // Format data for kronologi_analysis
+                                            $kronologiAnalysis = [
+                                                'ringkasan' => trim($data['ringkasan_kronologi'])
+                                            ];
+                                            
+                                            // Format data for possible_laws
+                                            $possibleLaws = [
+                                                'pidana_umum' => trim($data['analisis_hukum']['pidana_umum'] ?? ''),
+                                                'teknologi_informasi' => trim($data['analisis_hukum']['teknologi_informasi'] ?? ''),
+                                                'perundangan_lain' => trim($data['analisis_hukum']['perundangan_lain'] ?? '')
+                                            ];
+                                            
+                                            // Format data for investigation_steps
+                                            $investigationSteps = [
+                                                'barang_bukti_digital' => $data['langkah_penyidikan']['barang_bukti_digital'] ?? [],
+                                                'analisis_forensik' => $data['langkah_penyidikan']['analisis_forensik'] ?? [],
+                                                'penelusuran_pelaku' => $data['langkah_penyidikan']['penelusuran_pelaku'] ?? [],
+                                                'tindakan_penyidikan' => $data['langkah_penyidikan']['tindakan_penyidikan'] ?? []
+                                            ];
+                                            
+                                            // Tentukan priority level berdasarkan tingkat urgensi
+                                            $priorityLevels = [
+                                                $data['tingkat_urgensi']['dampak_kejadian']['level'] ?? 'Sedang',
+                                                $data['tingkat_urgensi']['nilai_kerugian']['level'] ?? 'Sedang',
+                                                $data['tingkat_urgensi']['tingkat_kompleksitas']['level'] ?? 'Sedang',
+                                                $data['tingkat_urgensi']['potensi_dampak']['level'] ?? 'Sedang'
+                                            ];
+                                            
+                                            // Hitung level prioritas berdasarkan mayoritas
+                                            $levelCounts = array_count_values($priorityLevels);
+                                            arsort($levelCounts);
+                                            $majorityLevel = key($levelCounts);
+                                            
+                                            // Format priority level dan tingkat urgensi
+                                            $priorityData = [
+                                                'calculated_level' => $majorityLevel,
+                                                'level_counts' => $levelCounts,
+                                                'urgensi' => $data['tingkat_urgensi']
+                                            ];
+                                            
+                                            // Persiapkan data yang akan disimpan
+                                            $dataToSave = [
+                                                'pengaduan_id' => $record->id,
+                                                'kronologi_analysis' => json_encode($kronologiAnalysis, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+                                                'possible_laws' => json_encode($possibleLaws, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+                                                'investigation_steps' => json_encode($investigationSteps, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+                                                'priority_level' => json_encode($priorityData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+                                                'raw_response' => json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+                                            ];
+                                            
+                                            // Tambahkan created_at dan updated_at
+                                            $dataToSave['created_at'] = now();
+                                            $dataToSave['updated_at'] = now();
+                                            
+                                            // Log data yang akan disimpan
+                                            \Log::info('Data yang akan disimpan:', $dataToSave);
+                                            
+                                            // Simpan data
+                                            $saved = $record->analysis()->updateOrCreate(
+                                                ['pengaduan_id' => $record->id],
+                                                $dataToSave
+                                            );
+                                            
+                                            if (!$saved) {
+                                                throw new \Exception('Gagal menyimpan data analisis');
+                                            }
+                                            
+                                            Notification::make()
+                                                ->title('Analisis Berhasil')
+                                                ->success()
+                                                ->body('Laporan berhasil dianalisis')
+                                                ->send();
+                                            
+                                            // Redirect ke view-analysis
+                                            return redirect()->to(PengaduanResource::getUrl('view-analysis', ['record' => $record]));
+                                            
+                                        } catch (\Exception $e) {
+                                            \Log::error('Error saat menyimpan analisis:', [
+                                                'error' => $e->getMessage(),
+                                                'trace' => $e->getTraceAsString(),
+                                                'data' => $data ?? null
+                                            ]);
+                                            
+                                            throw new \Exception('Gagal menyimpan hasil analisis: ' . $e->getMessage());
+                                        }
+                                    } else {
+                                        throw new \Exception('Format analisis tidak sesuai: Data tidak lengkap');
+                                    }
+                                } else {
+                                    throw new \Exception('Format analisis tidak sesuai: Tidak ada data dalam respons');
+                                }
+                            } catch (\Exception $e) {
+                                Notification::make()
+                                    ->title('Gagal Menganalisis')
+                                    ->danger()
+                                    ->body($e->getMessage())
+                                    ->send();
+                            }
+                        })
+                        ->color('success')
+                        ->icon('heroicon-o-cpu-chip')
+                        ->requiresConfirmation()
+                        ->modalHeading('Analisis Laporan')
+                        ->modalDescription('Apakah Anda yakin ingin menganalisis laporan ini menggunakan AI SiberBot?')
+                        ->modalSubmitActionLabel('Ya, Analisis'),
+                    Action::make('viewAnalysis')
+                        ->label('Lihat Analisis')
+                        ->icon('heroicon-o-document-magnifying-glass')
+                        ->url(fn (Pengaduan $record): string => static::getUrl('view-analysis', ['record' => $record]))
+                        ->visible(fn (Pengaduan $record): bool => $record->analysis()->exists()),
+                ]),
                 ActionsViewAction::make()
                     ->label(false)
                     ->modalContent(fn (Pengaduan $record): View => view(
@@ -1194,6 +1345,7 @@ class PengaduanResource extends Resource
             'create' => Pages\CreatePengaduan::route('/create'),
             'view' => Pages\ViewPengaduan::route('/{record}'),
             'edit' => Pages\EditPengaduan::route('/{record}/edit'),
+            'view-analysis' => Pages\ViewAnalysis::route('/{record}/analysis'),
         ];
     }
 }

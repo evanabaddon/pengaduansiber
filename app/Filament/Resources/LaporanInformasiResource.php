@@ -1391,45 +1391,4 @@ class LaporanInformasiResource extends Resource
         ];
     }
 
-    // Untuk form edit
-    // protected function mutateFormDataBeforeFill(array $data): array
-    // {
-    //     // test dd data record beserta data tambahan
-    //     dd($data);
-    //     $record = $this->record;
-        
-    //     if ($record) {
-    //         // Load relationships jika belum dimuat
-    //         if (!$record->relationLoaded('pelapors')) {
-    //             $record->load(['pelapors']);
-    //         }
-    //         if (!$record->relationLoaded('korbans')) {
-    //             $record->load(['korbans']);
-    //         }
-    //         if (!$record->relationLoaded('terlapors')) {
-    //             $record->load(['terlapors']);
-    //         }
-
-    //         // Pastikan data relationship dimuat ke form
-    //         if ($record->pelapors) {
-    //             $data['pelapors'] = $record->pelapors->toArray();
-    //             $data['pelapors']['data_tambahan'] = $record->pelapors->data_tambahan ?? [];
-    //         }
-    //         if ($record->korbans) {
-    //             $data['korbans'] = $record->korbans->toArray();
-    //             $data['korbans']['data_tambahan'] = $record->korbans->data_tambahan ?? [];
-    //         }
-    //         if ($record->terlapors) {
-    //             $data['terlapors'] = $record->terlapors->toArray();
-    //             $data['terlapors']['data_tambahan'] = $record->terlapors->data_tambahan ?? [];
-    //         }
-
-    //         \Log::info('Data Tambahan Pelapor:', ['data' => $data['pelapors']['data_tambahan'] ?? []]);
-    //         \Log::info('Data Tambahan Korban:', ['data' => $data['korbans']['data_tambahan'] ?? []]);
-    //         \Log::info('Data Tambahan Terlapor:', ['data' => $data['terlapors']['data_tambahan'] ?? []]);
-    //     }
-
-    //     return $data;
-    // }
-
 }

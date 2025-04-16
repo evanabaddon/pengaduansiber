@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\LaporanInformasiResource\Pages;
+namespace App\Filament\Resources\LaporanPolisiResource\Pages;
 
 use Filament\Actions\Action;
 use App\Services\OllamaService;
@@ -9,14 +9,14 @@ use Filament\Resources\Pages\Page;
 use Illuminate\Contracts\View\View;
 use Filament\Notifications\Notification;
 use Torgodly\Html2Media\Actions\Html2MediaAction;
-use App\Filament\Resources\LaporanInformasiResource;
+use App\Filament\Resources\LaporanPolisiResource;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 
 class ViewAnalysis extends Page
 {
     use InteractsWithRecord;
 
-    protected static string $resource = LaporanInformasiResource::class;
+    protected static string $resource = LaporanPolisiResource::class;
 
     protected static string $view = 'filament.resources.laporan.view-analysis';
 
@@ -150,7 +150,7 @@ class ViewAnalysis extends Page
                                     ->send();
 
                                 return redirect()->to(
-                                    LaporanInformasiResource::getUrl('view-analysis', ['record' => $record])
+                                    LaporanPolisiResource::getUrl('view-analysis', ['record' => $record])
                                 );
 
                             } catch (\Exception $e) {
@@ -193,7 +193,7 @@ class ViewAnalysis extends Page
                         ->success()
                         ->body('Analisis AI berhasil dihapus')
                         ->send();
-                    return redirect()->to(LaporanInformasiResource::getUrl('index'));
+                    return redirect()->to(LaporanPolisiResource::getUrl('index'));
                 })
                 ->requiresConfirmation()
                 ->modalHeading('Hapus Analisis AI')

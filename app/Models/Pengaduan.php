@@ -77,6 +77,11 @@ class Pengaduan extends Model
         return $this->morphMany(BarangBukti::class, 'buktiable');
     }
 
+    public function analysis()
+    {
+        return $this->hasOne(PengaduanAnalysis::class, 'pengaduan_id');
+    }
+
     protected static function booted()
     {
         static::deleting(function ($pengaduan) {

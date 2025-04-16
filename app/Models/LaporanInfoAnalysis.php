@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class LaporanAnalysis extends Model
+class LaporanInfoAnalysis extends Model
 {
     protected $fillable = [
         'laporan_id',
@@ -17,8 +17,6 @@ class LaporanAnalysis extends Model
 
     public function laporan()
     {
-        return $this->belongsTo(LaporanInformasi::class, 'laporan_id');
+        return $this->belongsTo(LaporanInfo::class, 'laporan_id');
     }
-    
-   
 }

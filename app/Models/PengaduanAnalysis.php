@@ -4,10 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class LaporanAnalysis extends Model
+class PengaduanAnalysis extends Model
 {
     protected $fillable = [
-        'laporan_id',
+        'pengaduan_id',
         'kronologi_analysis',
         'possible_laws',
         'investigation_steps',
@@ -15,10 +15,8 @@ class LaporanAnalysis extends Model
         'raw_response'
     ];
 
-    public function laporan()
+    public function pengaduan()
     {
-        return $this->belongsTo(LaporanInformasi::class, 'laporan_id');
+        return $this->belongsTo(Pengaduan::class, 'pengaduan_id');
     }
-    
-   
 }

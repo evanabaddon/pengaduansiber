@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\LaporanInformasiResource\Pages;
+namespace App\Filament\Resources\PengaduanResource\Pages;
 
 use Filament\Actions\Action;
 use App\Services\OllamaService;
@@ -9,14 +9,14 @@ use Filament\Resources\Pages\Page;
 use Illuminate\Contracts\View\View;
 use Filament\Notifications\Notification;
 use Torgodly\Html2Media\Actions\Html2MediaAction;
-use App\Filament\Resources\LaporanInformasiResource;
+use App\Filament\Resources\PengaduanResource;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 
 class ViewAnalysis extends Page
 {
     use InteractsWithRecord;
 
-    protected static string $resource = LaporanInformasiResource::class;
+    protected static string $resource = PengaduanResource::class;
 
     protected static string $view = 'filament.resources.laporan.view-analysis';
 
@@ -122,7 +122,7 @@ class ViewAnalysis extends Page
 
                                 // Persiapkan data yang akan disimpan
                                 $dataToSave = [
-                                    'laporan_id' => $record->id,
+                                    'pengaduan_id' => $record->id,
                                     'kronologi_analysis' => json_encode($kronologiAnalysis, JSON_PRETTY_PRINT),
                                     'possible_laws' => json_encode($possibleLaws, JSON_PRETTY_PRINT),
                                     'investigation_steps' => json_encode($investigationSteps, JSON_PRETTY_PRINT),
@@ -135,7 +135,7 @@ class ViewAnalysis extends Page
 
                                 // Simpan data
                                 $saved = $record->analysis()->updateOrCreate(
-                                    ['laporan_id' => $record->id],
+                                    ['pengaduan_id' => $record->id],
                                     $dataToSave
                                 );
 
@@ -150,7 +150,7 @@ class ViewAnalysis extends Page
                                     ->send();
 
                                 return redirect()->to(
-                                    LaporanInformasiResource::getUrl('view-analysis', ['record' => $record])
+                                    PengaduanResource::getUrl('view-analysis', ['record' => $record])
                                 );
 
                             } catch (\Exception $e) {
@@ -193,7 +193,7 @@ class ViewAnalysis extends Page
                         ->success()
                         ->body('Analisis AI berhasil dihapus')
                         ->send();
-                    return redirect()->to(LaporanInformasiResource::getUrl('index'));
+                    return redirect()->to(PengaduanResource::getUrl('index'));
                 })
                 ->requiresConfirmation()
                 ->modalHeading('Hapus Analisis AI')
