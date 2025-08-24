@@ -14,13 +14,13 @@ class ListPenyidiks extends ListRecords
     // title
     public function getTitle(): string
     {
-        return 'Penyidik/Penyidik Pembantu';
+        return 'Data Personil';
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->label('Tambah Penyidik'),
+            Actions\CreateAction::make()->label('Tambah Personil'),
         ];
     }
 

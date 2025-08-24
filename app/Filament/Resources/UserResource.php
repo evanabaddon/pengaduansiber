@@ -8,6 +8,7 @@ use Filament\Tables;
 use Filament\Forms\Get;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Hash;
 use Filament\Tables\Columns\TextColumn;
@@ -33,6 +34,15 @@ class UserResource extends Resource implements HasShieldPermissions
             'delete_any',
             'publish'
         ];
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $panelId = Filament::getCurrentPanel()->getId();
+
+        return in_array($panelId, [
+            'admin',
+        ]);
     }
 
     protected static ?string $model = User::class;

@@ -9,22 +9,31 @@ use App\Models\User;
 use Filament\Widgets;
 use Pages\ComingSoon;
 use Filament\PanelProvider;
+use Filament\Pages\Dashboard;
+use Filament\Facades\Filament;
 use Filament\Pages\Auth\Login;
+use Filament\Support\Assets\Js;
 use Kenepa\Banner\BannerPlugin;
 use App\Settings\GeneralSetting;
+use Filament\Support\Assets\Css;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use Illuminate\Support\HtmlString;
 use Filament\View\PanelsRenderHook;
 use App\Filament\Widgets\MapsWidget;
+use App\Http\Responses\LoginResponse;
 use Illuminate\Support\Facades\Schema;
+use Filament\Navigation\NavigationItem;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Navigation\NavigationGroup;
 use Filament\Notifications\Notification;
 use Orion\FilamentGreeter\GreeterPlugin;
 use App\Filament\Widgets\AllLaporanWidget;
 use Filament\Http\Middleware\Authenticate;
+use Filament\Navigation\NavigationBuilder;
 use Filament\Notifications\Actions\Action;
 use App\Filament\Pages\Profile\EditProfile;
+use App\Filament\Widgets\SidebarPanelSwitch;
 use App\Filament\Widgets\LatestLaporanWidget;
 use Illuminate\Session\Middleware\StartSession;
 use Devonab\FilamentEasyFooter\EasyFooterPlugin;
@@ -47,20 +56,22 @@ use App\Filament\Resources\PengaduanResource\Widgets\PengaduanStatusOverview;
 use App\Filament\Resources\LaporanInfoResource\Widgets\LaporanInfoStatusOverview;
 use App\Filament\Resources\LaporanPolisiResource\Widgets\LaporanPolisiStatusOverview;
 use App\Filament\Resources\LaporanInformasiResource\Widgets\LaporanInformasiStatusOverview;
-use Filament\Support\Assets\Js;
-use Filament\Support\Assets\Css;
+use App\Http\Middleware\RedirectToRolePanel;
+use Filament\Http\Responses\Auth\Contracts\LoginResponse as LoginResponseContract;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+
+
         return $panel
             ->default()
             ->id('admin')
             ->path('admin')
             ->darkMode(false)
             ->login(Login::class)
-            ->brandName('Ditressiber Polda Jatim')
+            ->brandName('DITRESSIBER POLDA JATIM')
             // ->brandLogo(asset('images/logo-siber-polri.png')) // Logo berada di folder public/images/
             ->brandLogoHeight('5rem') // Atur tinggi logo
             // ->profile(isSimple:false)
@@ -68,9 +79,13 @@ class AdminPanelProvider extends PanelProvider
                 'profile' => MenuItem::make()->url(fn (): string => EditProfile::getUrl())
             ])
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => '#1e2754', 
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
+            ->discoverResources(in: app_path('Filament/Bagbinopsnal/Resources'), for: 'App\\Filament\\Bagbinopsnal\\Resources')
+            ->discoverResources(in: app_path('Filament/Bagwassidik/Resources'), for: 'App\\Filament\\Bagwassidik\\Resources')
+            ->discoverResources(in: app_path('Filament/Sikorwas/Resources'), for: 'App\\Filament\\Sikorwas\\Resources')
+            ->discoverResources(in: app_path('Filament/Subbagrenmin/Resources'), for: 'App\\Filament\\Subbagrenmin\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,
@@ -93,11 +108,13 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                \Hasnayeen\Themes\Http\Middleware\SetTheme::class,
+                RedirectToRolePanel::class,
+                // \Hasnayeen\Themes\Http\Middleware\SetTheme::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->collapsibleNavigationGroups(false)
             ->plugins([
                 FilamentShieldPlugin::make(),
                 EasyFooterPlugin::make()
@@ -106,6 +123,24 @@ class AdminPanelProvider extends PanelProvider
                     ->hiddenFromPages(['admin/login'])
                     ->withSentence(new HtmlString('<img src="'.asset('images/logo-siber-polri.png').'" alt="Ditressiber Polda Jatim" style="width: 20px; height: 20px;"> <b>Ditressiber Polda Jatim</b>'))
                     ->withBorder(),
+                FilamentBackgroundsPlugin::make()
+                    ->imageProvider(
+                        MyImages::make()->directory('images/backgrounds')
+                    )
+                    ->showAttribution(false)
+                    ->showAttribution(false),
+                BannerPlugin::make()
+                    ->navigationGroup('Setting')
+                    ->bannerManagerAccessPermission('super_admin'),
+                GreeterPlugin::make()
+                    ->columnSpan('full')
+                    ->message(function() {
+                        if (Schema::hasTable('users') && auth()->check()) {
+                            return 'Hai ' . auth()->user()->name . ', Selamat Datang di Ditressiber Polda Jatim';
+                        }
+                        return 'Selamat Datang di Ditressiber Polda Jatim';
+                    }),
+                    \Hasnayeen\Themes\ThemesPlugin::make()
                 // \JoaoPaulolndev\FilamentEditProfile\FilamentEditProfilePlugin::make()
                 // ->editProfileComponents([
                 //     'editProfile' => EditProfile::class
@@ -121,8 +156,8 @@ class AdminPanelProvider extends PanelProvider
             //     }
             //     return asset('images/logo-siber-polri.png');
             // })
-            ->sidebarWidth('25rem')
-            ->sidebarCollapsibleOnDesktop()
+            // ->sidebarWidth('25rem')
+            // ->sidebarCollapsibleOnDesktop()
             ->favicon(app()->environment('local') ? secure_asset('images/favicon.ico') : asset('images/favicon.ico'))
             ->brandName(function() {
                 if (Schema::hasTable('settings')) {
@@ -130,26 +165,6 @@ class AdminPanelProvider extends PanelProvider
                 }
                 return 'Ditressiber Polda Jatim';
             })
-            ->plugins([
-                FilamentBackgroundsPlugin::make()
-                    ->imageProvider(
-                        MyImages::make()->directory('images/backgrounds')
-                    )
-                    ->showAttribution(false)
-                    ->showAttribution(false),
-                BannerPlugin::make()
-                    ->navigationGroup('Setting')
-                    ->bannerManagerAccessPermission('super_admin'),
-                GreeterPlugin::make()
-                    ->columnSpan('full')
-                    ->message(function() {
-                        if (Schema::hasTable('users') && auth()->check()) {
-                            return 'Selamat Datang ' . auth()->user()->name . ' di Ditressiber Polda Jatim';
-                        }
-                        return 'Selamat Datang di Ditressiber Polda Jatim';
-                    }),
-                    \Hasnayeen\Themes\ThemesPlugin::make()
-                ])
             ->renderHook(
                 // custom footer
                 PanelsRenderHook::FOOTER,
@@ -176,7 +191,10 @@ class AdminPanelProvider extends PanelProvider
 
                 Css::make('highcharts-dashboard', app()->environment('local') ? secure_asset('https://code.highcharts.com/dashboards/css/dashboards.css') : asset('https://code.highcharts.com/dashboards/css/dashboards.css')),
 
-                Css::make('highcharts-custom', app()->environment('local') ? secure_asset('css/highcharts-custom.css') : asset('css/highcharts-custom.css'))
+                Css::make('highcharts-custom', app()->environment('local') ? secure_asset('css/highcharts-custom.css') : asset('css/highcharts-custom.css')),
+
+                // Custom Style
+                Css::make('filament-custom', app()->environment('local') ? secure_asset('css/custom.css') : asset('css/custom.css')),
             ]);
     }
 }

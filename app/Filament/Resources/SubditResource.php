@@ -7,6 +7,7 @@ use Filament\Tables;
 use App\Models\Subdit;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Facades\Filament;
 use App\Services\PangkatService;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Select;
@@ -24,6 +25,11 @@ class SubditResource extends Resource
     protected static ?string $model = Subdit::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return Filament::getCurrentPanel()->getId() === 'subbagrenmin';
+    }
 
     // sort navigation
     protected static ?int $navigationSort = -3;

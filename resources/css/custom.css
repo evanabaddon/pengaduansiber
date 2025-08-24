@@ -1,0 +1,19 @@
+/* Style Navigation Group Filament */
+.fi-sidebar .fi-sidebar-group {
+    background-color: #1e2754 !important; /* Warna background */
+    border-radius: 8px;
+    padding: 6px;
+    margin-bottom: 10px;
+}
+
+/* Ubah warna text judul group */
+.fi-sidebar .fi-sidebar-group-label {
+    color: #ffffff !important;
+    font-weight: bold;
+}
+
+/* Hover efek item di dalam group */
+.fi-sidebar .fi-sidebar-item a:hover {
+    background-color: #33407a !important;
+    color: #fff !important;
+}

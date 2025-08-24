@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use Filament\Panel;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
@@ -21,6 +22,19 @@ class User extends Authenticatable implements FilamentUser
     {
         return true;
     }
+    // public function canAccessPanel(Panel $panel): bool
+    // {
+    //     $user = Auth::user();
+
+    //     return match ($panel->getId()) {
+    //         'subbagrenmin' => $user->hasRole('Subbagrenmin'),
+    //         'sikorwas'     => $user->hasRole('Sikorwas'),
+    //         'bagwassidik'  => $user->hasRole('Bagwassidik'),
+    //         'bagbinopsnal' => $user->hasRole('Bagbinopsnal'),
+    //         'admin'        => $user->hasRole('Admin'),
+    //         default        => false,
+    //     };
+    // }
 
     /**
      * The attributes that are mass assignable.

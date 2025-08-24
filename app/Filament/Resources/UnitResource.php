@@ -8,6 +8,7 @@ use Filament\Tables;
 use App\Models\Subdit;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
@@ -24,6 +25,11 @@ class UnitResource extends Resource
     protected static ?string $model = Unit::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return Filament::getCurrentPanel()->getId() === 'subbagrenmin';
+    }
 
     // sort navigation
     protected static ?int $navigationSort = -2;
@@ -167,14 +173,29 @@ class UnitResource extends Resource
         ];
     }
 
+    // public static function getEloquentQuery(): Builder
+    // {
+    //     $query = parent::getEloquentQuery();
+
+    //     // Jika bukan admin, filter berdasarkan subdit_id user
+    //     if (!auth()->user()->hasRole('super_admin')) {
+    //         $query->where('subdit_id', auth()->user()->subdit_id);
+    //     }
+
+    //     return $query;
+    // }
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
 
-        // Jika bukan admin, filter berdasarkan subdit_id user
-        if (!auth()->user()->hasRole('super_admin')) {
-            $query->where('subdit_id', auth()->user()->subdit_id);
+        $user = auth()->user();
+
+        // Jika bukan super_admin dan subdit_id ada, filter berdasarkan subdit_id
+        if (!$user->hasRole('super_admin') && $user->subdit_id) {
+            $query->where('subdit_id', $user->subdit_id);
         }
+
+        // Jika subdit_id null, query tidak difilter -> tampil semua data
 
         return $query;
     }

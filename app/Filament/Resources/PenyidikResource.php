@@ -10,6 +10,7 @@ use Filament\Forms\Get;
 use App\Models\Penyidik;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Illuminate\Support\Collection;
 use Filament\Forms\Components\Select;
@@ -29,13 +30,30 @@ class PenyidikResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-circle';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        $panelId = Filament::getCurrentPanel()->getId();
+
+        return in_array($panelId, [
+            'subbagrenmin',
+            'sikorwas',
+            'bagwassidik',
+            'bagbinopsnal'
+        ]);
+    }
+
+    public static function getSlug(): string
+    {
+        return 'personil';
+    }
+
     // sort navigation
     protected static ?int $navigationSort = -1;
 
     // navigation label
     public static function getNavigationLabel(): string
     {
-        return 'Data Penyidik/Penyidik Pembantu';
+        return 'Personil';
     }
 
     // navigation group
@@ -63,7 +81,7 @@ class PenyidikResource extends Resource
                         ->where('subdit_id', $get('subdit_id'))
                         ->pluck('name', 'id'))
                         ->searchable(),
-                TextInput::make('name')->label('PENYIDIK/PENYIDIK PEMBANTU'),
+                TextInput::make('name')->label('PERSONIL'),
                 // select pangkat
                 Select::make('pangkat_penyidik')
                     ->label('PANGKAT')
@@ -80,6 +98,7 @@ class PenyidikResource extends Resource
                         10 => 'BRIGPOL',
                         11 => 'BRIPTU',
                         12 => 'BRIPDA',
+                        13 => 'STAFF'
                     ])
                     ->searchable(),
                 TextInput::make('nrp_penyidik')->label('NRP'),
@@ -94,7 +113,7 @@ class PenyidikResource extends Resource
             ->columns([
                 TextColumn::make('unit.name')->label('UNIT')->sortable()->searchable(),
                 TextColumn::make('subdit.name')->label('SUBDIT')->sortable()->searchable(),
-                TextColumn::make('name')->label('PENYIDIK/PENYIDIK PEMBANTU')->sortable()->searchable(),
+                TextColumn::make('name')->label('NAMA STAFF')->sortable()->searchable(),
                 // pangkat
                 TextColumn::make('pangkat_penyidik')
                     ->label('PANGKAT')
@@ -111,6 +130,7 @@ class PenyidikResource extends Resource
                         '10' => 'BRIGPOL',
                         '11' => 'BRIPTU',
                         '12' => 'BRIPDA',
+                        '13' => 'STAFF',
                         default => $state,
                     })
                     ->sortable()
@@ -187,6 +207,7 @@ class PenyidikResource extends Resource
 
     public static function getPages(): array
     {
+
         return [
             'index' => Pages\ListPenyidiks::route('/'),
             'create' => Pages\CreatePenyidik::route('/create'),
@@ -195,13 +216,39 @@ class PenyidikResource extends Resource
     }
 
     // tampilkan penyidik berdasarkan user dengan unit_id dan atau subdit_id
+    // public static function getEloquentQuery(): Builder
+    // {
+    //     $query = parent::getEloquentQuery();
+
+    //     if (!auth()->user()->hasRole('super_admin')) {
+    //         $query->where('unit_id', auth()->user()->unit_id)
+    //             ->orWhere('subdit_id', auth()->user()->subdit_id);
+    //     }
+
+    //     return $query;
+    // }
+
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
 
-        if (!auth()->user()->hasRole('super_admin')) {
-            $query->where('unit_id', auth()->user()->unit_id)
-                ->orWhere('subdit_id', auth()->user()->subdit_id);
+        $user = auth()->user();
+
+        if (!$user->hasRole('super_admin')) {
+            // Hanya tambahkan filter jika ada unit_id atau subdit_id
+            if ($user->unit_id || $user->subdit_id) {
+                $query->where(function($q) use ($user) {
+                    if ($user->unit_id) {
+                        $q->where('unit_id', $user->unit_id);
+                    }
+
+                    if ($user->subdit_id) {
+                        // Gunakan orWhere di dalam closure
+                        $q->orWhere('subdit_id', $user->subdit_id);
+                    }
+                });
+            }
+            // jika user tidak punya unit_id & subdit_id, query tidak difilter -> tampil semua
         }
 
         return $query;

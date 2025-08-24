@@ -6,7 +6,9 @@ use Filament\Infolists\Infolist;
 use Illuminate\Support\Facades\URL;
 use Filament\Forms\Components\Select;
 use Illuminate\Support\ServiceProvider;
+use BezhanSalleh\PanelSwitch\PanelSwitch;
 use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
+use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -141,6 +143,34 @@ class AppServiceProvider extends ServiceProvider
             });
         });
 
+        // PanelSwitch::configureUsing(function (PanelSwitch $panelSwitch) {
+            
+        //     $panelSwitch->renderHook('panels::sidebar.nav.end')
+        //         ->simple()
+        //         ->visible(fn (): bool =>
+        //         auth()->user()?->hasRole('super_admin') // tampil hanya di panel admin
+        //         );
+
+        // });
+
+        PanelSwitch::configureUsing(function (PanelSwitch $panelSwitch) {
+            $panelSwitch
+                ->renderHook('panels::sidebar.nav.end')
+                ->simple()
+                ->panels(['subbagrenmin', 'bagbinopsnal', 'bagwassidik', 'sikorwas'])
+                ->labels([
+                    'admin' => 'Panel Option',
+                    'subbagrenmin' => 'Panel Subbagrenmin',
+                    'bagbinopsnal' => 'Panel Bagbinopsnal',
+                    'bagwassidik' => 'Panel Bagwassidik',
+                    'sikorwas' => 'Panel Sikorwas PPNS'
+                    ]) 
+                ->visible(function () {
+                    return auth()->user() ? auth()->user()->hasRole('super_admin') : false;
+                })
+                ->excludes(['admin']); // ini akan selalu sembunyikan panel admin
+        });
+        
        
     }
 }
