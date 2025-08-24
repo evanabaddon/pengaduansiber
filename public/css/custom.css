@@ -1,6 +1,15 @@
 /* Style Navigation Group Filament */
 .fi-sidebar .fi-sidebar-group {
-    background-color: #1e2754 !important; /* Warna background */
+    border-radius: 8px;
+    margin-bottom: 10px;
+    padding: 0; /* jangan kasih padding disini */
+    background: transparent !important; /* reset */
+}
+
+/* Bungkus grup sidebar */
+.fi-sidebar .fi-sidebar-group-button {
+    background-color: #1e2754 !important; /* sama kayak group bg */
+    color: #ffffff !important;
     border-radius: 8px;
     padding: 6px;
     margin-bottom: 10px;
@@ -8,27 +17,30 @@
 
 /* Ubah warna text judul group */
 .fi-sidebar .fi-sidebar-group-label {
+    background-color: #1e2754 !important;
     color: #ffffff !important;
-    /* font-weight: bold; */
+    font-weight: bold;
+    border-radius: 6px;
+    padding: 6px 10px;
+    display: block;
 }
-
 .fi-sidebar-item-label  {
-    color: #ffffff !important;
+    /* color: #ffffff !important; */
 }
 
 .fi-sidebar-item-icon {
-    color: #ffffff !important;
+    /* color: #ffffff !important; */
 }
 
 /* Hover efek item di dalam group */
 .fi-sidebar .fi-sidebar-item a:hover {
-    background-color: #33407a !important;
+    /* background-color: #33407a !important; */
     color: #fff !important;
 }
 
 .fi-sidebar .fi-sidebar-item.fi-active a,
 .fi-sidebar .fi-sidebar-item[data-active="true"] a {
-    background-color: #27346f !important; /* warna active */
+    /* background-color: #27346f !important;  */
     color: #ffffff !important;
     font-weight: bold;
     border-radius: 6px;

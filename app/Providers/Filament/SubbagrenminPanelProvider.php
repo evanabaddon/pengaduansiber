@@ -91,13 +91,13 @@ class SubbagrenminPanelProvider extends PanelProvider
                     ->bannerManagerAccessPermission('super_admin'),
                 GreeterPlugin::make()
                     ->columnSpan('full')
+                    ->title(fn () => 'Selamat Datang di Ditressiber Polda Jatim')
                     ->message(function() {
                         if (Schema::hasTable('users') && auth()->check()) {
-                            return 'Hai ' . auth()->user()->name . ', Selamat Datang di Ditressiber Polda Jatim';
+                            return 'Hai ' ;
                         }
-                        return 'Selamat Datang di Ditressiber Polda Jatim';
+                        return 'Hai ...';
                     }),
-                    // \Hasnayeen\Themes\ThemesPlugin::make()
                 ])
             ->renderHook(
                 // custom footer

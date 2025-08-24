@@ -114,7 +114,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->collapsibleNavigationGroups(false)
+            // ->collapsibleNavigationGroups(false)
             ->plugins([
                 FilamentShieldPlugin::make(),
                 EasyFooterPlugin::make()
