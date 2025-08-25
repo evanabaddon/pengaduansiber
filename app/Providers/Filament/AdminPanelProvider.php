@@ -174,6 +174,16 @@ class AdminPanelProvider extends PanelProvider
                 Js::make('highcharts', 'https://code.highcharts.com/highcharts.js'),
                 Js::make('highcharts-map', 'https://code.highcharts.com/maps/modules/map.js'),
                 Js::make('highcharts-id-map', 'https://code.highcharts.com/mapdata/countries/id/id-all.js'),
+                // Js::make('proj4', asset('js/highcharts/proj4.js')),
+                // Js::make('highcharts', asset('js/highcharts/highcharts.js')),
+                // Js::make('highcharts-accessibility', asset('js/highcharts/accessibility.js')),
+                // Js::make('highcharts-map', asset('js/highcharts/map.js')),
+                // Js::make('highcharts-id-map', asset('js/highcharts/id-all.js')),
+                // Js::make('highcharts-exporting', asset('js/highcharts/exporting.js')),
+
+                Css::make('highcharts-dashboard', 'https://code.highcharts.com/dashboards/css/dashboards.css'),
+                Css::make('highcharts-custom', asset('css/highcharts-custom.css')),
+                // Css::make('filament-custom', asset('css/custom.css')),
                 // Load Proj4js first
                 Js::make('proj4', app()->environment('local') ? secure_asset('js/highcharts/proj4.js') : asset('js/highcharts/proj4.js')),
                 

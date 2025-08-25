@@ -60,9 +60,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // ngrok https localhost
-        if (config('app.env') === 'local' && !str_contains(request()->getHost(), 'localhost') && !str_contains(request()->getHost(), '127.0.0.1')) {
+        // if (config('app.env') === 'local' && !str_contains(request()->getHost(), 'localhost') && !str_contains(request()->getHost(), '127.0.0.1')) {
+        //     URL::forceScheme('https');
+        // }
+
+        if (config('app.env') === 'local' && str_contains(request()->getHost(), 'ngrok-free.app')) {
             URL::forceScheme('https');
         }
+        
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $switch
