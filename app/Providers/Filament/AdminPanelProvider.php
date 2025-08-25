@@ -171,6 +171,9 @@ class AdminPanelProvider extends PanelProvider
                 fn () => view('components.filament.auto-save-scripts')
             )
             ->assets([
+                Js::make('highcharts', 'https://code.highcharts.com/highcharts.js'),
+                Js::make('highcharts-map', 'https://code.highcharts.com/maps/modules/map.js'),
+                Js::make('highcharts-id-map', 'https://code.highcharts.com/mapdata/countries/id/id-all.js'),
                 // Load Proj4js first
                 Js::make('proj4', app()->environment('local') ? secure_asset('js/highcharts/proj4.js') : asset('js/highcharts/proj4.js')),
                 
