@@ -12,7 +12,7 @@ class EditPenyidik extends EditRecord
     // title
     public function getTitle(): string
     {
-        return 'Ubah Personil';
+        return 'Ubah Penyidik / Penyidik Pembantu';
     }
 
     // redirect ke halaman list setelah edit

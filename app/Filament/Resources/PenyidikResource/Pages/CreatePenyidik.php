@@ -16,7 +16,7 @@ class CreatePenyidik extends CreateRecord
     // title
     public function getTitle(): string
     {
-        return 'Tambah Personil';
+        return 'Tambah Penyidik / Penyidik Pembantu';
     }
 
     // fungsi handle record creation

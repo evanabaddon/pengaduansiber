@@ -43,7 +43,7 @@ class UnitResource extends Resource
     // navigation group
     public static function getNavigationGroup(): ?string
     {
-        return 'Master Data';
+        return 'Menu Personel';
     }
 
     public static function form(Form $form): Form

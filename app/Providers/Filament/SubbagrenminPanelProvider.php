@@ -106,11 +106,12 @@ class SubbagrenminPanelProvider extends PanelProvider
             )
             ->renderHook(PanelsRenderHook::SIDEBAR_NAV_END, function () {
                 $currentPanel = Filament::getCurrentPanel()->getId();
+                $user = auth()->user();
             
-                // Tampilkan tombol Back / Home jika bukan panel admin
-                if ($currentPanel !== 'admin') {
+                // Jika panel bukan admin DAN user punya role super_admin / admin
+                if ($currentPanel !== 'admin' && $user && $user->hasAnyRole(['super_admin', 'admin'])) {
                     $adminUrl = Filament::getPanel('admin')->getUrl();
-            
+
                     return new HtmlString(
                         Blade::render('
                             <div class="flex justify-center items-center py-4">
@@ -127,6 +128,8 @@ class SubbagrenminPanelProvider extends PanelProvider
                         ')
                     );
                 }
+
+                return '';
             
                 return '';
             })

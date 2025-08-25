@@ -42,24 +42,19 @@ class PenyidikResource extends Resource
         ]);
     }
 
-    public static function getSlug(): string
-    {
-        return 'personil';
-    }
-
     // sort navigation
     protected static ?int $navigationSort = -1;
 
     // navigation label
     public static function getNavigationLabel(): string
     {
-        return 'Personil';
+        return 'Data Penyidik';
     }
 
     // navigation group
     public static function getNavigationGroup(): ?string
     {
-        return 'Master Data';
+        return 'Menu Personel';
     }
 
     public static function form(Form $form): Form
@@ -81,7 +76,7 @@ class PenyidikResource extends Resource
                         ->where('subdit_id', $get('subdit_id'))
                         ->pluck('name', 'id'))
                         ->searchable(),
-                TextInput::make('name')->label('PERSONIL'),
+                TextInput::make('name')->label('NAMA'),
                 // select pangkat
                 Select::make('pangkat_penyidik')
                     ->label('PANGKAT')
@@ -113,7 +108,7 @@ class PenyidikResource extends Resource
             ->columns([
                 TextColumn::make('unit.name')->label('UNIT')->sortable()->searchable(),
                 TextColumn::make('subdit.name')->label('SUBDIT')->sortable()->searchable(),
-                TextColumn::make('name')->label('NAMA STAFF')->sortable()->searchable(),
+                TextColumn::make('name')->label('NAMA PENYIDIK')->sortable()->searchable(),
                 // pangkat
                 TextColumn::make('pangkat_penyidik')
                     ->label('PANGKAT')
