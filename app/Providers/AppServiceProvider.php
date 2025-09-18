@@ -2,11 +2,15 @@
 
 namespace App\Providers;
 
+use Filament\Facades\Filament;
 use Filament\Infolists\Infolist;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\URL;
 use Filament\Forms\Components\Select;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use BezhanSalleh\PanelSwitch\PanelSwitch;
+use Filament\Support\Facades\FilamentView;
 use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 
@@ -60,13 +64,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // ngrok https localhost
-        // if (config('app.env') === 'local' && !str_contains(request()->getHost(), 'localhost') && !str_contains(request()->getHost(), '127.0.0.1')) {
-        //     URL::forceScheme('https');
-        // }
-
-        if (config('app.env') === 'local' && str_contains(request()->getHost(), 'ngrok-free.app')) {
+        if (config('app.env') === 'local' && !str_contains(request()->getHost(), 'localhost') && !str_contains(request()->getHost(), '127.0.0.1')) {
             URL::forceScheme('https');
         }
+
+        // if (config('app.env') === 'local' && str_contains(request()->getHost(), 'ngrok-free.app')) {
+        //     URL::forceScheme('https');
+        // }
         
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
@@ -148,34 +152,36 @@ class AppServiceProvider extends ServiceProvider
             });
         });
 
-        // PanelSwitch::configureUsing(function (PanelSwitch $panelSwitch) {
-            
-        //     $panelSwitch->renderHook('panels::sidebar.nav.end')
-        //         ->simple()
-        //         ->visible(fn (): bool =>
-        //         auth()->user()?->hasRole('super_admin') // tampil hanya di panel admin
-        //         );
-
-        // });
-
         PanelSwitch::configureUsing(function (PanelSwitch $panelSwitch) {
             $panelSwitch
-                ->renderHook('panels::sidebar.nav.end')
+                ->renderHook('panels::topbar.start')
                 ->simple()
-                ->panels(['subbagrenmin', 'bagbinopsnal', 'bagwassidik', 'sikorwas'])
-                ->labels([
-                    'admin' => 'Panel Option',
-                    'subbagrenmin' => 'Panel Subbagrenmin',
-                    'bagbinopsnal' => 'Panel Bagbinopsnal',
-                    'bagwassidik' => 'Panel Bagwassidik',
-                    'sikorwas' => 'Panel Sikorwas PPNS'
-                    ]) 
-                ->visible(function () {
-                    return auth()->user() ? auth()->user()->hasRole('super_admin') : false;
-                })
-                ->excludes(['admin']); // ini akan selalu sembunyikan panel admin
+                ->visible(fn () => false);
         });
         
-       
+        FilamentView::registerRenderHook(
+            \Filament\View\PanelsRenderHook::SIDEBAR_NAV_END,
+            function () {
+                $currentPanel = filament()->getCurrentPanel()->getId();
+                $user = auth()->user();
+    
+                // Tampilkan hanya di panel admin dan role super_admin
+                if ($currentPanel === 'admin' && $user && $user->hasRole('super_admin')) {
+                    $items = [
+                        '/subbagrenmin' => 'Panel Subbagrenmin',
+                        '/bagbinopsnal' => 'Panel Bagbinopsnal',
+                        '/bagwassidik' => 'Panel Bagwassidik',
+                        '/sikorwas' => 'Panel Sikorwas PPNS',
+                    ];
+    
+                    return Blade::render('filament.admin-panel-dropdown', [
+                        'label' => 'Panel Option',
+                        'items' => $items,
+                    ]);
+                }
+    
+                return '';
+            }
+        );
     }
 }

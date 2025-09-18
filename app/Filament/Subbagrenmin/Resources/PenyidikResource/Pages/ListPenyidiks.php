@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Filament\Subbagrenmin\Resources\PenyidikResource\Pages;
+
+
+use Filament\Actions;
+use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Subbagrenmin\Resources\PenyidikResource;
+
+class ListPenyidiks extends ListRecords
+{
+    protected static string $resource = PenyidikResource::class;
+
+    // title
+    public function getTitle(): string
+    {
+        return 'Data Penyidik / Penyidik Pembantu';
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\CreateAction::make()->label('Tambah Penyidik'),
+        ];
+    }
+
+    protected function modifyQueryUsing(Builder $query): Builder
+    {
+        return $query->when(!auth()->user()->hasRole('super_admin'), function ($query) {
+            $query->where('unit_id', auth()->user()->unit_id);
+        });
+    }
+}

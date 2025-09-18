@@ -22,7 +22,8 @@ class UrmintuResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Filament::getCurrentPanel()->getId() === 'subbagrenmin';
+        // return Filament::getCurrentPanel()->getId() === 'subbagrenmin';
+        return false;
     }
 
     // navigation group

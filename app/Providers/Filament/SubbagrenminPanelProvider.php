@@ -19,9 +19,13 @@ use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Schema;
+use Filament\Navigation\NavigationItem;
+use Filament\Navigation\NavigationGroup;
 use Filament\Widgets\FilamentInfoWidget;
 use Orion\FilamentGreeter\GreeterPlugin;
+use App\Filament\Resources\SuratResource;
 use Filament\Http\Middleware\Authenticate;
+use Filament\Navigation\NavigationBuilder;
 use App\Filament\Pages\Profile\EditProfile;
 use Illuminate\Session\Middleware\StartSession;
 use Devonab\FilamentEasyFooter\EasyFooterPlugin;
@@ -33,6 +37,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Swis\Filament\Backgrounds\ImageProviders\MyImages;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
+use App\Filament\Subbagrenmin\Resources\AnggaranResource;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -45,14 +50,50 @@ class SubbagrenminPanelProvider extends PanelProvider
             ->id('subbagrenmin')
             ->path('subbagrenmin')
             ->brandName('DITRESSIBER POLDA JATIM')
-            // ->brandLogo(asset('images/logo-siber-polri.png')) // Logo berada di folder public/images/
-            ->brandLogoHeight('5rem') // Atur tinggi logo
-            // ->profile(isSimple:false)
             ->userMenuItems([
                 'profile' => MenuItem::make()->url(fn (): string => EditProfile::getUrl())
             ])
             ->colors([
                 'primary' => '#1e2754', 
+            ])
+            ->navigationItems([
+                // ---------------- Urkeu ----------------
+                NavigationItem::make('Anggaran')
+                    ->url('/subbagrenmin/anggaran')
+                    ->group('Urkeu'),
+                
+                NavigationItem::make('Persuratan')
+                    ->url(url('/subbagrenmin/surats?menu=urkeu'))
+                    ->icon('heroicon-o-document-text')
+                    ->group('Urkeu')
+                    ->isActiveWhen(fn () => request('menu') === 'urkeu'),
+
+                // ---------------- Urmintu ----------------
+                NavigationItem::make('Personil')
+                    // ->url('/subbagrenmin/pimpinans')
+                    ->url('/subbagrenmin/personil')
+                    ->icon('heroicon-o-users')
+                    ->group('Urmintu')
+                    ->isActiveWhen(fn() => request()->is('subbagrenmin/personil') || request()->is('subbagrenmin/pimpinans') || request()->is('subbagrenmin/staff')),
+
+                NavigationItem::make('Surat Masuk')
+                    ->url('/subbagrenmin/surat-masuks')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->group('Urmintu')
+                    ->isActiveWhen(fn() => request()->is('subbagrenmin/surat-masuks')),
+
+                NavigationItem::make('Persuratan')
+                    ->url(url('/subbagrenmin/surats?menu=urmintu'))
+                    ->icon('heroicon-o-document-text')
+                    ->group('Urmintu')
+                    ->isActiveWhen(fn () => request('menu') === 'urmintu'),
+
+                // ---------------- Urren ----------------
+                NavigationItem::make('Persuratan')
+                    ->url(url('/subbagrenmin/surats?menu=urren'))
+                    ->icon('heroicon-o-document-text')
+                    ->group('Urren')
+                    ->isActiveWhen(fn () => request('menu') === 'urren'),
             ])
             ->login()
             ->homeUrl('/subbagrenmin')
@@ -71,9 +112,9 @@ class SubbagrenminPanelProvider extends PanelProvider
             ->userMenuItems([
                 'profile' => MenuItem::make()->url(fn (): string => EditProfile::getUrl())
             ])
+            ->spa()
             ->maxContentWidth('full')
             ->plugins([
-                // FilamentShieldPlugin::make(),
                 EasyFooterPlugin::make()
                     ->withFooterPosition('footer')
                     ->hiddenFromPagesEnabled()
@@ -110,7 +151,9 @@ class SubbagrenminPanelProvider extends PanelProvider
             
                 // Jika panel bukan admin DAN user punya role super_admin / admin
                 if ($currentPanel !== 'admin' && $user && $user->hasAnyRole(['super_admin', 'admin'])) {
-                    $adminUrl = Filament::getPanel('admin')->getUrl();
+                    // $adminUrl = Filament::getPanel('admin')->getUrl();
+
+                    $adminUrl = '/admin';
 
                     return new HtmlString(
                         Blade::render('
@@ -130,9 +173,8 @@ class SubbagrenminPanelProvider extends PanelProvider
                 }
 
                 return '';
-            
-                return '';
             })
+            
             ->assets([
                 Js::make('highcharts', 'https://code.highcharts.com/highcharts.js'),
                 Js::make('highcharts-map', 'https://code.highcharts.com/maps/modules/map.js'),

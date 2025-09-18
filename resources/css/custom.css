@@ -17,3 +17,26 @@
     background-color: #33407a !important;
     color: #fff !important;
 }
+
+/* Container dropdown khusus sidebar */
+.sidebar-dropdown .fi-dropdown-trigger button {
+    @apply fi-sidebar-group-button; /* kalau pakai Tailwind, pakai kelas asli */
+    width: 100%; /* penuh sesuai sidebar */
+    padding-left: 0.5rem;  /* sesuaikan px-2 */
+    padding-right: 0.5rem;
+    padding-top: 0.5rem;   /* px-2 py-2 sesuai group */
+    padding-bottom: 0.5rem;
+    border-radius: 0.375rem; /* rounded sesuai group */
+}
+
+/* Panel dropdown */
+.sidebar-dropdown .fi-dropdown-panel {
+    width: 100% !important;  /* samakan lebar dengan trigger */
+    min-width: unset !important; /* override default Filament */
+    left: 0 !important;       /* rapat ke kiri sidebar */
+}
+
+/* Item dropdown */
+.sidebar-dropdown .fi-dropdown-list-item {
+    @apply fi-sidebar-group-item flex items-center gap-x-3 px-2 py-2 w-full text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded;
+}

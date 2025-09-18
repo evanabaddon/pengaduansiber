@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "aymanalhattami/filament-page-with-sidebar": "^2.6",
         "bezhansalleh/filament-language-switch": "^3.1",
         "bezhansalleh/filament-panel-switch": "^1.1",
         "bezhansalleh/filament-shield": "^3.3",
@@ -16,6 +17,7 @@
         "filament/infolists": "^3.2",
         "filament/notifications": "^3.2",
         "filament/spatie-laravel-settings-plugin": "^3.2",
+        "firebase/php-jwt": "^6.11",
         "hasnayeen/themes": "^3.0",
         "joaopaulolndev/filament-edit-profile": "^1.0",
         "kenepa/banner": "^0.0.9",
@@ -25,6 +27,7 @@
         "oriondevelops/filament-greeter": "^0.2.0",
         "parfaitementweb/filament-country-field": "^2.2",
         "petercoles/multilingual-country-list": "^1.2",
+        "phpoffice/phpspreadsheet": "^1.30",
         "psr/simple-cache": "2.0",
         "pxlrbt/filament-excel": "^2.3",
         "spatie/laravel-medialibrary": "^11.10",

@@ -134,13 +134,14 @@ class AdminPanelProvider extends PanelProvider
                     ->bannerManagerAccessPermission('super_admin'),
                 GreeterPlugin::make()
                     ->columnSpan('full')
+                    ->title(fn () => 'Selamat Datang di Ditressiber Polda Jatim')
                     ->message(function() {
                         if (Schema::hasTable('users') && auth()->check()) {
-                            return 'Hai ' . auth()->user()->name . ', Selamat Datang di Ditressiber Polda Jatim';
+                            return 'Hai ' ;
                         }
-                        return 'Selamat Datang di Ditressiber Polda Jatim';
+                        return 'Hai ...';
                     }),
-                    \Hasnayeen\Themes\ThemesPlugin::make()
+                \Hasnayeen\Themes\ThemesPlugin::make()
                 // \JoaoPaulolndev\FilamentEditProfile\FilamentEditProfilePlugin::make()
                 // ->editProfileComponents([
                 //     'editProfile' => EditProfile::class
@@ -180,7 +181,6 @@ class AdminPanelProvider extends PanelProvider
                 // Js::make('highcharts-map', asset('js/highcharts/map.js')),
                 // Js::make('highcharts-id-map', asset('js/highcharts/id-all.js')),
                 // Js::make('highcharts-exporting', asset('js/highcharts/exporting.js')),
-
                 Css::make('highcharts-dashboard', 'https://code.highcharts.com/dashboards/css/dashboards.css'),
                 Css::make('highcharts-custom', asset('css/highcharts-custom.css')),
                 // Css::make('filament-custom', asset('css/custom.css')),
