@@ -4,25 +4,18 @@ namespace App\Filament\Subbagrenmin\Resources\AnggaranResource\Pages;
 
 use Filament\Actions;
 use Filament\Actions\Action;
-use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\ViewRecord;
 use App\Filament\Subbagrenmin\Resources\AnggaranResource;
 
-class CreateAnggaran extends CreateRecord
+class AnggaranPreview extends ViewRecord
 {
     protected static string $resource = AnggaranResource::class;
 
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
-    }
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $title = 'Preview Anggaran';
 
-    protected function getFormActions(): array
-    {
-        return [
-            //$this->getSaveFormAction(),
-            $this->getCancelFormAction(),
-        ];
-    }
+    protected static string $view = 'filament.subbagrenmin.pages.anggaran-preview';
+
     public function getHeaderActions(): array
     {
         return [
@@ -32,9 +25,4 @@ class CreateAnggaran extends CreateRecord
                 ->url(route('filament.subbagrenmin.resources.anggarans.index')),  // arahkan ke index resource
         ];
     }
-    // protected function mutateFormDataBeforeCreate(array $data): array
-    // {
-    //     return dd($data);
-    // }
-
 }

@@ -23,7 +23,9 @@
         "kenepa/banner": "^0.0.9",
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
+        "maatwebsite/excel": "^3.1",
         "malzariey/filament-daterangepicker-filter": "^3.1",
+        "mpdf/mpdf": "^8.2",
         "oriondevelops/filament-greeter": "^0.2.0",
         "parfaitementweb/filament-country-field": "^2.2",
         "petercoles/multilingual-country-list": "^1.2",
@@ -32,6 +34,7 @@
         "pxlrbt/filament-excel": "^2.3",
         "spatie/laravel-medialibrary": "^11.10",
         "swisnl/filament-backgrounds": "^1.1",
+        "tecnickcom/tcpdf": "^6.10",
         "teguh02/indonesia-territory-forms": "^1.1",
         "torgodly/html2media": "^1.1",
         "ysfkaya/filament-phone-input": "^3.1"

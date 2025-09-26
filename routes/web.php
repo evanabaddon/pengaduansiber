@@ -15,4 +15,9 @@ Route::get('/subbagrenmin/anggaran/editor/{id}', [AnggaranEditorController::clas
 Route::post('/subbagrenmin/anggaran/editor/callback/{id}', [AnggaranEditorController::class, 'callback']);
 Route::get('/subbagrenmin/anggaran/view/{id}', [AnggaranEditorController::class, 'view']);
 Route::get('/subbagrenmin/anggaran/download/{id}', [AnggaranEditorController::class, 'download']);
-
+// Route::get('anggaran/{id}/convert-pdf', [AnggaranEditorController::class, 'convertToPdf'])->name('anggaran.convertPdf');
+Route::get('anggaran/{id}/preview', function($id){
+    $record = \App\Models\Anggaran::findOrFail($id);
+    return view('filament.subbagrenmin.pages.anggaran-preview', compact('record'));
+})->name('anggaran.preview');
+Route::get('anggaran/{id}/convert-pdf', [AnggaranEditorController::class, 'convertExcelToPdf'])->name('anggaran.convertPdf');
