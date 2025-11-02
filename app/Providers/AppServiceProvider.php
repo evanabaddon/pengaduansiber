@@ -80,6 +80,28 @@ class AppServiceProvider extends ServiceProvider
 
         Infolist::$defaultNumberLocale = 'id';
 
+        Select::macro('kabupatenUmum', function () {
+            return $this->options(function (callable $get) {
+                $provinsiId = $get('province_id');
+                return $provinsiId ? app('wilayah')->getKabupaten($provinsiId) : [];
+            });
+        });
+        
+        Select::macro('kecamatanUmum', function () {
+            return $this->options(function (callable $get) {
+                $kabupatenId = $get('city_id');
+                return $kabupatenId ? app('wilayah')->getKecamatan($kabupatenId) : [];
+            });
+        });
+        
+        Select::macro('kelurahanUmum', function () {
+            return $this->options(function (callable $get) {
+                $kecamatanId = $get('district_id');
+                return $kecamatanId ? app('wilayah')->getKelurahan($kecamatanId) : [];
+            });
+        });
+        
+
         // Macro untuk Select Wilayah dengan mapping field yang berbeda dengan support relationship
         Select::macro('provinsi', function () {
             return $this->options(fn () => app('wilayah')->getProvinsi());
