@@ -12,7 +12,7 @@ class AnggaranPreview extends ViewRecord
     protected static string $resource = AnggaranResource::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static ?string $title = 'Preview Anggaran';
+    protected static ?string $title = 'Lihat Anggaran';
 
     protected static string $view = 'filament.subbagrenmin.pages.anggaran-preview';
 

@@ -1,7 +1,7 @@
 <x-filament::page>
     <div class="bg-white rounded-xl shadow p-6">
         {{-- HEADER --}}
-        <div class="flex items-center gap-4 pb-2 mb-10">
+        <div class="flex items-center gap-4 pb-2" style="margin-bottom: 20px;">
             <div class="flex-shrink-0">
                 <img 
                     src="{{ asset('images/logo-siber-polri.png') }}" 
@@ -10,15 +10,15 @@
                 >
             </div>
             <div class="flex flex-col leading-tight">
-                <h2 class="text-md font-semibold uppercase tracking-wide">
+                <h3 class="text-md font-semibold uppercase tracking-wide">
                     KEPOLISIAN NEGARA REPUBLIK INDONESIA
-                </h2>
+                </h3>
                 <h3 class="text-md font-semibold uppercase">
                     DAERAH JAWA TIMUR
                 </h3>
-                <h4 class="text-md font-semibold uppercase">
+                <h3 class="text-md font-semibold uppercase">
                     DIREKTORAT RESERSE SIBER
-                </h4>
+                </h3>
             </div>
         </div>
 
@@ -90,7 +90,7 @@
                                     'Telp.' => $record->telp,
                                 ] as $label => $value)
                                     <tr>
-                                        <td class="w-40 font-medium align-top py-1">{{ $label }}</td>
+                                        <td class="w-40 font-medium align-top py-1" style="vertical-align: top">{{ $label }}</td>
                                         <td class="w-1 align-top py-1">:</td>
                                         <td class="align-top py-1">{{ $value ?: '-' }}</td>
                                     </tr>
@@ -180,9 +180,9 @@
         <table class="w-full border-collapse border text-sm mt-10">
             <thead>
                 <tr>
-                    <th class="w-1/3 border bg-gray-100 dark:bg-gray-700  font-semibold p-2">I. PENDIDIKAN KEPOLISIAN</th>
-                    <th class="w-1/3 border bg-gray-100 dark:bg-gray-700  font-semibold p-2">II. PENDIDIKAN UMUM</th>
-                    <th class="w-1/3 border bg-gray-100 dark:bg-gray-700  font-semibold p-2">III. RIWAYAT PANGKAT</th>
+                    <th class="w-1/3 border bg-gray-100 dark:bg-gray-700 font-semibold p-2" style="background-color:#1b234c;color:white;">I. PENDIDIKAN KEPOLISIAN</th>
+                    <th class="w-1/3 border bg-gray-100 dark:bg-gray-700  font-semibold p-2" style="background-color:#1b234c;color:white;">II. PENDIDIKAN UMUM</th>
+                    <th class="w-1/3 border bg-gray-100 dark:bg-gray-700  font-semibold p-2" style="background-color:#1b234c;color:white;">III. RIWAYAT PANGKAT</th>
                 </tr>
             </thead>
             <tbody>
@@ -192,7 +192,7 @@
                         <table class="w-full border-collapse border text-sm">
                             <thead class="bg-gray-100 font-semibold">
                                 <tr>
-                                    <th class="p-2 border">No</th>
+                                    {{-- <th class="p-2 border">No</th> --}}
                                     <th class="p-2 border">Tingkat</th>
                                     <th class="p-2 border">Tahun</th>
                                 </tr>
@@ -206,7 +206,7 @@
 
                                 @forelse($pendidikanPolri as $index => $pp) {{-- <-- gunakan $pendidikanPolri --}}
                                     <tr>
-                                        <td class="p-2 border">{{ $index + 1 }}</td>
+                                        {{-- <td class="p-2 border">{{ $index + 1 }}</td> --}}
                                         <td class="p-2 border">{{ $pp['tingkat'] ?? '-' }}</td>
                                         <td class="p-2 border">{{ $pp['tahun'] ?? '-' }}</td>
                                     </tr>
@@ -224,7 +224,7 @@
                         <table class="w-full border-collapse border text-sm">
                             <thead class="bg-gray-100 font-semibold">
                                 <tr>
-                                    <th class="p-2 border">No</th>
+                                    {{-- <th class="p-2 border">No</th> --}}
                                     <th class="p-2 border">Tingkat</th>
                                     <th class="p-2 border">Institusi</th>
                                     <th class="p-2 border">Tahun</th>
@@ -239,7 +239,7 @@
 
                                 @forelse($pendidikanUmum as $index => $pu)
                                     <tr>
-                                        <td class="p-2 border">{{ $index + 1 }}</td>
+                                        {{-- <td class="p-2 border">{{ $index + 1 }}</td> --}}
                                         <td class="p-2 border">{{ $pu['tingkat'] ?? '-' }}</td>
                                         <td class="p-2 border">{{ $pu['nama_institusi'] ?? '-' }}</td>
                                         <td class="p-2 border">{{ $pu['tahun'] ?? '-' }}</td>
@@ -258,7 +258,7 @@
                         <table class="w-full border-collapse border text-sm">
                             <thead class="bg-gray-100 font-semibold">
                                 <tr>
-                                    <th class="p-2 border">No</th>
+                                    {{-- <th class="p-2 border">No</th> --}}
                                     <th class="p-2 border">Pangkat</th>
                                     <th class="p-2 border">TMT</th>
                                 </tr>
@@ -272,10 +272,10 @@
 
                                 @forelse($riwayatPangkat as $index => $rp)
                                     <tr>
-                                        <td class="p-2 border">{{ $index + 1 }}</td>
+                                        {{-- <td class="p-2 border">{{ $index + 1 }}</td> --}}
                                         <td class="p-2 border">{{ $record->getPangkatLabel($rp['pangkat']) }}</td>
                                         <td class="p-2 border">
-                                            {{ !empty($rp['tmt']) ? \Carbon\Carbon::parse($rp['tmt'])->translatedFormat('d F Y') : '-' }}
+                                            {{ !empty($rp['tmt']) ? \Carbon\Carbon::parse($rp['tmt'])->format('d-m-Y') : '-' }}
                                         </td>
                                     </tr>
                                 @empty
@@ -295,7 +295,7 @@
         <table class="w-full border-collapse border text-sm mt-6">
             <thead>
                 <tr>
-                    <th colspan="3" class=" bg-gray-100 dark:bg-gray-700 font-semibold p-2">IV. RIWAYAT JABATAN</th>
+                    <th colspan="3" class=" bg-gray-100 dark:bg-gray-700 font-semibold p-2" style="background-color:#1b234c;color:white;">IV. RIWAYAT JABATAN</th>
                 </tr>
             </thead>
             <tbody>
@@ -304,7 +304,7 @@
                         <table class="w-full border-collapse border text-sm">
                             <thead class="bg-gray-100 font-semibold">
                                 <tr>
-                                    <th class="p-2 border">No</th>
+                                    {{-- <th class="p-2 border">No</th> --}}
                                     <th class="p-2 border">Jabatan</th>
                                     <th class="p-2 border">TMT</th>
                                 </tr>
@@ -317,10 +317,10 @@
                                 @endphp
                                 @forelse($riwayatJabatan as $index => $rj)
                                     <tr>
-                                        <td class="p-2 border">{{ $index + 1 }}</td>
+                                        {{-- <td class="p-2 border">{{ $index + 1 }}</td> --}}
                                         <td class="p-2 border">{{ $rj['jabatan'] ?? '-' }}</td>
                                         <td class="p-2 border">
-                                            {{ !empty($rj['tmt']) ? \Carbon\Carbon::parse($rj['tmt'])->translatedFormat('d F Y') : '-' }}
+                                            {{ !empty($rj['tmt']) ? \Carbon\Carbon::parse($rj['tmt'])->format('d-m-Y') : '-' }}
                                         </td>
                                     </tr>
                                 @empty
@@ -339,7 +339,7 @@
         <table class="w-full border-collapse border text-sm mt-6">
             <thead>
                 <tr>
-                    <th colspan="3" class=" bg-gray-100 dark:bg-gray-700 font-semibold p-2">V. PENDIDIKAN PENGEMBANGAN & PELATIHAN</th>
+                    <th colspan="3" class=" bg-gray-100 dark:bg-gray-700 font-semibold p-2" style="background-color:#1b234c;color:white;">V. PENDIDIKAN PENGEMBANGAN & PELATIHAN</th>
                 </tr>
             </thead>
             <tbody>
@@ -348,8 +348,8 @@
                         <table class="w-full border-collapse border text-sm">
                             <thead class="bg-gray-100 font-semibold">
                                 <tr>
-                                    <th class="p-2 border">No</th>
-                                    <th class="p-2 border">Nama Pelatihan</th>
+                                    {{-- <th class="p-2 border">No</th> --}}
+                                    <th class="p-2 border">Dikbang</th>
                                     <th class="p-2 border">Tahun</th>
                                 </tr>
                             </thead>
@@ -361,9 +361,11 @@
                                 @endphp
                                 @forelse($pendidikanPelatihan as $index => $pp)
                                     <tr>
-                                        <td class="p-2 border">{{ $index + 1 }}</td>
+                                        {{-- <td class="p-2 border">{{ $index + 1 }}</td> --}}
                                         <td class="p-2 border">{{ $pp['nama_pelatihan'] ?? '-' }}</td>
-                                        <td class="p-2 border">{{ !empty($rj['tmt']) ? \Carbon\Carbon::parse($rj['tmt'])->translatedFormat('d F Y') : '-' }}</td>
+                                        <td class="p-2 border">
+                                            {{ !empty($pp['tmt']) ? \Carbon\Carbon::parse($pp['tmt'])->format('d-m-Y') : '-' }}
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -381,7 +383,7 @@
         <table class="w-full border-collapse border text-sm mt-6">
             <thead>
                 <tr>
-                    <th colspan="3" class=" bg-gray-100 dark:bg-gray-700 font-semibold p-2">VI. TANDA KEHORMATAN</th>
+                    <th colspan="3" class=" bg-gray-100 dark:bg-gray-700 font-semibold p-2" style="background-color:#1b234c;color:white;">VI. TANDA KEHORMATAN</th>
                 </tr>
             </thead>
             <tbody>
@@ -390,7 +392,7 @@
                         <table class="w-full border-collapse border text-sm">
                             <thead class="bg-gray-100 font-semibold">
                                 <tr>
-                                    <th class="p-2 border">No</th>
+                                    {{-- <th class="p-2 border">No</th> --}}
                                     <th class="p-2 border">Nama Tanda Kehormatan</th>
                                     <th class="p-2 border">Tahun</th>
                                 </tr>
@@ -401,9 +403,11 @@
                                 @endphp
                                 @forelse($tandaKehormatan as $index => $tk)
                                     <tr>
-                                        <td class="p-2 border">{{ $index + 1 }}</td>
+                                        {{-- <td class="p-2 border">{{ $index + 1 }}</td> --}}
                                         <td class="p-2 border">{{ $tk['nama_tanda'] ?? '-' }}</td>
-                                        <td class="p-2 border">{{ $tk['tmt'] ?? '-' }}</td>
+                                        <td class="p-2 border">
+                                            {{ !empty($tk['tmt']) ? \Carbon\Carbon::parse($tk['tmt'])->format('d-m-Y') : '-' }}
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -421,7 +425,7 @@
         <table class="w-full border-collapse border text-sm mt-6">
             <thead>
                 <tr>
-                    <th colspan="3" class=" bg-gray-100 dark:bg-gray-700 font-semibold p-2">VII. KEMAMPUAN BAHASA</th>
+                    <th colspan="3" class=" bg-gray-100 dark:bg-gray-700 font-semibold p-2" style="background-color:#1b234c;color:white;">VII. KEMAMPUAN BAHASA</th>
                 </tr>
             </thead>
             <tbody>
@@ -430,7 +434,7 @@
                         <table class="w-full border-collapse border text-sm">
                             <thead class="bg-gray-100 font-semibold">
                                 <tr>
-                                    <th class="p-2 border">No</th>
+                                    {{-- <th class="p-2 border">No</th> --}}
                                     <th class="p-2 border">Bahasa</th>
                                     <th class="p-2 border">Status</th>
                                 </tr>
@@ -441,7 +445,7 @@
                                 @endphp
                                 @forelse($bahasa as $index => $b)
                                     <tr>
-                                        <td class="p-2 border">{{ $index + 1 }}</td>
+                                        {{-- <td class="p-2 border">{{ $index + 1 }}</td> --}}
                                         <td class="p-2 border">{{ $b['bahasa'] ?? '-' }}</td>
                                         <td class="p-2 border">{{ $b['status'] ?? '-' }}</td>
                                     </tr>
@@ -461,7 +465,7 @@
         <table class="w-full border-collapse border text-sm mt-6 mb-6">
             <thead>
                 <tr>
-                    <th colspan="3" class=" bg-gray-100 dark:bg-gray-700 font-semibold p-2">VIII. PENUGASAN LUAR NEGERI</th>
+                    <th colspan="3" class=" bg-gray-100 dark:bg-gray-700 font-semibold p-2" style="background-color:#1b234c;color:white;">VIII. PENUGASAN LUAR NEGERI</th>
                 </tr>
             </thead>
             <tbody>
@@ -470,7 +474,7 @@
                         <table class="w-full border-collapse border text-sm">
                             <thead class="bg-gray-100 font-semibold">
                                 <tr>
-                                    <th class="p-2 border">No</th>
+                                    {{-- <th class="p-2 border">No</th> --}}
                                     <th class="p-2 border">Penugasan</th>
                                     <th class="p-2 border">Negara</th>
                                     <th class="p-2 border">Tahun</th>
@@ -482,7 +486,7 @@
                                 @endphp
                                 @forelse($penugasanLN as $index => $pln)
                                     <tr>
-                                        <td class="p-2 border">{{ $index + 1 }}</td>
+                                        {{-- <td class="p-2 border">{{ $index + 1 }}</td> --}}
                                         <td class="p-2 border">{{ $pln['penugasan'] ?? '-' }}</td>
                                         <td class="p-2 border">{{ $pln['lokasi'] ?? '-' }}</td>
                                         <td class="p-2 border">{{ $pln['tmt'] ?? '-' }}</td>

@@ -1,4 +1,10 @@
+@import './custom.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import './custom.css';
+
+@layer utilities {
+    .force-blue {
+        @apply bg-blue-900;
+    }
+}

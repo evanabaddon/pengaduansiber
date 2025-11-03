@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use ZipArchive;
 use App\Models\Staff;
 use Firebase\JWT\JWT;
 use App\Models\Anggaran;
@@ -10,10 +11,11 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Settings;
-use Illuminate\Support\Facades\Storage;
 
+use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Writer\Pdf\Mpdf as PdfWriter;
 
 class AnggaranEditorController extends Controller
@@ -315,6 +317,9 @@ class AnggaranEditorController extends Controller
         return view('filament.subbagrenmin.pages.anggaran-viewer', compact('record', 'config', 'token'));
     }
 
+
+
+    
     public function convertExcelToPdf($id)
     {
         $record = \App\Models\Anggaran::findOrFail($id);
@@ -333,45 +338,57 @@ class AnggaranEditorController extends Controller
         $pdfPath = $pdfDir . '/' . $pdfFilename;
     
         try {
-            // Load Excel file
+            // 🔹 Load Excel file
             $spreadsheet = IOFactory::load($excelPath);
             $worksheet = $spreadsheet->getActiveSheet();
     
-            // Ganti font Aptos dengan font standar yang tersedia di server
+            // ✅ Cek apakah Excel sudah punya gambar (logo)
+            $hasExistingDrawing = count($worksheet->getDrawingCollection()) > 0;
+    
+            // 🔹 Tambahkan logo baru (presisi ke pojok kiri atas)
+            $logoPath = public_path('images/logo-siber-polri.png');
+            if (file_exists($logoPath)) {
+                $drawing = new Drawing();
+                $drawing->setName('Logo');
+                $drawing->setDescription('Logo Ditres Siber Polda Jatim');
+                $drawing->setPath($logoPath);
+                $drawing->setHeight(55);     // ✅ sedikit lebih kecil dari 70
+                // $drawing->setWidth(40);
+                $drawing->setCoordinates('A1');
+                $drawing->setOffsetX(0);     // beri jarak kecil dari kiri
+                $drawing->setOffsetY(0);   // posisi sama seperti versi 70 yang bagus
+                $drawing->setWorksheet($worksheet);
+                $worksheet->getColumnDimension('A')->setWidth(5);
+            }
+    
+            // 🔹 Ganti font non-standar ke Aptos
             $cellCollection = $worksheet->getCellCollection();
             foreach ($cellCollection as $cellCoordinate) {
-                $cell = $worksheet->getCell($cellCoordinate);
                 $style = $worksheet->getStyle($cellCoordinate);
                 $font = $style->getFont();
-                
-                // Jika font adalah Aptos atau similar, ganti dengan Arial atau font standar
                 $fontName = $font->getName();
-                if (stripos($fontName, 'Aptos') !== false || 
-                    stripos($fontName, 'Calibri') !== false ||
-                    stripos($fontName, 'Segoe') !== false) {
-                    $font->setName('Arial'); // atau 'Helvetica', 'DejaVu Sans'
+                if (stripos($fontName, 'Aptos Display') !== false || stripos($fontName, 'Calibri') !== false || stripos($fontName, 'Segoe') !== false) {
+                    $font->setName('Arial');
                 }
             }
     
-            // Atur orientation landscape
+            // 🔹 Atur orientasi & margin
             $pageSetup = $worksheet->getPageSetup();
-            $pageSetup->setOrientation(
-                \PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE
-            );
+            $pageSetup->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
             $pageSetup->setFitToWidth(1);
             $pageSetup->setFitToHeight(1);
     
-            // Margin kecil
             $margins = $worksheet->getPageMargins();
             $margins->setTop(0.3);
             $margins->setRight(0.3);
-            $margins->setLeft(1);
+            $margins->setLeft(0.7);
             $margins->setBottom(0.3);
     
-            // Save as PDF
+            // 🔹 Simpan ke PDF
             $writer = IOFactory::createWriter($spreadsheet, 'Mpdf');
             $writer->save($pdfPath);
     
+            // 🔹 Update database
             $record->update(['pdf_path' => 'docs/' . $pdfFilename]);
     
             return response()->file($pdfPath);
@@ -381,6 +398,74 @@ class AnggaranEditorController extends Controller
             return response()->json(['error' => 'Gagal mengkonversi PDF: ' . $e->getMessage()], 500);
         }
     }
+    
+
+    // public function convertExcelToPdf($id)
+    // {
+    //     $record = \App\Models\Anggaran::findOrFail($id);
+    //     $excelPath = storage_path('app/public/' . $record->file_path);
+    
+    //     if (!file_exists($excelPath)) {
+    //         abort(404, 'File Excel tidak ditemukan');
+    //     }
+    
+    //     $pdfDir = storage_path('app/public/docs');
+    //     if (!file_exists($pdfDir)) {
+    //         mkdir($pdfDir, 0755, true);
+    //     }
+    
+    //     $pdfFilename = pathinfo($record->file_path, PATHINFO_FILENAME) . '.pdf';
+    //     $pdfPath = $pdfDir . '/' . $pdfFilename;
+    
+    //     try {
+    //         // Load Excel file
+    //         $spreadsheet = IOFactory::load($excelPath);
+    //         $worksheet = $spreadsheet->getActiveSheet();
+    
+    //         // Ganti font Aptos dengan font standar yang tersedia di server
+    //         $cellCollection = $worksheet->getCellCollection();
+    //         foreach ($cellCollection as $cellCoordinate) {
+    //             $cell = $worksheet->getCell($cellCoordinate);
+    //             $style = $worksheet->getStyle($cellCoordinate);
+    //             $font = $style->getFont();
+                
+    //             // Jika font adalah Aptos atau similar, ganti dengan Arial atau font standar
+    //             $fontName = $font->getName();
+    //             if (stripos($fontName, 'Aptos Display') !== false || 
+    //                 stripos($fontName, 'Calibri') !== false ||
+    //                 stripos($fontName, 'Segoe') !== false) {
+    //                 $font->setName('Arial'); // atau 'Helvetica', 'DejaVu Sans'
+    //             }
+    //         }
+    
+    //         // Atur orientation landscape
+    //         $pageSetup = $worksheet->getPageSetup();
+    //         $pageSetup->setOrientation(
+    //             \PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE
+    //         );
+    //         $pageSetup->setFitToWidth(1);
+    //         $pageSetup->setFitToHeight(1);
+    
+    //         // Margin kecil
+    //         $margins = $worksheet->getPageMargins();
+    //         $margins->setTop(0.3);
+    //         $margins->setRight(0.3);
+    //         $margins->setLeft(1);
+    //         $margins->setBottom(0.3);
+    
+    //         // Save as PDF
+    //         $writer = IOFactory::createWriter($spreadsheet, 'Mpdf');
+    //         $writer->save($pdfPath);
+    
+    //         $record->update(['pdf_path' => 'docs/' . $pdfFilename]);
+    
+    //         return response()->file($pdfPath);
+    
+    //     } catch (\Exception $e) {
+    //         \Log::error('PDF Conversion Error: ' . $e->getMessage());
+    //         return response()->json(['error' => 'Gagal mengkonversi PDF: ' . $e->getMessage()], 500);
+    //     }
+    // }
 
     // Fungsi cetak / download
     public function download($id)

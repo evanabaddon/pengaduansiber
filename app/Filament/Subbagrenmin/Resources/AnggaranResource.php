@@ -1526,14 +1526,14 @@ class AnggaranResource extends Resource
                 //         ->openUrlInNewTab(),
                 //         ])->button()->label('Dokumen'),
                 Tables\Actions\Action::make('preview')
-                    ->label('Preview')
+                    ->label('Lihat')
                     ->icon('heroicon-o-eye')
                     ->url(fn ($record) => route(
                         'filament.subbagrenmin.resources.anggarans.preview', 
                         $record
                     )),
                 Tables\Actions\Action::make('viewPdf')
-                        ->label('Download')
+                        ->label('Unduh')
                         ->icon('heroicon-o-arrow-down-tray')
                         ->url(fn ($record) => route('anggaran.convertPdf', $record))
                         ->openUrlInNewTab(),
