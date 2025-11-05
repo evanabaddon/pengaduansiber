@@ -76,11 +76,11 @@ class SubbagrenminPanelProvider extends PanelProvider
                     ->group('Urmintu')
                     ->isActiveWhen(fn() => request()->is('subbagrenmin/personil') || request()->is('subbagrenmin/pimpinans') || request()->is('subbagrenmin/staff')),
 
-                NavigationItem::make('Surat Masuk')
-                    ->url('/subbagrenmin/surat-masuks')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->group('Urmintu')
-                    ->isActiveWhen(fn() => request()->is('subbagrenmin/surat-masuks')),
+                // NavigationItem::make('Surat Masuk')
+                //     ->url('/subbagrenmin/surat-masuks')
+                //     ->icon('heroicon-o-document-arrow-down')
+                //     ->group('Urmintu')
+                //     ->isActiveWhen(fn() => request()->is('subbagrenmin/surat-masuks')),
 
                 NavigationItem::make('Persuratan')
                     ->url(url('/subbagrenmin/surats?menu=urmintu'))

@@ -1,19 +1,24 @@
 <?php
 namespace App\Http\Controllers;
 
+use Mpdf\Mpdf;
 use ZipArchive;
+use ReflectionClass;
 use App\Models\Staff;
 use Firebase\JWT\JWT;
 use App\Models\Anggaran;
+use Mpdf\HTMLParserMode;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Mpdf\Config\FontVariables;
+use Mpdf\Config\ConfigVariables;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Settings;
-
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Writer\Html;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Writer\Pdf\Mpdf as PdfWriter;
@@ -338,66 +343,127 @@ class AnggaranEditorController extends Controller
         $pdfPath = $pdfDir . '/' . $pdfFilename;
     
         try {
-            // 🔹 Load Excel file
+            // 🔹 Load Excel
             $spreadsheet = IOFactory::load($excelPath);
             $worksheet = $spreadsheet->getActiveSheet();
     
-            // ✅ Cek apakah Excel sudah punya gambar (logo)
-            $hasExistingDrawing = count($worksheet->getDrawingCollection()) > 0;
-    
-            // 🔹 Tambahkan logo baru (presisi ke pojok kiri atas)
+            // 🔹 Tambahkan logo di pojok kiri atas
             $logoPath = public_path('images/logo-siber-polri.png');
             if (file_exists($logoPath)) {
                 $drawing = new Drawing();
                 $drawing->setName('Logo');
                 $drawing->setDescription('Logo Ditres Siber Polda Jatim');
                 $drawing->setPath($logoPath);
-                $drawing->setHeight(55);     // ✅ sedikit lebih kecil dari 70
-                // $drawing->setWidth(40);
+                $drawing->setHeight(55); // ukuran yang sudah pas
                 $drawing->setCoordinates('A1');
-                $drawing->setOffsetX(0);     // beri jarak kecil dari kiri
-                $drawing->setOffsetY(0);   // posisi sama seperti versi 70 yang bagus
+                $drawing->setOffsetX(0);
+                $drawing->setOffsetY(0);
                 $drawing->setWorksheet($worksheet);
                 $worksheet->getColumnDimension('A')->setWidth(5);
             }
     
-            // 🔹 Ganti font non-standar ke Aptos
+            // 🔹 Ganti font Excel ke Arial agar konsisten di HTML
             $cellCollection = $worksheet->getCellCollection();
             foreach ($cellCollection as $cellCoordinate) {
                 $style = $worksheet->getStyle($cellCoordinate);
                 $font = $style->getFont();
                 $fontName = $font->getName();
-                if (stripos($fontName, 'Aptos Display') !== false || stripos($fontName, 'Calibri') !== false || stripos($fontName, 'Segoe') !== false) {
+                if (stripos($fontName, 'Aptos') !== false || stripos($fontName, 'Calibri') !== false || stripos($fontName, 'Segoe') !== false) {
                     $font->setName('Arial');
                 }
             }
     
-            // 🔹 Atur orientasi & margin
-            $pageSetup = $worksheet->getPageSetup();
-            $pageSetup->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
-            $pageSetup->setFitToWidth(1);
-            $pageSetup->setFitToHeight(1);
+            // 🔹 Convert Excel → HTML
+            $htmlWriter = new Html($spreadsheet);
+            ob_start();
+            $htmlWriter->save('php://output');
+            $htmlContent = ob_get_clean();
+
+            // **CSS Tetap Digunakan:** (font-size: 5pt; white-space: nowrap !important;)
+            $cssStyles = '
+                <style>
+                    /* NON-BREAKING CONTENT */
+                    * {
+                        page-break-after: avoid !important;
+                        page-break-before: avoid !important;
+                        page-break-inside: avoid !important;
+                    }
+                    .page-break { page-break-after: avoid !important; }
+
+                    /* TABLE STYLING */
+                    table {
+                        width: 100% !important; 
+                        table-layout: auto; 
+                        font-size: 5pt; 
+                        border-collapse: collapse;
+                    }
+                    td, th {
+                        padding: 2px; 
+                        word-wrap: normal !important; 
+                        white-space: nowrap !important; /* Wajib: Teks tidak akan pecah */
+                    }
+                    .phpspreadsheet-header-container, .phpspreadsheet-logo-container {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        
+                    }
+                </style>
+            ';
+            $htmlContent = $cssStyles . $htmlContent;
+            // -------------------------------------------------------------------
     
-            $margins = $worksheet->getPageMargins();
-            $margins->setTop(0.3);
-            $margins->setRight(0.3);
-            $margins->setLeft(0.7);
-            $margins->setBottom(0.3);
+            // 🔹 Konfigurasi mPDF
+            $mpdfConfig = [
+                'mode' => 'c',
+                'format' => [280, 290], // Landscape
+                'margin_left' => 0,
+                'margin_right' => 3,
+                'margin_top' => 0,
+                'margin_bottom' => 5,
+                'tempDir' => storage_path('app/tmp'),
+                'fontDir' => [storage_path('app/fonts')],
+                'fontdata' => [
+                    'aptosdisplay' => [
+                        'R' => 'Aptos-Display.ttf',
+                        'B' => 'Aptos-Display-Bold.ttf',
+                        'I' => 'Aptos-Display-Italic.ttf',
+                        'BI' => 'Aptos-Display-Bold-Italic.ttf',
+                    ],
+                ],
+                'default_font' => 'aptosdisplay',
+            ];
     
-            // 🔹 Simpan ke PDF
-            $writer = IOFactory::createWriter($spreadsheet, 'Mpdf');
-            $writer->save($pdfPath);
+            // 🔹 Generate PDF dari HTML
+            $mpdf = new Mpdf($mpdfConfig);
+
+            // 🚨 PERBAIKAN PENGATURAN SKALA & PAGE BREAK 🚨
+        
+            // 1. Matikan Pemecahan Halaman Otomatis
+            $mpdf->SetAutoPageBreak(false, 0); 
+
+            // 2. Aktifkan Shrink-to-Fit
+            $mpdf->shrink_tables_to_fit = 1;
+
+            // 3. Atur Skala Tampilan Awal (Zoom) menggunakan PDF JavaScript
+            // Kita akan atur zoom 70%. Jika konten terpotong, mPDF akan mencoba 'shrink-to-fit'
+            // dan memaksa muat, meskipun tampilannya kecil.
+            // $mpdf->SetJS('this.zoom = 60;'); // Atur zoom awal ke 70%
+            
+            $mpdf->WriteHTML($htmlContent);
+            $mpdf->Output($pdfPath, \Mpdf\Output\Destination::FILE);
     
             // 🔹 Update database
             $record->update(['pdf_path' => 'docs/' . $pdfFilename]);
     
             return response()->file($pdfPath);
-    
         } catch (\Exception $e) {
             \Log::error('PDF Conversion Error: ' . $e->getMessage());
             return response()->json(['error' => 'Gagal mengkonversi PDF: ' . $e->getMessage()], 500);
         }
     }
+    
     
 
     // public function convertExcelToPdf($id)

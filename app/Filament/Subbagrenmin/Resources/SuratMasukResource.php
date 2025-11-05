@@ -22,14 +22,12 @@ class SuratMasukResource extends Resource
 
     protected static ?string $navigationGroup = 'Urmintu';
 
-    
-
     public static function shouldRegisterNavigation(): bool
     {
         $panelId = Filament::getCurrentPanel()->getId();
 
         return in_array($panelId, [
-            'subbagrenmin',
+            // 'subbagrenmin',
             'sikorwas',
             'bagwassidik',
             'bagbinopsnal'
