@@ -21,42 +21,73 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Helper untuk membaca file JSON
+        // Helper untuk membaca file JSON wilayah Indonesia
         $this->app->singleton('wilayah', function () {
             return new class {
+                // 🧠 Fungsi bantu ubah teks kapital jadi Title Case (contoh: “JAWA BARAT” → “Jawa Barat”)
+                private function formatName($text)
+                {
+                    // lowercase semua lalu ubah huruf awal tiap kata jadi kapital
+                    return ucwords(strtolower($text));
+                }
+
                 public function getProvinsi()
                 {
                     $path = public_path('data-indonesia/provinsi.json');
                     $data = json_decode(file_get_contents($path), true);
-                    return collect($data)->pluck('nama', 'id')->toArray();
+
+                    return collect($data)
+                        ->mapWithKeys(fn($item) => [
+                            $item['id'] => $this->formatName($item['nama'])
+                        ])
+                        ->toArray();
                 }
 
                 public function getKabupaten($provinsiId)
                 {
                     $path = public_path("data-indonesia/kabupaten/{$provinsiId}.json");
                     if (!file_exists($path)) return [];
+
                     $data = json_decode(file_get_contents($path), true);
-                    return collect($data)->pluck('nama', 'id')->toArray();
+
+                    return collect($data)
+                        ->mapWithKeys(fn($item) => [
+                            $item['id'] => $this->formatName($item['nama'])
+                        ])
+                        ->toArray();
                 }
 
                 public function getKecamatan($kabupatenId)
                 {
                     $path = public_path("data-indonesia/kecamatan/{$kabupatenId}.json");
                     if (!file_exists($path)) return [];
+
                     $data = json_decode(file_get_contents($path), true);
-                    return collect($data)->pluck('nama', 'id')->toArray();
+
+                    return collect($data)
+                        ->mapWithKeys(fn($item) => [
+                            $item['id'] => $this->formatName($item['nama'])
+                        ])
+                        ->toArray();
                 }
 
                 public function getKelurahan($kecamatanId)
                 {
                     $path = public_path("data-indonesia/kelurahan/{$kecamatanId}.json");
                     if (!file_exists($path)) return [];
+
                     $data = json_decode(file_get_contents($path), true);
-                    return collect($data)->pluck('nama', 'id')->toArray();
+
+                    return collect($data)
+                        ->mapWithKeys(fn($item) => [
+                            $item['id'] => $this->formatName($item['nama'])
+                        ])
+                        ->toArray();
                 }
             };
         });
     }
+
 
     /**
      * Bootstrap any application services.
