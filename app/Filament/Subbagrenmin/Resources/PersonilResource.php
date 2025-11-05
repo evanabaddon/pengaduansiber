@@ -10,12 +10,15 @@ use Filament\Tables\Table;
 use App\Models\KlasterJabatan;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Illuminate\Support\HtmlString;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Wizard;
+// use Filament\Infolists\Components\Grid;
+use Illuminate\Support\Facades\Blade;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Repeater;
-use Filament\Infolists\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
@@ -53,64 +56,76 @@ class PersonilResource extends Resource
                         // 🧩 STEP 1 — KLASTER JABATAN
                         Step::make('Klaster Jabatan')->schema([
                             Section::make('Struktur Klaster Jabatan')->schema([
-                        
+
+                                // LEVEL 1 — Klaster Utama (Selalu tampil)
                                 Select::make('level_1')
                                     ->label('Klaster Utama')
                                     ->options(
                                         KlasterJabatan::whereNull('parent_id')->pluck('nama', 'id')
                                     )
+                                    ->searchable()
                                     ->reactive()
-                                    ->afterStateHydrated(function ($set, $get, $record = null) {
+                                    ->afterStateHydrated(function ($set, $record = null) {
                                         if (! $record?->klaster_jabatan_id) return;
 
                                         $node = KlasterJabatan::find($record->klaster_jabatan_id);
-                                        if ($node) {
-                                            $ancestors = $node->ancestorsAndSelf()->pluck('id')->toArray();
-                                            $set('level_1', $ancestors[0] ?? null);
-                                            $set('level_2', $ancestors[1] ?? null);
-                                            $set('level_3', $ancestors[2] ?? null);
-                                            $set('level_4', $ancestors[3] ?? null);
+                                        if (! $node) return;
+
+                                        // Ambil seluruh parent chain
+                                        $ancestors = collect();
+                                        while ($node) {
+                                            $ancestors->prepend($node->id);
+                                            $node = $node->parent;
                                         }
+
+                                        $set('level_1', $ancestors[0] ?? null);
+                                        $set('level_2', $ancestors[1] ?? null);
+                                        $set('level_3', $ancestors[2] ?? null);
+                                        $set('level_4', $ancestors[3] ?? null);
                                     })
                                     ->afterStateUpdated(fn (callable $set) => $set('level_2', null)),
 
-                        
+                                // LEVEL 2 — hanya tampil kalau level_1 dipilih & punya anak
                                 Select::make('level_2')
                                     ->label('Sub Unit / Bagian')
                                     ->options(fn (callable $get) =>
                                         KlasterJabatan::where('parent_id', $get('level_1'))->pluck('nama', 'id')
                                     )
+                                    ->searchable()
                                     ->reactive()
-                                    ->visible(fn (callable $get) => $get('level_1'))
+                                    ->visible(fn (callable $get) =>
+                                        filled($get('level_1')) &&
+                                        KlasterJabatan::where('parent_id', $get('level_1'))->exists()
+                                    )
                                     ->afterStateUpdated(fn (callable $set) => $set('level_3', null)),
-                        
+
+                                // LEVEL 3 — hanya tampil kalau level_2 dipilih & punya anak
                                 Select::make('level_3')
                                     ->label('Jabatan / Subjabatan')
                                     ->options(fn (callable $get) =>
                                         KlasterJabatan::where('parent_id', $get('level_2'))->pluck('nama', 'id')
                                     )
+                                    ->searchable()
                                     ->reactive()
-                                    ->visible(fn (callable $get) => $get('level_2'))
+                                    ->visible(fn (callable $get) =>
+                                        filled($get('level_2')) &&
+                                        KlasterJabatan::where('parent_id', $get('level_2'))->exists()
+                                    )
                                     ->afterStateUpdated(fn (callable $set) => $set('level_4', null)),
-                        
+
+                                // LEVEL 4 — hanya tampil kalau level_3 dipilih & punya anak
                                 Select::make('level_4')
-                                    ->label('Detail Jabatan (jika ada)')
+                                    ->label('Detail Jabatan')
                                     ->options(fn (callable $get) =>
                                         KlasterJabatan::where('parent_id', $get('level_3'))->pluck('nama', 'id')
                                     )
+                                    ->searchable()
                                     ->reactive()
-                                    ->visible(fn (callable $get) => $get('level_3')),
-                        
-                                // Placeholder::make('jabatan_terpilih')
-                                //     ->label('Jabatan yang Dipilih')
-                                //     ->content(fn ($get) => collect([
-                                //         $get('level_1'),
-                                //         $get('level_2'),
-                                //         $get('level_3'),
-                                //         $get('level_4'),
-                                //     ])->filter()->map(fn ($id) => KlasterJabatan::find($id)?->nama)->join(' / '))
-                                //     ->visible(fn ($get) => filled($get('level_1')))->columnSpanFull(),
-                        
+                                    ->visible(fn (callable $get) =>
+                                        filled($get('level_3')) &&
+                                        KlasterJabatan::where('parent_id', $get('level_3'))->exists()
+                                    ),
+
                                 Hidden::make('klaster_jabatan_id')
                                     ->reactive()
                                     ->dehydrated(true)
@@ -119,27 +134,44 @@ class PersonilResource extends Resource
                                     ),
                             ])->columns(4),
                         ]),
+                        // 🧩 STEP 2 — DATA DIRI & KELUARGA
                         Step::make('Data Pribadi & Keluarga')->schema([
                             Section::make('Data Personil')->schema([
-                                TextInput::make('nama')->required()->label('Nama Personil'),
-                                TextInput::make('nrp')->label('NRP'),
-                                TextInput::make('tempat_lahir')->label('Tempat Lahir'),
+                                // 📸 Foto Personil (kolom penuh di atas)
+                                FileUpload::make('photo')
+                                    ->label('Foto Personel')
+                                    ->image()
+                                    ->imagePreviewHeight('150')
+                                    ->columnSpanFull(),
+                            
+                                // 🧍 Identitas Dasar
+                                TextInput::make('nama')
+                                    ->required()
+                                    ->label('Nama Personil'),
+                                TextInput::make('nrp')
+                                    ->label('NRP'),
+                                TextInput::make('tempat_lahir')
+                                    ->label('Tempat Lahir'),
                                 Flatpickr::make('tanggal_lahir')
                                     ->label('Tanggal Lahir')
                                     ->required()
                                     ->allowInput()
-                                    ->dateFormat('Y-m-d') 
+                                    ->dateFormat('Y-m-d')
                                     ->altFormat('d F Y')
                                     ->altInput(true),
-                                Select::make('golongan_darah')->label('Golongan Darah')->searchable()->options([
-                                    'A' => 'A',
-                                    'B' => 'B',
-                                    'AB' => 'AB',
-                                    'O' => 'O',
-                                ]),
+                            
+                                // 💉 Informasi Umum
+                                Select::make('golongan_darah')
+                                    ->label('Golongan Darah')
+                                    ->options([
+                                        'A' => 'A',
+                                        'B' => 'B',
+                                        'AB' => 'AB',
+                                        'O' => 'O',
+                                    ])
+                                    ->searchable(),
                                 Select::make('agama')
                                     ->label('Agama')
-                                    ->searchable()
                                     ->options([
                                         'Islam' => 'Islam',
                                         'Kristen' => 'Kristen',
@@ -147,79 +179,160 @@ class PersonilResource extends Resource
                                         'Hindu' => 'Hindu',
                                         'Budha' => 'Budha',
                                         'Konghucu' => 'Konghucu',
-                                    ]),
-                                TextInput::make('suku')->label('Suku'),
-                                PhoneInput::make('telp')->inputNumberFormat(PhoneInputNumberType::NATIONAL)->label('No. Telp'),
-                                FileUpload::make('photo')->label('Foto Personil'),
-                                FileUpload::make('bpjs')->label('Kartu BPJS'),
-                                Select::make('status')->label('Status')->options([
-                                    'Aktif' => 'Aktif',
-                                    'Tidak Aktif' => 'Tidak Aktif',
-                                ]),
-                            ])->columns(2),
+                                    ])
+                                    ->searchable(),
+                                TextInput::make('suku')
+                                    ->label('Suku'),
+                            
+                                // 📞 Kontak & BPJS
+                                PhoneInput::make('telp')
+                                    ->label('No. Telp')
+                                    ->inputNumberFormat(PhoneInputNumberType::NATIONAL),
+                                TextInput::make('nomor_bpjs')
+                                    ->label('Nomor BPJS')
+                                    ->placeholder('Masukkan nomor BPJS')
+                                    ->numeric(),
+                                FileUpload::make('bpjs')
+                                    ->label('Kartu BPJS')
+                                    ->imagePreviewHeight('120'),
+                            
+                                // ⚙️ Status
+                                Select::make('status')
+                                    ->label('Status')
+                                    ->options([
+                                        'Aktif' => 'Aktif',
+                                        'Tidak Aktif' => 'Tidak Aktif',
+                                    ])
+                                    ->default('Aktif'),
+                            ])->columns([
+                                'default' => 2,
+                                'lg' => 2, // di layar besar bisa 3 kolom biar lebih seimbang
+                            ]),
                             Section::make('Data Alamat')->schema([
-                                TextInput::make('alamat')->label('Alamat')->columnSpanFull(),
+                                // 🏠 Alamat Lengkap
+                                TextInput::make('alamat')
+                                    ->label('Alamat Lengkap')
+                                    ->placeholder('Masukkan alamat sesuai KTP')
+                                    ->columnSpanFull(),
+                            
+                                // 🌍 Wilayah Administratif
                                 Select::make('province_id')
                                     ->label('Provinsi')
                                     ->provinsi()
                                     ->live()
                                     ->searchable()
-                                    ->afterStateUpdated(fn (callable $set) => $set('city_id', null)),
+                                    ->afterStateUpdated(fn (callable $set) => $set('city_id', null))
+                                    ->required(),
+                            
                                 Select::make('city_id')
-                                    ->label('Kota')
+                                    ->label('Kabupaten / Kota')
                                     ->kabupatenUmum()
                                     ->live()
                                     ->searchable()
-                                    ->afterStateUpdated(fn (callable $set) => $set('district_id', null)),
+                                    ->afterStateUpdated(fn (callable $set) => $set('district_id', null))
+                                    ->required(),
+                            
                                 Select::make('district_id')
                                     ->label('Kecamatan')
                                     ->kecamatanUmum()
                                     ->live()
                                     ->searchable()
-                                    ->afterStateUpdated(fn (callable $set) => $set('subdistrict_id', null)),
+                                    ->afterStateUpdated(fn (callable $set) => $set('subdistrict_id', null))
+                                    ->required(),
+                            
                                 Select::make('subdistrict_id')
-                                    ->label('Kelurahan')
+                                    ->label('Kelurahan / Desa')
                                     ->kelurahanUmum()
                                     ->live()
-                                    ->searchable(),
-                            ])->columns(2),
-                            Section::make('Pasangan (Istri/Suami)')->schema([
-                                TextInput::make('pasangan.nama')->label('Nama Pasangan'),
-                                TextInput::make('pasangan.tempat_lahir')->label('Tempat Lahir Pasangan'),
+                                    ->searchable()
+                                    ->required(),
+                            ])->columns([
+                                'default' => 2,
+                                'lg' => 4, // tampil lebih rapi di layar besar
+                            ]),
+                            
+                            // 👩‍❤️‍👨 Data Pasangan (Istri/Suami)
+                            Section::make('Data Pasangan (Istri/Suami)')->schema([
+                                TextInput::make('pasangan.nama')
+                                    ->label('Nama Pasangan')
+                                    ->placeholder('Masukkan nama pasangan')
+                                    ->required(),
+
+                                TextInput::make('pasangan.tempat_lahir')
+                                    ->label('Tempat Lahir')
+                                    ->placeholder('Contoh: Bandung')
+                                    ->required(),
+
                                 Flatpickr::make('pasangan.tanggal_lahir')
-                                    ->label('Tanggal Lahir Pasangan')
-                                    ->required()
+                                    ->label('Tanggal Lahir')
                                     ->allowInput()
-                                    ->dateFormat('Y-m-d') 
-                                    ->altFormat('d F Y')
-                                    ->altInput(true),
-                                Select::make('pasangan.golongan_darah')->label('Golongan Darah Pasangan')->options([
-                                    'A' => 'A',
-                                    'B' => 'B',
-                                    'AB' => 'AB',
-                                    'O' => 'O',
-                                ]),
-                                
-                                TextInput::make('pasangan.telp')->label('No. Telp Pasangan'),
-                                FileUpload::make('pasangan.kartu_ktp')->label('Kartu KTP Pasangan'),
-                                FileUpload::make('pasangan.bpjs')->label('Kartu BPJS'),
-                            ])->columns(2),
-                            Repeater::make('keluarga')->schema([
-                                TextInput::make('nama')->label('Nama Anak'),
-                                Flatpickr::make('tanggal_lahir')
-                                    ->label('Tanggal Lahir Anak')
                                     ->required()
-                                    ->allowInput()
                                     ->dateFormat('Y-m-d')
                                     ->altFormat('d F Y')
                                     ->altInput(true),
-                            ])->columns(2),                            
+
+                                Select::make('pasangan.golongan_darah')
+                                    ->label('Golongan Darah')
+                                    ->options([
+                                        'A' => 'A',
+                                        'B' => 'B',
+                                        'AB' => 'AB',
+                                        'O' => 'O',
+                                    ])
+                                    ->searchable(),
+
+                                PhoneInput::make('pasangan.telp')
+                                    ->label('Nomor Telepon')
+                                    ->inputNumberFormat(PhoneInputNumberType::NATIONAL)
+                                    ->placeholder('Contoh: 08123456789'),
+
+                                Grid::make(2)->schema([
+                                    FileUpload::make('pasangan.kartu_ktp')
+                                    ->label('Kartu Pengenal Istri/Suami')
+                                    ->imagePreviewHeight('150')
+                                    ->directory('dokumen/pasangan/ktp'),
+
+                                FileUpload::make('pasangan.bpjs')
+                                    ->label('Kartu BPJS')
+                                    ->imagePreviewHeight('150')
+                                    ->directory('dokumen/pasangan/bpjs'),
+                                ]),
+                                
+                            ])->columns([
+                                'default' => 2,
+                                'lg' => 2, // tampilan lebih efisien di layar besar
+                            ]),
+
+                            // 👶 Data Anak / Keluarga
+                            Section::make('Data Anak / Keluarga')
+                            ->schema([
+                                Repeater::make('keluarga')
+                                    ->schema([
+                                        TextInput::make('nama')
+                                            ->label('Nama Anak')
+                                            ->placeholder('Masukkan nama anak')
+                                            ->required(),
+
+                                        Flatpickr::make('tanggal_lahir')
+                                            ->label('Tanggal Lahir')
+                                            ->allowInput()
+                                            ->required()
+                                            ->dateFormat('Y-m-d')
+                                            ->altFormat('d F Y')
+                                            ->altInput(true),
+                                    ])
+                                    ->columns(2)
+                                    // ->createItemButtonLabel('Tambah Anak')
+                                    ->collapsible(),
+                            ]),
+                   
                         ]),
+                        // 🧩 STEP 2 — PENDIDIKAN & PANGKAT
                         Step::make('Data Pendidikan & Pangkat')->schema([
                             Section::make('Pendidikan Polri')->schema([
                                 Repeater::make('pendidikan_polri')->schema([
                                     TextInput::make('tingkat')->label('Tingkat Pendidikan'),
-                                    TextInput::make('tahun')->label('Tahun Pendidikan')->numeric(),
+                                    TextInput::make('tahun')->label('Tahun Lulus')->numeric(),
                                     FileUpload::make('dokumen')->label('Dokumen Pendukung'),
                                 ])->columns(3),
                             ]),
@@ -227,7 +340,7 @@ class PersonilResource extends Resource
                                 Repeater::make('pendidikan_umum')->schema([
                                     TextInput::make('tingkat')->label('Tingkat Pendidikan'),
                                     TextInput::make('nama_institusi')->label('Nama Institusi'),
-                                    TextInput::make('tahun')->label('Tahun Pendidikan')->numeric(),
+                                    TextInput::make('tahun')->label('Tahun Lulus')->numeric(),
                                     FileUpload::make('dokumen')->label('Dokumen Pendukung'),
                                 ])->columns(4),
                             ]),
@@ -248,7 +361,6 @@ class PersonilResource extends Resource
                                             10 => 'BRIGPOL',
                                             11 => 'BRIPTU',
                                             12 => 'BRIPDA',
-                                            13 => 'STAFF'
                                         ])
                                         ->searchable(),
                                     Flatpickr::make('tmt')->label('TMT Pangkat')->required()->allowInput()->dateFormat('Y-m-d')->altFormat('d F Y')->altInput(true),
@@ -283,21 +395,28 @@ class PersonilResource extends Resource
                                         'Aktif' => 'Aktif',
                                         'Pasif' => 'Pasif',
                                     ]),
-                                    FileUpload::make('dokumen')->label('Dokumen Pendukung'),
-                                ])->columns(3),
+                                ])->columns(2),
                             ]),
-                            Section::make('Penugasan LN')->schema([
+                            Section::make('Penugasan Luar Negeri')->schema([
                                 Repeater::make('penugasan_ln')->label('Penugasan Luar Negeri')->schema([
                                     TextInput::make('penugasan')->label('Penugasan'),
                                     TextInput::make('lokasi')->label('Lokasi'),
                                     Flatpickr::make('tmt')->label('TMT Penugasan')->required()->allowInput()->dateFormat('Y-m-d')->altFormat('d F Y')->altInput(true),
                                     FileUpload::make('dokumen')->label('Dokumen Pendukung'),
-                                ])->columns(3),
+                                ])->columns(4),
                             ]),
                         ]),
                     ])
                     ->skippable()
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->submitAction(new HtmlString(Blade::render(<<<BLADE
+                                <x-filament::button
+                                    type="submit"
+                                    size="sm"
+                                >
+                                    Simpan
+                                </x-filament::button>
+                            BLADE))),
             ]);
     }
 

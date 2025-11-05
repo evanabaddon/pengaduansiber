@@ -9,4 +9,13 @@ use Filament\Resources\Pages\CreateRecord;
 class CreatePersonil extends CreateRecord
 {
     protected static string $resource = PersonilResource::class;
+
+    // hidden save button
+    protected function getFormActions(): array
+    {
+        return [
+            //$this->getSaveFormAction(),
+            $this->getCancelFormAction(),
+        ];
+    }
 }

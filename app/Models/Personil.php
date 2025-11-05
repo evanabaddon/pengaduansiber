@@ -25,7 +25,7 @@ class Personil extends Model
     protected $fillable = [
         'nama', 'pangkat', 'nrp', 'jabatan', 'tmt', 'tempat_lahir', 'tanggal_lahir',
         'golongan_darah', 'agama', 'suku', 'alamat', 'province_id', 'city_id',
-        'district_id', 'subdistrict_id', 'telp', 'bpjs',
+        'district_id', 'subdistrict_id', 'telp', 'bpjs', 'nomor_bpjs',
         'pasangan', 'keluarga', 'pendidikan_polri', 'pendidikan_umum',
         'riwayat_pangkat', 'riwayat_jabatan', 'dikbang_pelatihan',
         'tanda_kehormatan', 'kemampuan_bahasa', 'penugasan_ln',
