@@ -30,11 +30,18 @@ class Personil extends Page implements HasTable
 
     protected static string $view = 'filament.subbagrenmin.pages.personil';
 
+    protected static ?string $slug = 'personel';
+
+    public function getTitle(): string
+    {
+        return 'Personel';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             Actions\Action::make('create')
-                ->label('Tambah Personil')
+                ->label('Tambah Personel')
                 // ->icon('heroicon-o-plus')
                 ->url(\App\Filament\Subbagrenmin\Resources\PersonilResource::getUrl('create')),
         ];

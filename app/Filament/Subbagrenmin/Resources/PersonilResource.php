@@ -40,6 +40,10 @@ class PersonilResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    protected static ?string $modelLabel = 'Personel';
+
+    // protected static ?string $slug = 'personel';
+
     public static function form(Form $form): Form
     {
         return $form
@@ -352,7 +356,7 @@ class PersonilResource extends Resource
                 ->url(fn ($record) => route('filament.subbagrenmin.resources.personils.view', ['record' => $record->id])),
 
             Tables\Actions\EditAction::make('edit')
-                ->label('Edit')
+                ->label('Ubah')
                 ->url(fn ($record) => route('filament.subbagrenmin.resources.personils.edit', ['record' => $record->id])),
         ];
     }
