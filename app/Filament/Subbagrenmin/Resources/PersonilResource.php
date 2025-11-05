@@ -7,8 +7,10 @@ use Filament\Tables;
 use App\Models\Personil;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Models\KlasterJabatan;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Section;
@@ -19,6 +21,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Infolists\Components\TextEntry;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -43,6 +46,75 @@ class PersonilResource extends Resource
             ->schema([
                 Wizard::make()
                     ->steps([
+                        // 🧩 STEP 1 — KLASTER JABATAN
+                        Step::make('Klaster Jabatan')->schema([
+                            Section::make('Struktur Klaster Jabatan')->schema([
+                        
+                                Select::make('level_1')
+                                    ->label('Klaster Utama')
+                                    ->options(
+                                        KlasterJabatan::whereNull('parent_id')->pluck('nama', 'id')
+                                    )
+                                    ->reactive()
+                                    ->afterStateHydrated(function ($set, $get, $record = null) {
+                                        if (! $record?->klaster_jabatan_id) return;
+
+                                        $node = KlasterJabatan::find($record->klaster_jabatan_id);
+                                        if ($node) {
+                                            $ancestors = $node->ancestorsAndSelf()->pluck('id')->toArray();
+                                            $set('level_1', $ancestors[0] ?? null);
+                                            $set('level_2', $ancestors[1] ?? null);
+                                            $set('level_3', $ancestors[2] ?? null);
+                                            $set('level_4', $ancestors[3] ?? null);
+                                        }
+                                    })
+                                    ->afterStateUpdated(fn (callable $set) => $set('level_2', null)),
+
+                        
+                                Select::make('level_2')
+                                    ->label('Sub Unit / Bagian')
+                                    ->options(fn (callable $get) =>
+                                        KlasterJabatan::where('parent_id', $get('level_1'))->pluck('nama', 'id')
+                                    )
+                                    ->reactive()
+                                    ->visible(fn (callable $get) => $get('level_1'))
+                                    ->afterStateUpdated(fn (callable $set) => $set('level_3', null)),
+                        
+                                Select::make('level_3')
+                                    ->label('Jabatan / Subjabatan')
+                                    ->options(fn (callable $get) =>
+                                        KlasterJabatan::where('parent_id', $get('level_2'))->pluck('nama', 'id')
+                                    )
+                                    ->reactive()
+                                    ->visible(fn (callable $get) => $get('level_2'))
+                                    ->afterStateUpdated(fn (callable $set) => $set('level_4', null)),
+                        
+                                Select::make('level_4')
+                                    ->label('Detail Jabatan (jika ada)')
+                                    ->options(fn (callable $get) =>
+                                        KlasterJabatan::where('parent_id', $get('level_3'))->pluck('nama', 'id')
+                                    )
+                                    ->reactive()
+                                    ->visible(fn (callable $get) => $get('level_3')),
+                        
+                                // Placeholder::make('jabatan_terpilih')
+                                //     ->label('Jabatan yang Dipilih')
+                                //     ->content(fn ($get) => collect([
+                                //         $get('level_1'),
+                                //         $get('level_2'),
+                                //         $get('level_3'),
+                                //         $get('level_4'),
+                                //     ])->filter()->map(fn ($id) => KlasterJabatan::find($id)?->nama)->join(' / '))
+                                //     ->visible(fn ($get) => filled($get('level_1')))->columnSpanFull(),
+                        
+                                Hidden::make('klaster_jabatan_id')
+                                    ->reactive()
+                                    ->dehydrated(true)
+                                    ->dehydrateStateUsing(fn ($get) =>
+                                        $get('level_4') ?? $get('level_3') ?? $get('level_2') ?? $get('level_1')
+                                    ),
+                            ])->columns(4),
+                        ]),
                         Step::make('Data Pribadi & Keluarga')->schema([
                             Section::make('Data Personil')->schema([
                                 TextInput::make('nama')->required()->label('Nama Personil'),

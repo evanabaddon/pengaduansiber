@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Personil extends Model
 {
@@ -28,7 +29,7 @@ class Personil extends Model
         'pasangan', 'keluarga', 'pendidikan_polri', 'pendidikan_umum',
         'riwayat_pangkat', 'riwayat_jabatan', 'dikbang_pelatihan',
         'tanda_kehormatan', 'kemampuan_bahasa', 'penugasan_ln',
-        'photo', 'status',
+        'photo', 'status', 'klaster_jabatan_id'
     ];
 
     public function getPangkatLabel($key)
@@ -159,4 +160,10 @@ class Personil extends Model
             return Carbon::parse($this->keluarga['tanggal_lahir'] ?? null)->age;
         });
     }
+
+    public function klasterJabatan() : BelongsTo
+    {
+        return $this->belongsTo(KlasterJabatan::class, 'klaster_jabatan_id');
+    }
+
 }
