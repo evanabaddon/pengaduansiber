@@ -59,7 +59,7 @@ class PersonilResource extends Resource
 
                                 // LEVEL 1 — Klaster Utama (Selalu tampil)
                                 Select::make('level_1')
-                                    ->label('Klaster Utama')
+                                    ->label('Klaster')
                                     ->options(
                                         KlasterJabatan::whereNull('parent_id')->pluck('nama', 'id')
                                     )
@@ -87,7 +87,7 @@ class PersonilResource extends Resource
 
                                 // LEVEL 2 — hanya tampil kalau level_1 dipilih & punya anak
                                 Select::make('level_2')
-                                    ->label('Sub Unit / Bagian')
+                                    ->label('Jabatan/Divisi')
                                     ->options(fn (callable $get) =>
                                         KlasterJabatan::where('parent_id', $get('level_1'))->pluck('nama', 'id')
                                     )
@@ -101,7 +101,7 @@ class PersonilResource extends Resource
 
                                 // LEVEL 3 — hanya tampil kalau level_2 dipilih & punya anak
                                 Select::make('level_3')
-                                    ->label('Jabatan / Subjabatan')
+                                    ->label('Jabatan/Subjabatan')
                                     ->options(fn (callable $get) =>
                                         KlasterJabatan::where('parent_id', $get('level_2'))->pluck('nama', 'id')
                                     )
