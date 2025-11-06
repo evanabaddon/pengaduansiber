@@ -13,6 +13,9 @@ class KlasterJabatanSeeder extends Seeder
      */
     public function run(): void
     {
+        // Add this line to delete existing records before seeding
+        // KlasterJabatan::truncate();
+
         $createRecursively = function (array $items, $parentId = null) use (&$createRecursively) {
             foreach ($items as $key => $value) {
                 if (is_int($key)) {
@@ -130,27 +133,49 @@ class KlasterJabatanSeeder extends Seeder
 
             // PELAKSANA TUGAS POKOK / SUBDIT
             'Pelaksana Tugas Pokok / Subdit' => [
-
                 'Subdit I' => [
-                    // Kasubdit I -> punya Kanit I..V
-                    'Kasubdit I' => $kanitRange(),
-                    // Banit berada langsung di bawah Subdit I (sejajar Kasubdit)
+                    'Kasubdit I',
+                    'Kanit' => $kanitRange(),
+                    'Panit' => [
+                        'Panit I',
+                        'Panit II',
+                        'Panit III',
+                        'Panit IV',
+                        'Panit V',
+                    ],
                     'Banit' => $banitRange(),
                     'Banum Subdit I',
                 ],
 
                 'Subdit II' => [
-                    'Kasubdit II' => $kanitRange(),
+                    'Kasubdit II',
+                    'Kanit' => $kanitRange(),
+                    'Panit' => [
+                        'Panit I',
+                        'Panit II',
+                        'Panit III',
+                        'Panit IV',
+                        'Panit V',
+                    ],
                     'Banit' => $banitRange(),
                     'Banum Subdit II',
                 ],
 
                 'Subdit III' => [
-                    'Kasubdit III' => $kanitRange(),
+                    'Kasubdit III',
+                    'Kanit' => $kanitRange(),
+                    'Panit' => [
+                        'Panit I',
+                        'Panit II',
+                        'Panit III',
+                        'Panit IV',
+                        'Panit V',
+                    ],
                     'Banit' => $banitRange(),
                     'Banum Subdit III',
                 ],
             ],
+
         ];
 
         $createRecursively($struktur);
