@@ -41,13 +41,13 @@ class ListSurats extends ListRecords
 
         // Struktur data → definisi group & item
         $groups = [
-            'Surat' => [
-                ['label' => 'Kapolda / a.n. Kapolda', 'type' => 'surat', 'subtype' => 'kapolda'],
-                ['label' => 'Direktur / a.n. Direktur', 'type' => 'surat', 'subtype' => 'direktur'],
-            ],
             'Surat Perintah' => [
                 ['label' => 'Kapolda / a.n. Kapolda', 'type' => 'surat_perintah', 'subtype' => 'kapolda'],
                 ['label' => 'Direktur / a.n. Direktur', 'type' => 'surat_perintah', 'subtype' => 'direktur'],
+            ],
+            'Surat' => [
+                ['label' => 'Kapolda / a.n. Kapolda', 'type' => 'surat', 'subtype' => 'kapolda'],
+                ['label' => 'Direktur / a.n. Direktur', 'type' => 'surat', 'subtype' => 'direktur'],
             ],
             'TR/STR' => [
                 ['label' => 'Kapolda / a.n. Kapolda', 'type' => 'str', 'subtype' => 'kapolda'],

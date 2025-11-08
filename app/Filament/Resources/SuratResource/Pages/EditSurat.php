@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\SuratResource\Pages;
 
-use App\Filament\Resources\SuratResource;
 use Filament\Actions;
+use App\Helpers\TemplateResolver;
 use Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\SuratResource;
 
 class EditSurat extends EditRecord
 {
@@ -15,5 +16,22 @@ class EditSurat extends EditRecord
         return [
             Actions\DeleteAction::make(),
         ];
+    }
+
+    public function mutateFormDataBeforeSave(array $data): array
+    {
+        // gunakan pilihan user jika ada
+        if (!empty($data['template_version'])) {
+            $data['template_path'] = "NASKAH DINAS/1. SURAT PERINTAH/" . $data['template_version'];
+        } else {
+            // fallback otomatis
+            $data['template_path'] = TemplateResolver::resolve(
+                $data['jenis_dokumen'],
+                $data['kategori_surat'],
+                $data['pejabat_penerbit']
+            );
+        }
+
+        return $data;
     }
 }

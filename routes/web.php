@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Request;
 use App\Http\Controllers\AnggaranEditorController;
 use App\Http\Controllers\UniversalLoginController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use App\Http\Controllers\OnlyOfficeController;
 
 Route::get('/', function () {
     return redirect('/admin');
@@ -21,3 +22,7 @@ Route::get('anggaran/{id}/preview', function($id){
     return view('filament.subbagrenmin.pages.anggaran-preview', compact('record'));
 })->name('anggaran.preview');
 Route::get('anggaran/{id}/convert-pdf', [AnggaranEditorController::class, 'convertExcelToPdf'])->name('anggaran.convertPdf');
+Route::get('/onlyoffice/{surat}', [OnlyOfficeController::class, 'edit'])->name('onlyoffice.edit');
+Route::get('/onlyoffice/{surat}/download', [OnlyOfficeController::class, 'download'])->name('onlyoffice.download');
+Route::post('/onlyoffice/callback/{surat}', [OnlyOfficeController::class, 'callback'])
+    ->name('onlyoffice.callback');
