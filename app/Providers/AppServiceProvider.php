@@ -10,6 +10,7 @@ use Filament\Forms\Components\Select;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use BezhanSalleh\PanelSwitch\PanelSwitch;
+use Filament\Resources\Pages\CreateRecord;
 use Filament\Support\Facades\FilamentView;
 use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
@@ -211,6 +212,8 @@ class AppServiceProvider extends ServiceProvider
                 ->simple()
                 ->visible(fn () => false);
         });
+
+        CreateRecord::disableCreateAnother();
         
         FilamentView::registerRenderHook(
             \Filament\View\PanelsRenderHook::SIDEBAR_NAV_END,

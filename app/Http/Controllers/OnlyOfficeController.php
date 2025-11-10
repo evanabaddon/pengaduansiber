@@ -85,45 +85,35 @@ class OnlyOfficeController extends Controller
         return view('onlyoffice.editor', compact('config', 'token', 'surat'));
     }
 
-    // public function callback(Request $request, Surat $surat)
-    // {
-    //     Log::info('OnlyOffice callback diterima', $request->all());
-
-    //     $status = $request->input('status');
-    //     $fileUrl = $request->input('url');
-
-    //     // Status 2 = file selesai diedit dan disimpan
-    //     if ($status == 2 && $fileUrl) {
-    //         $contents = file_get_contents($fileUrl);
-
-    //         $localPath = storage_path('app/' . str_replace('storage/', 'public/', $surat->document_url));
-    //         file_put_contents($localPath, $contents);
-
-    //         Log::info('Dokumen berhasil disimpan lokal', ['path' => $localPath]);
-    //     }
-
-    //     return response()->json(['error' => 0]);
-    // }
     public function callback(Request $request, Surat $surat)
-{
-    Log::info('OnlyOffice callback diterima', $request->all());
+    {
+        Log::info('OnlyOffice callback diterima', $request->all());
 
-    $status = $request->input('status');
+        $status = $request->input('status');
 
-    // Gunakan status 2 sebagai tanda dokumen selesai diedit
-    if ($status == 2) {
-        $localPath = storage_path('app/public/docs/' . $surat->kategori_surat . '/' . basename($surat->document_url));
+        // Gunakan status 2 sebagai tanda dokumen selesai diedit
+        if ($status == 2) {
+            // ✅ Update status record agar dianggap sudah disimpan
+            $surat->update(['status' => 'saved']);
 
-        if (file_exists($localPath)) {
-            Log::info('Dokumen selesai diedit, file lokal ada', ['path' => $localPath]);
-        } else {
-            Log::error('File lokal tidak ditemukan meski status 2 diterima', ['path' => $localPath]);
+            $localPath = storage_path('app/public/docs/' . $surat->kategori_surat . '/' . basename($surat->document_url));
+
+            if (file_exists($localPath)) {
+                Log::info('Dokumen selesai diedit, file lokal ada', ['path' => $localPath]);
+            } else {
+                Log::error('File lokal tidak ditemukan meski status 2 diterima', ['path' => $localPath]);
+            }
         }
+
+        return response()->json(['error' => 0]);
     }
 
-    return response()->json(['error' => 0]);
-}
+    public function loading($id)
+    {
+        $surat = Surat::findOrFail($id);
 
-
+        // tampilkan tampilan loading ringan
+        return view('onlyoffice.loading', compact('surat'));
+    }
 
 }

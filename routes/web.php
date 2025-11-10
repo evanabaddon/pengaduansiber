@@ -23,6 +23,7 @@ Route::get('anggaran/{id}/preview', function($id){
 })->name('anggaran.preview');
 Route::get('anggaran/{id}/convert-pdf', [AnggaranEditorController::class, 'convertExcelToPdf'])->name('anggaran.convertPdf');
 Route::get('/onlyoffice/{surat}', [OnlyOfficeController::class, 'edit'])->name('onlyoffice.edit');
+Route::get('/onlyoffice/loading/{id}', [\App\Http\Controllers\OnlyOfficeController::class, 'loading'])->name('onlyoffice.loading');
 Route::get('/onlyoffice/{surat}/download', [OnlyOfficeController::class, 'download'])->name('onlyoffice.download');
 Route::post('/onlyoffice/callback/{surat}', [OnlyOfficeController::class, 'callback'])
     ->name('onlyoffice.callback');

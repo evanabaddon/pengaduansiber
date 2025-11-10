@@ -19,6 +19,7 @@
         "filament/spatie-laravel-settings-plugin": "^3.2",
         "firebase/php-jwt": "^6.11",
         "hasnayeen/themes": "^3.0",
+        "hayderhatem/filament-sub-navigation": "^1.0",
         "joaopaulolndev/filament-edit-profile": "^1.0",
         "kenepa/banner": "^0.0.9",
         "laravel/framework": "^11.9",

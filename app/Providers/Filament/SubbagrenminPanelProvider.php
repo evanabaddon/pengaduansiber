@@ -30,6 +30,7 @@ use App\Filament\Pages\Profile\EditProfile;
 use Illuminate\Session\Middleware\StartSession;
 use Devonab\FilamentEasyFooter\EasyFooterPlugin;
 use Illuminate\Cookie\Middleware\EncryptCookies;
+use App\Filament\Navigation\CustomNavigationItem;
 use Filament\Http\Middleware\AuthenticateSession;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Illuminate\Routing\Middleware\SubstituteBindings;
@@ -44,6 +45,21 @@ use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 
 class SubbagrenminPanelProvider extends PanelProvider
 {
+    protected function toNavigationItem(CustomNavigationItem $custom): NavigationItem
+    {
+        $navItem = NavigationItem::make($custom->label)
+            ->url(empty($custom->subItems) ? $custom->url : '#')
+            ->icon($custom->icon)
+            ->group($custom->group)
+            ->isActiveWhen(fn() => $custom->isActive());
+
+        if (!empty($custom->subItems)) {
+            $navItem->badge('▼');
+        }
+
+        return $navItem;
+    }
+
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -57,16 +73,26 @@ class SubbagrenminPanelProvider extends PanelProvider
                 'primary' => '#1e2754', 
             ])
             ->navigationItems([
-                // ---------------- Urkeu ----------------
-                NavigationItem::make('Anggaran')
-                    ->url('/subbagrenmin/anggaran')
-                    ->group('Urkeu'),
-                
+                // ---------------- Urren ----------------
                 NavigationItem::make('Persuratan')
-                    ->url(url('/subbagrenmin/surats?menu=urkeu'))
+                    ->url(url('/subbagrenmin/surats?menu=urren'))
                     ->icon('heroicon-o-document-text')
-                    ->group('Urkeu')
-                    ->isActiveWhen(fn () => request('menu') === 'urkeu'),
+                    ->group('Urren')
+                    ->childItems([
+                        NavigationItem::make('Naskah Dinas')
+                            ->url(url('/subbagrenmin/surats?menu=urren&jenis_dokumen=Naskah Dinas'))
+                            ->icon('heroicon-o-document-text')
+                            // ->group('Urmintu')
+                            ->parentItem('Persuratan')
+                            ->isActiveWhen(fn () => 
+                                request('menu') === 'urren' &&
+                                request('jenis_dokumen') === 'Naskah Dinas'
+                            ),
+                    ])
+                    ->isActiveWhen(fn () => request('menu') === 'urren'),
+                   
+                
+                  
 
                 // ---------------- Urmintu ----------------
                 NavigationItem::make('Personel')
@@ -86,14 +112,35 @@ class SubbagrenminPanelProvider extends PanelProvider
                     ->url(url('/subbagrenmin/surats?menu=urmintu'))
                     ->icon('heroicon-o-document-text')
                     ->group('Urmintu')
+                    ->childItems([
+                        NavigationItem::make('Naskah Dinas')
+                            ->url(url('/subbagrenmin/surats?menu=urmintu&jenis_dokumen=naskah_dinas'))
+                            ->icon('heroicon-o-document-text')
+                            // ->group('Urmintu')
+                            ->parentItem('Persuratan')
+                            ->isActiveWhen(fn () => request('menu') === 'urmintu'),
+                    ])
                     ->isActiveWhen(fn () => request('menu') === 'urmintu'),
 
-                // ---------------- Urren ----------------
+                     // ---------------- Urkeu ----------------
+                NavigationItem::make('Anggaran')
+                    ->url('/subbagrenmin/anggaran')
+                    ->group('Urkeu'),
+            
                 NavigationItem::make('Persuratan')
-                    ->url(url('/subbagrenmin/surats?menu=urren'))
+                    ->url(url('/subbagrenmin/surats?menu=urkeu'))
                     ->icon('heroicon-o-document-text')
-                    ->group('Urren')
-                    ->isActiveWhen(fn () => request('menu') === 'urren'),
+                    ->group('Urkeu')
+                    ->childItems([
+                        NavigationItem::make('Naskah Dinas')
+                            ->url(url('/subbagrenmin/surats?menu=urkeu&jenis_dokumen=naskah_dinas'))
+                            ->icon('heroicon-o-document-text')
+                            // ->group('urkeu')
+                            ->parentItem('Persuratan')
+                            ->isActiveWhen(fn () => request('menu') === 'urkeu'),
+                    ])
+                    ->isActiveWhen(fn () => request('menu') === 'urkeu'),
+                
             ])
             ->login()
             ->homeUrl('/subbagrenmin')
@@ -140,10 +187,11 @@ class SubbagrenminPanelProvider extends PanelProvider
                         return 'Hai ...';
                     }),
                 ])
+                
             ->renderHook(
                 // custom footer
                 PanelsRenderHook::FOOTER,
-                fn () => view('components.filament.auto-save-scripts')
+                fn () => view('components.filament.auto-save-scripts'),
             )
             ->renderHook(PanelsRenderHook::SIDEBAR_NAV_END, function () {
                 $currentPanel = Filament::getCurrentPanel()->getId();
@@ -174,7 +222,6 @@ class SubbagrenminPanelProvider extends PanelProvider
 
                 return '';
             })
-            
             ->assets([
                 Js::make('highcharts', 'https://code.highcharts.com/highcharts.js'),
                 Js::make('highcharts-map', 'https://code.highcharts.com/maps/modules/map.js'),
@@ -215,7 +262,10 @@ class SubbagrenminPanelProvider extends PanelProvider
                 Css::make(
                     'filament-custom',
                     app()->environment('local') ? secure_asset('css/custom.css') : asset('css/custom.css')
-                )
+                ),
+
+                Css::make('custom-sidebar', asset('css/custom-sidebar.css')),
+                Js::make('custom-sidebar', asset('js/custom-sidebar.js')),
                 
             ])
             ->middleware([
@@ -233,4 +283,6 @@ class SubbagrenminPanelProvider extends PanelProvider
                 Authenticate::class,
             ]);
     }
+
+    
 }

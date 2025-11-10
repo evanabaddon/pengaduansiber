@@ -1,0 +1,128 @@
+/* Filament Sub Navigation Styles */
+/* Version: 1.0.0 */
+/* Provides styling enhancements for the sub-navigation dropdowns */
+
+/* Ensure navigation items can contain positioned dropdowns */
+.fi-sidebar-item {
+    position: relative !important;
+}
+
+/* Badge styling for dropdown indicators */
+.fi-sidebar-item .fi-badge {
+    transition: transform 0.2s ease;
+    cursor: pointer;
+}
+
+/* Rotate badge on hover to indicate interactivity */
+.fi-sidebar-item:hover .fi-badge {
+    transform: rotate(180deg);
+}
+
+/* Base dropdown styles (enhanced by JavaScript) */
+.sub-nav-dropdown {
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease !important;
+    pointer-events: auto;
+}
+
+/* Enhanced focus styles for accessibility */
+.sub-nav-dropdown a:focus {
+    outline: 2px solid rgb(59, 130, 246);
+    outline-offset: -2px;
+    border-radius: 4px;
+}
+
+/* Keyboard navigation support */
+.sub-nav-dropdown a:focus-visible {
+    outline: 2px solid rgb(59, 130, 246);
+    outline-offset: -2px;
+}
+
+/* Print styles - hide dropdowns when printing */
+@media print {
+    .sub-nav-dropdown {
+        display: none !important;
+    }
+    
+    .fi-badge {
+        display: none !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .sub-nav-dropdown {
+        border-width: 2px !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5) !important;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .sub-nav-dropdown,
+    .fi-badge {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .sub-nav-dropdown {
+        min-width: 180px !important;
+        max-width: 250px !important;
+        left: -10px !important;
+        right: -10px !important;
+    }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .sub-nav-dropdown {
+        min-width: 200px !important;
+        max-width: 280px !important;
+    }
+}
+
+/* Large screen optimizations */
+@media (min-width: 1200px) {
+    .sub-nav-dropdown {
+        min-width: 220px !important;
+        max-width: 320px !important;
+    }
+}
+
+/* Dark mode specific enhancements (when needed) */
+.dark .sub-nav-dropdown {
+    backdrop-filter: blur(8px);
+}
+
+/* Light mode specific enhancements */
+:not(.dark) .sub-nav-dropdown {
+    backdrop-filter: blur(4px);
+}
+
+/* Loading state styles */
+.sub-nav-dropdown[data-loading="true"] {
+    opacity: 0.6 !important;
+    pointer-events: none !important;
+}
+
+/* Error state styles */
+.sub-nav-dropdown[data-error="true"] {
+    border-color: rgb(239, 68, 68) !important;
+}
+
+/* Success/active state styles */
+.sub-nav-dropdown a[aria-current="page"] {
+    font-weight: 600 !important;
+}
+
+/* Ensure dropdowns don't interfere with scrollbars */
+.fi-sidebar {
+    overflow: visible !important;
+}
+
+/* Z-index management */
+.sub-nav-dropdown {
+    z-index: 1000 !important;
+} 

@@ -21,6 +21,10 @@ class Surat extends Model
         'subdit_id',
         'unit_id',
         'penyidik_id',
+        'panel',
+        'satker',
+        'nama_dokumen',
+        'status'
     ];
 
     /**

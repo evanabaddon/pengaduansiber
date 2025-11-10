@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1bf0fafae2c80340ccc6650aa1126dd3",
+    "content-hash": "4f2269c0f3024eb7b7a8fde2583a6b28",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -3077,6 +3077,73 @@
                 }
             ],
             "time": "2025-02-27T05:00:18+00:00"
+        },
+        {
+            "name": "hayderhatem/filament-sub-navigation",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/HayderHatem/filament-sub-navigation.git",
+                "reference": "57196decc1160d40501dc6945cd75daff8cbff6c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/HayderHatem/filament-sub-navigation/zipball/57196decc1160d40501dc6945cd75daff8cbff6c",
+                "reference": "57196decc1160d40501dc6945cd75daff8cbff6c",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^3.0",
+                "illuminate/contracts": "^10.0|^11.0",
+                "php": "^8.1",
+                "spatie/laravel-package-tools": "^1.15.0"
+            },
+            "require-dev": {
+                "nunomaduro/collision": "^7.9|^8.0",
+                "orchestra/testbench": "^8.0|^9.0",
+                "pestphp/pest": "^2.1",
+                "pestphp/pest-plugin-arch": "^2.0",
+                "pestphp/pest-plugin-laravel": "^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "HayderHatem\\FilamentSubNavigation\\FilamentSubNavigationServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "HayderHatem\\FilamentSubNavigation\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Hayder Hatem",
+                    "email": "hayder.hatem@example.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Add hover-based sub-navigation to Filament navigation items using badges",
+            "homepage": "https://github.com/hayderhatem/filament-sub-navigation",
+            "keywords": [
+                "badge",
+                "filament",
+                "hayderhatem",
+                "laravel",
+                "navigation",
+                "sub-navigation"
+            ],
+            "support": {
+                "issues": "https://github.com/HayderHatem/filament-sub-navigation/issues",
+                "source": "https://github.com/HayderHatem/filament-sub-navigation/tree/v1.0.0"
+            },
+            "time": "2025-06-30T07:56:37+00:00"
         },
         {
             "name": "jaybizzle/crawler-detect",
