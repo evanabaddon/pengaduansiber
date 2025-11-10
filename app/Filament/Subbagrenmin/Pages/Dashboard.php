@@ -1,11 +1,15 @@
 <?php
- 
-namespace App\Filament\Pages;
- 
-class Dashboard extends \Filament\Pages\Dashboard
+
+namespace App\Filament\Subbagrenmin\Pages;
+
+use Filament\Pages\Dashboard as BaseDashboard;
+use Illuminate\Support\Str;
+
+class Dashboard extends BaseDashboard
 {
-    
-    public function getTitle(): string
+    protected static ?string $navigationIcon = 'heroicon-o-home';
+
+    public  function getTitle(): string
     {
         // Ambil segmen pertama setelah domain
         $segment = request()->segment(1); // contoh: 'subbagrenmin'

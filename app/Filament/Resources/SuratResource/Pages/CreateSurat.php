@@ -13,7 +13,7 @@ class CreateSurat extends CreateRecord
 {
     protected static string $resource = SuratResource::class;
 
-    protected static ?string $title = 'Buat Naskah Dinas';
+    protected static ?string $title = 'Buat Surat';
 
     protected function getRedirectUrl(): string
     {

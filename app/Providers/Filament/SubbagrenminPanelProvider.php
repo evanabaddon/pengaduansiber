@@ -31,6 +31,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Devonab\FilamentEasyFooter\EasyFooterPlugin;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use App\Filament\Navigation\CustomNavigationItem;
+use App\Filament\Subbagrenmin\Pages\Dashboard as PagesDashboard;
 use Filament\Http\Middleware\AuthenticateSession;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Illuminate\Routing\Middleware\SubstituteBindings;
@@ -73,9 +74,11 @@ class SubbagrenminPanelProvider extends PanelProvider
                 'primary' => '#1e2754', 
             ])
             ->navigationItems([
+                // TITLE
+                NavigationItem::make('Subbagrenmin')->url('/subbagrenmin'),
                 // ---------------- Urren ----------------
                 NavigationItem::make('Persuratan')
-                    ->url(url('/subbagrenmin/surats?menu=urren'))
+                    ->url(url('/subbagrenmin/surats?menu=urren&jenis_dokumen=Naskah Dinas'))
                     ->icon('heroicon-o-document-text')
                     ->group('Urren')
                     ->childItems([
@@ -109,7 +112,7 @@ class SubbagrenminPanelProvider extends PanelProvider
                 //     ->isActiveWhen(fn() => request()->is('subbagrenmin/surat-masuks')),
 
                 NavigationItem::make('Persuratan')
-                    ->url(url('/subbagrenmin/surats?menu=urmintu'))
+                    ->url(url('/subbagrenmin/surats?menu=urmintu&jenis_dokumen=Naskah Dinas'))
                     ->icon('heroicon-o-document-text')
                     ->group('Urmintu')
                     ->childItems([
@@ -128,7 +131,7 @@ class SubbagrenminPanelProvider extends PanelProvider
                     ->group('Urkeu'),
             
                 NavigationItem::make('Persuratan')
-                    ->url(url('/subbagrenmin/surats?menu=urkeu'))
+                    ->url(url('/subbagrenmin/surats?menu=urkeu&jenis_dokumen=Naskah Dinas'))
                     ->icon('heroicon-o-document-text')
                     ->group('Urkeu')
                     ->childItems([
@@ -148,7 +151,8 @@ class SubbagrenminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Subbagrenmin/Pages'), for: 'App\\Filament\\Subbagrenmin\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                PagesDashboard::class,
+                // Pages\Dashboard::class,
                 EditProfile::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Subbagrenmin/Widgets'), for: 'App\\Filament\\Subbagrenmin\\Widgets')
