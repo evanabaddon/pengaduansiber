@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Bagwassidik\Pages\Dashboard;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
@@ -59,7 +60,7 @@ class BagwassidikPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Bagwassidik/Pages'), for: 'App\\Filament\\Bagwassidik\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                Dashboard::class,
                 EditProfile::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Bagwassidik/Widgets'), for: 'App\\Filament\\Bagwassidik\\Widgets')

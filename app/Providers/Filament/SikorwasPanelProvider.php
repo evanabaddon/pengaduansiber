@@ -10,7 +10,6 @@ use Filament\Facades\Filament;
 use Filament\Support\Assets\Js;
 use Kenepa\Banner\BannerPlugin;
 use Filament\Support\Assets\Css;
-use App\Filament\Pages\Dashboard;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use Hasnayeen\Themes\ThemesPlugin;
@@ -23,6 +22,7 @@ use Filament\Widgets\FilamentInfoWidget;
 use Orion\FilamentGreeter\GreeterPlugin;
 use Filament\Http\Middleware\Authenticate;
 use App\Filament\Pages\Profile\EditProfile;
+use App\Filament\Sikorwas\Pages\Dashboard;
 use Illuminate\Session\Middleware\StartSession;
 use Devonab\FilamentEasyFooter\EasyFooterPlugin;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -59,7 +59,7 @@ class SikorwasPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Sikorwas/Pages'), for: 'App\\Filament\\Sikorwas\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                Dashboard::class,
                 EditProfile::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Sikorwas/Widgets'), for: 'App\\Filament\\Sikorwas\\Widgets')

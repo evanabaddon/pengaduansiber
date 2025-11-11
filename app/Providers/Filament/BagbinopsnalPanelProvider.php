@@ -2,11 +2,11 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Bagbinopsnal\Pages\Dashboard;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
 use Filament\PanelProvider;
-use Filament\Pages\Dashboard;
 use Filament\Facades\Filament;
 use Filament\Pages\Auth\Login;
 use Filament\Support\Assets\Js;

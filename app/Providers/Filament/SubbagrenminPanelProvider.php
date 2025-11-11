@@ -75,7 +75,7 @@ class SubbagrenminPanelProvider extends PanelProvider
             ])
             ->navigationItems([
                 // TITLE
-                NavigationItem::make('Subbagrenmin')->url('/subbagrenmin'),
+                NavigationItem::make('Subbagrenmin')->url('/subbagrenmin')->icon('heroicon-o-check-circle'),
                 // ---------------- Urren ----------------
                 NavigationItem::make('Persuratan')
                     ->url(url('/subbagrenmin/surats?menu=urren&jenis_dokumen=Naskah Dinas'))
@@ -151,8 +151,8 @@ class SubbagrenminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Subbagrenmin/Pages'), for: 'App\\Filament\\Subbagrenmin\\Pages')
             ->pages([
-                PagesDashboard::class,
-                // Pages\Dashboard::class,
+                // PagesDashboard::class,
+                Dashboard::class,
                 EditProfile::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Subbagrenmin/Widgets'), for: 'App\\Filament\\Subbagrenmin\\Widgets')

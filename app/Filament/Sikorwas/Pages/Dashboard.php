@@ -1,13 +1,15 @@
 <?php
- 
-namespace App\Filament\Pages;
 
+namespace App\Filament\Sikorwas\Pages;
+
+use Filament\Pages\Dashboard as BaseDashboard;
 use Illuminate\Support\Str;
- 
-class Dashboard extends \Filament\Pages\Dashboard
+
+class Dashboard extends BaseDashboard
 {
-    
-    public function getTitle(): string
+    protected static ?string $navigationIcon = 'heroicon-o-home';
+
+    public  function getTitle(): string
     {
         // Ambil segmen pertama setelah domain
         $segment = request()->segment(1); // contoh: 'subbagrenmin'
