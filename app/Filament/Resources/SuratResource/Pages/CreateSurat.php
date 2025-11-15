@@ -6,18 +6,15 @@ use Filament\Actions;
 use App\Helpers\TemplateResolver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
-use App\Filament\Resources\SuratResource;
 use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Resources\SuratResource;
 
 class CreateSurat extends CreateRecord
 {
     protected static string $resource = SuratResource::class;
 
-    // protected static ?string $title = 'Buat Surat';
-
     public static function getLabel(): string
     {
-        // session sebagai fallback untuk modal
         $jenis = request()->query('jenis_dokumen') ?? session('surat_jenis_dokumen');
         return $jenis ? urldecode($jenis) : 'Persuratan';
     }
@@ -31,23 +28,48 @@ class CreateSurat extends CreateRecord
         return $this->previousUrl ?? static::getResource()::getUrl('index');
     }
 
+    // OVERRIDE BUKA NEW TAB
+    protected function getCreatedNotificationMessage(): ?string
+    {
+        return null; 
+    }
+
+    // OVERRIDE: Redirect dengan JavaScript untuk buka new tab
+    protected function afterCreate(): void
+    {
+        if ($this->record) {
+            $editorUrl = route('onlyoffice.loading', ['id' => $this->record->id]);
+            
+            // JavaScript untuk buka new tab
+            $this->js(<<<JS
+                setTimeout(() => {
+                    window.open('{$editorUrl}', '_blank');
+                    
+                    // Redirect kembali ke halaman list setelah buka editor
+                    const listUrl = '{$this->getResource()::getUrl('index')}?' + new URLSearchParams({
+                        menu: '{$this->record->satker}',
+                        jenis_dokumen: '{$this->record->jenis_dokumen}'
+                    });
+                    window.location.href = listUrl;
+                }, 100);
+            JS);
+        }
+    }
+
     public function mount(): void
     {
         parent::mount();
 
-        // Ambil parameter dari URL
         $jenisDokumen = request('jenis_dokumen');
         $menu = request('menu');
         $panel = request()->segment(1);
 
-        // Pastikan panel & satker selalu terisi
         $this->form->fill([
             'panel' => request()->segment(1) ?? null,
             'satker' => request('menu') ?? null,
             'jenis_dokumen' => $jenisDokumen ?? null,
         ]);
 
-        // Jika ada jenis_dokumen dari URL, set template otomatis
         if ($jenisDokumen) {
             $this->data['jenis_dokumen'] = $jenisDokumen;
         }
@@ -55,34 +77,27 @@ class CreateSurat extends CreateRecord
 
     public function mutateFormDataBeforeCreate(array $data): array
     {
-         // pastikan selalu ada panel & satker
         $data['panel'] = $data['panel'] ?? request('panel');
         $data['satker'] = $data['satker'] ?? request('menu');
         $data['jenis_dokumen'] = $data['jenis_dokumen'] ?? request('jenis_dokumen');
 
-        // dd($data);
+        // ✅ AUTO SET USER ID
+        $data['user_id'] = auth()->id();
 
-        // gunakan pilihan user jika ada
         if (!empty($data['template_version'])) {
             $data['template_path'] = "NASKAH DINAS/1. SURAT PERINTAH/" . $data['template_version'];
         } else {
-            // fallback otomatis
             $data['template_path'] = TemplateResolver::resolve(
-                $data['jenis_dokumen'] ?? 'naskah_dinas', // Default ke naskah_dinas
+                $data['jenis_dokumen'] ?? 'naskah_dinas',
                 $data['kategori_surat'],
                 $data['pejabat_penerbit']
             );
         }
 
-        /**
-         * 💾 Buat nama file otomatis berdasarkan nama dokumen user
-         * contoh: "Surat_Penugasan_1731246072.docx"
-         */
         $baseName = str_replace(' ', '_', $data['nama_dokumen']);
         $timestamp = now()->format('Ymd_His');
         $data['nama_dokumen'] = "{$baseName}_{$timestamp}.docx";
 
-        // Tambahkan status awal
         $data['status'] = 'draft';
 
         return $data;
@@ -91,11 +106,7 @@ class CreateSurat extends CreateRecord
     protected function handleRecordCreation(array $data): Model
     {
         $record = static::getModel()::create($data);
-
-        // 📄 Simpan file template ke lokasi sementara
         Storage::copy("templates/{$record->template_path}", "drafts/{$record->nama_dokumen}");
-
         return $record;
     }
-
 }

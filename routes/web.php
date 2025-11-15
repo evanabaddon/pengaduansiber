@@ -27,3 +27,6 @@ Route::get('/onlyoffice/loading/{id}', [\App\Http\Controllers\OnlyOfficeControll
 Route::get('/onlyoffice/{surat}/download', [OnlyOfficeController::class, 'download'])->name('onlyoffice.download');
 Route::post('/onlyoffice/callback/{surat}', [OnlyOfficeController::class, 'callback'])
     ->name('onlyoffice.callback');
+
+    Route::get('/onlyoffice/{surat}/close', [OnlyOfficeController::class, 'close'])
+    ->name('onlyoffice.close');

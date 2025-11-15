@@ -35,6 +35,37 @@ class SuratResource extends Resource
         return $jenis ? urldecode($jenis) : 'Persuratan';
     }
 
+    // OVERRIDE BREADCRUMB
+    public static function getBreadcrumb(): string
+    {
+        $menu = request('menu') ?? session('surat_menu');
+        $jenisDokumen = request('jenis_dokumen') ?? session('surat_jenis_dokumen');
+        
+        if ($menu && $jenisDokumen) {
+            // Format text dengan kapital yang benar
+            $formattedMenu = static::formatMenuText($menu);
+            return $formattedMenu;
+        }
+        
+        return static::getLabel();
+    }
+
+    // METHOD UNTUK FORMAT TEXT MENU (STATIC)
+    private static function formatMenuText(string $menu): string
+    {
+        $menuFormats = [
+            'urkeu' => 'Urkeu',
+            'urmintu' => 'Urmintu', 
+            'urren' => 'Urren',
+            'subbagrenmin' => 'Subbagrenmin',
+            'sikorwas' => 'Sikorwas',
+            'bagwassidik' => 'Bagwassidik',
+            'bagbinopsnal' => 'Bagbinopsnal',
+        ];
+        
+        return $menuFormats[$menu] ?? ucfirst($menu);
+    }
+
     public static function shouldRegisterNavigation(): bool
     {
         $panelId = Filament::getCurrentPanel()->getId();
@@ -311,6 +342,11 @@ class SuratResource extends Resource
         $type = request('type') ?? session('surat_type');
         $subtype = request('subtype') ?? session('surat_subtype');
 
+        // ✅ FILTER BERDASARKAN USER LOGIN, KECUALI SUPER_ADMIN
+        if (!auth()->user()->hasRole('super_admin')) {
+            $query->where('user_id', auth()->id());
+        }
+
         return $query
             ->when($menu, fn($q, $menu) => $q->where('satker', $menu))
             ->when($jenisDokumen, fn($q) => $q->where('jenis_dokumen', urldecode($jenisDokumen)))
@@ -328,6 +364,5 @@ class SuratResource extends Resource
                 $q->where('pejabat_penerbit', $mappedSubtype);
             });
     }
-
 
 }

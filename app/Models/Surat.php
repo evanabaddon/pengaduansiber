@@ -24,11 +24,20 @@ class Surat extends Model
         'panel',
         'satker',
         'nama_dokumen',
-        'status'
+        'status',
+        'user_id'
     ];
 
     /**
-     * 🔗 Relasi ke tabel lain
+     * Relasi ke user yang membuat surat
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Relasi ke tabel lain
      */
     public function subdit(): BelongsTo
     {
@@ -46,7 +55,7 @@ class Surat extends Model
     }
 
     /**
-     * 🧩 Accessor untuk template_path (jika perlu otomatis)
+     * Accessor untuk template_path
      */
     public function getTemplateFullPathAttribute(): ?string
     {
@@ -58,7 +67,7 @@ class Surat extends Model
     }
 
     /**
-     * 🧩 Contoh helper untuk generate path otomatis (bisa dipakai nanti di form)
+     *  helper untuk generate path otomatis (bisa dipakai nanti di form)
      */
     public static function generateTemplatePath($kategori, $pejabat, $opsi = null)
     {

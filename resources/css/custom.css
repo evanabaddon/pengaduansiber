@@ -32,7 +32,7 @@
 
 /* Styling untuk icons */
 .fi-sidebar-item-icon {
-    color: #9ca3af;
+    color : #9ca3af !important;
     transition: color 0.2s ease-in-out;
 }
 
@@ -88,4 +88,92 @@
 .fi-sidebar-item-button:disabled .fi-sidebar-item-icon,
 .fi-sidebar-item-button.disabled .fi-sidebar-item-icon {
     color: #9ca3af !important;
+}
+
+/* Active state styling dengan pseudo-element */
+.fi-sidebar-item-button.fi-active {
+    position: relative;
+    color: #111827 !important; /* gray-900 */
+}
+
+.fi-sidebar-item-button.fi-active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -8px; /* sama dengan -mx-2 */
+    right: -8px; /* sama dengan -mx-2 */
+    bottom: 0;
+    background-color: #f3f4f6 !important; /* gray-100 */
+    border-radius: 6px;
+    z-index: -1;
+}
+
+.fi-sidebar-item-button.fi-active .fi-sidebar-item-icon {
+    color: #4b5563 !important; /* gray-600 */
+}
+
+/* Hover state dengan pseudo-element */
+.fi-sidebar-item-button:hover {
+    position: relative;
+    color: #111827 !important; /* gray-900 */
+}
+
+.fi-sidebar-item-button:hover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -8px; /* sama dengan -mx-2 */
+    right: -8px; /* sama dengan -mx-2 */
+    bottom: 0;
+    background-color: #f3f4f6 !important; /* gray-100 */
+    border-radius: 6px;
+    z-index: -1;
+}
+
+.fi-sidebar-item-button:hover .fi-sidebar-item-icon {
+    color: #4b5563 !important; /* gray-600 */
+}
+
+/* Dark mode support */
+.dark .fi-sidebar-item-button.fi-active {
+    color: #f9fafb !important; /* gray-50 */
+}
+
+.dark .fi-sidebar-item-button.fi-active::before {
+    background-color: #374151 !important; /* gray-700 */
+}
+
+.dark .fi-sidebar-item-button.fi-active .fi-sidebar-item-icon {
+    color: #d1d5db !important; /* gray-300 */
+}
+
+.dark .fi-sidebar-item-button:hover {
+    color: #f9fafb !important; /* gray-50 */
+}
+
+.dark .fi-sidebar-item-button:hover::before {
+    background-color: #374151 !important; /* gray-700 */
+}
+
+.dark .fi-sidebar-item-button:hover .fi-sidebar-item-icon {
+    color: #d1d5db !important; /* gray-300 */
+}
+
+/* Pastikan z-index tidak mengganggu */
+.fi-sidebar-item-button {
+    position: relative;
+    z-index: 1;
+}
+
+/* Auto buka submenu jika parent active */
+.fi-sidebar-item-button.fi-active + #urren-persuratan-submenu,
+.fi-sidebar-item-button.fi-active + #urmintu-persuratan-submenu,
+.fi-sidebar-item-button.fi-active + #urkeu-persuratan-submenu {
+    display: block !important;
+}
+
+.fi-sidebar-item-button.fi-active #urren-persuratan-chevron,
+.fi-sidebar-item-button.fi-active #urmintu-persuratan-chevron,
+.fi-sidebar-item-button.fi-active #urkeu-persuratan-chevron {
+    transform: rotate(90deg);
 }

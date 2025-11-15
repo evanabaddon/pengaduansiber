@@ -6,7 +6,6 @@ use Log;
 use App\Models\Surat;
 use Firebase\JWT\JWT;
 use Illuminate\Http\Request;
-use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Storage;
 
 class OnlyOfficeController extends Controller
@@ -47,66 +46,112 @@ class OnlyOfficeController extends Controller
         return $destination;
 
     }
-
     public function edit(Surat $surat)
-    {
-        // Pastikan file surat sudah ada, kalau belum buat dulu
-        $localPath = $this->generateSuratFile($surat);
-        // gunakan URL ngrok publik, bukan asset()
-        $publicUrl = env('APP_PUBLIC_URL') . '/storage/docs/' . $surat->kategori_surat . '/' . basename($localPath);
+{
+    $localPath = $this->generateSuratFile($surat);
+    $publicUrl = env('APP_PUBLIC_URL') . '/storage/docs/' . $surat->kategori_surat . '/' . basename($localPath);
+    $callbackUrl = route('onlyoffice.callback', $surat->id);
 
-        // Buat URL callback ke route lokal Laravel
-        $callbackUrl = route('onlyoffice.callback', $surat->id);
+    // Tentukan return URL berdasarkan panel
+    $returnUrl = url('/admin'); // Default
+    
+    // Deteksi panel dari URL saat ini
+    $currentUrl = request()->fullUrl();
+    if (str_contains($currentUrl, 'subbagrenmin')) {
+        $returnUrl = url('/subbagrenmin');
+    } elseif (str_contains($currentUrl, 'sikorwas')) {
+        $returnUrl = url('/sikorwas');
+    } elseif (str_contains($currentUrl, 'bagwassidik')) {
+        $returnUrl = url('/bagwassidik');
+    } elseif (str_contains($currentUrl, 'bagbinopsnal')) {
+        $returnUrl = url('/bagbinopsnal');
+    }
 
-        $config = [
-            'document' => [
-                'fileType' => 'docx',
-                'key' => md5($surat->id . now()),
-                'title' => "{$surat->kategori_surat} - {$surat->pejabat_penerbit}.docx",
-                'url' => $publicUrl,
-            ],
-            'documentType' => 'word',
-            'editorConfig' => [
-                'callbackUrl' => $callbackUrl, // arahkan ke Laravel sendiri
-                'lang' => 'id',
-                'mode' => 'edit',
-                'customization' => [
-                    'forcesave' => true,
-                    "goback" => [
-                        "url" => Filament::getCurrentPanel()->getUrl(),
-                    ],
+    $config = [
+        'document' => [
+            'fileType' => 'docx',
+            'key' => md5($surat->id . now()),
+            'title' => "{$surat->kategori_surat} - {$surat->pejabat_penerbit}.docx",
+            'url' => $publicUrl,
+        ],
+        'documentType' => 'word',
+        'editorConfig' => [
+            'callbackUrl' => $callbackUrl,
+            'lang' => 'id',
+            'mode' => 'edit',
+            'customization' => [
+                'forcesave' => true,
+                'goback' => [
+                    'url' => $returnUrl,
+                    'blank' => false,
                 ],
+                'autosave' => true,
+                'compactHeader' => false,
+                'compactToolbar' => false,
+                'feedback' => [
+                    'url' => $callbackUrl,
+                    'visible' => true
+                ],
+                // Tambahkan konfigurasi untuk auto-close
+                'plugins' => false,
+                'hideRulers' => true,
             ],
-        ];
+        ],
+    ];
 
-        $secret = env('ONLYOFFICE_JWT_SECRET');
-        $token = JWT::encode($config, $secret, 'HS256');
+    $secret = env('ONLYOFFICE_JWT_SECRET');
+    $token = JWT::encode($config, $secret, 'HS256');
 
-        return view('onlyoffice.editor', compact('config', 'token', 'surat'));
+    return view('onlyoffice.editor', compact('config', 'token', 'surat'));
+}
+
+
+public function close(Surat $surat)
+{
+    $surat->update(['status' => 'saved']);
+    
+    // Ambil return URL dari session atau parameter
+    $returnUrl = session('filament_panel_url', '/admin');
+    
+    if (request()->has('return_url')) {
+        $returnUrl = request('return_url');
     }
 
-    public function callback(Request $request, Surat $surat)
-    {
-        Log::info('OnlyOffice callback diterima', $request->all());
+    return redirect($returnUrl);
+}
 
-        $status = $request->input('status');
+public function callback(Request $request, Surat $surat)
+{
+    Log::info('OnlyOffice callback diterima', $request->all());
 
-        // Gunakan status 2 sebagai tanda dokumen selesai diedit
-        if ($status == 2) {
-            // ✅ Update status record agar dianggap sudah disimpan
-            $surat->update(['status' => 'saved']);
+    $status = $request->input('status');
+    $actions = $request->input('actions', []);
+    
+    Log::info('Callback details:', [
+        'status' => $status,
+        'actions' => $actions,
+        'url' => $request->input('url'),
+        'history' => $request->input('history')
+    ]);
 
-            $localPath = storage_path('app/public/docs/' . $surat->kategori_surat . '/' . basename($surat->document_url));
-
-            if (file_exists($localPath)) {
-                Log::info('Dokumen selesai diedit, file lokal ada', ['path' => $localPath]);
-            } else {
-                Log::error('File lokal tidak ditemukan meski status 2 diterima', ['path' => $localPath]);
-            }
+    // Status yang menandakan dokumen selesai
+    $completedStatuses = [2, 3, 4, 6, 7];
+    
+    if (in_array($status, $completedStatuses)) {
+        $surat->update(['status' => 'saved']);
+        Log::info('Dokumen berhasil disimpan', ['status' => $status]);
+        
+        // Jika status 2, 6, atau 7, berikan response untuk close
+        if (in_array($status, [2, 6, 7])) {
+            return response()->json([
+                'error' => 0,
+                'close' => true // Flag untuk close editor
+            ]);
         }
-
-        return response()->json(['error' => 0]);
     }
+
+    return response()->json(['error' => 0]);
+}
 
     public function loading($id)
     {
