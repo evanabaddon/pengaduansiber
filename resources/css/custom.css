@@ -1,42 +1,91 @@
-/* Style Navigation Group Filament */
-.fi-sidebar .fi-sidebar-group {
-    background-color: #1e2754 !important; /* Warna background */
+/* Custom styling untuk sidebar groups */
+.fi-sidebar-group {
+    background-color: #1e2754 !important;
     border-radius: 8px;
-    padding: 6px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    padding: 4px;
 }
 
-/* Ubah warna text judul group */
-.fi-sidebar .fi-sidebar-group-label {
-    color: #ffffff !important;
-    font-weight: bold;
+.fi-sidebar-group-button {
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
 }
 
-/* Hover efek item di dalam group */
-.fi-sidebar .fi-sidebar-item a:hover {
+.fi-sidebar-group-button:hover {
     background-color: #33407a !important;
-    color: #fff !important;
 }
 
-/* Container dropdown khusus sidebar */
-.sidebar-dropdown .fi-dropdown-trigger button {
-    /* @apply fi-sidebar-group-button; kalau pakai Tailwind, pakai kelas asli */
-    width: 100%; /* penuh sesuai sidebar */
-    padding-left: 0.5rem;  /* sesuaikan px-2 */
-    padding-right: 0.5rem;
-    padding-top: 0.5rem;   /* px-2 py-2 sesuai group */
-    padding-bottom: 0.5rem;
-    border-radius: 0.375rem; /* rounded sesuai group */
+.fi-sidebar-group-label {
+    color: #ffffff !important;
+    font-weight: 600;
 }
 
-/* Panel dropdown */
-.sidebar-dropdown .fi-dropdown-panel {
-    width: 100% !important;  /* samakan lebar dengan trigger */
-    min-width: unset !important; /* override default Filament */
-    left: 0 !important;       /* rapat ke kiri sidebar */
+.fi-sidebar-item-button {
+    transition: all 0.2s ease-in-out;
+    margin: 2px 0;
 }
 
-/* Item dropdown */
-.sidebar-dropdown .fi-dropdown-list-item {
-    /* @apply fi-sidebar-group-item flex items-center gap-x-3 px-2 py-2 w-full text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded; */
+.fi-sidebar-item-button:hover {
+    background-color: #33407a !important;
+    color: #ffffff !important;
+}
+
+/* Styling untuk icons */
+.fi-sidebar-item-icon {
+    color: #9ca3af;
+    transition: color 0.2s ease-in-out;
+}
+
+.fi-sidebar-item-button:hover .fi-sidebar-item-icon {
+    color: #ffffff;
+}
+
+/* Icon button styling */
+.fi-icon-btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.fi-icon-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Custom styling untuk sub menu */
+.fi-sidebar-item {
+    position: relative;
+    padding-left: 32px;
+}
+
+#urren-persuratan-submenu,
+#urmintu-persuratan-submenu,
+#urkeu-persuratan-submenu {
+    transition: all 0.3s ease-in-out;
+}
+
+.rotate-90 {
+    transform: rotate(90deg);
+}
+
+/* Styling untuk child items tanpa icon */
+.fi-sidebar-item-button .fi-sidebar-item-label:only-child {
+    margin-left: 0;
+}
+
+/* Border untuk hierarchy visual */
+.border-l {
+    border-left-width: 1px;
+}
+
+/* Custom styling untuk disabled items */
+.fi-sidebar-item-button:disabled,
+.fi-sidebar-item-button.disabled {
+    background-color: transparent !important;
+    color: #9ca3af !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    opacity: 0.5 !important;
+}
+
+.fi-sidebar-item-button:disabled .fi-sidebar-item-icon,
+.fi-sidebar-item-button.disabled .fi-sidebar-item-icon {
+    color: #9ca3af !important;
 }

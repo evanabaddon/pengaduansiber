@@ -46,21 +46,6 @@ use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 
 class SubbagrenminPanelProvider extends PanelProvider
 {
-    protected function toNavigationItem(CustomNavigationItem $custom): NavigationItem
-    {
-        $navItem = NavigationItem::make($custom->label)
-            ->url(empty($custom->subItems) ? $custom->url : '#')
-            ->icon($custom->icon)
-            ->group($custom->group)
-            ->isActiveWhen(fn() => $custom->isActive());
-
-        if (!empty($custom->subItems)) {
-            $navItem->badge('▼');
-        }
-
-        return $navItem;
-    }
-
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -73,78 +58,94 @@ class SubbagrenminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => '#1e2754', 
             ])
-            ->navigationItems([
-                // TITLE
-                NavigationItem::make('Subbagrenmin')->url('/subbagrenmin')->icon('heroicon-o-check-circle'),
-                // ---------------- Urren ----------------
-                NavigationItem::make('Persuratan')
-                    ->url(url('/subbagrenmin/surats?menu=urren&jenis_dokumen=Naskah Dinas'))
-                    ->icon('heroicon-o-document-text')
-                    ->group('Urren')
-                    ->childItems([
-                        NavigationItem::make('Naskah Dinas')
-                            ->url(url('/subbagrenmin/surats?menu=urren&jenis_dokumen=Naskah Dinas'))
-                            ->icon('heroicon-o-document-text')
-                            // ->group('Urmintu')
-                            ->parentItem('Persuratan')
-                            ->isActiveWhen(fn () => 
-                                request('menu') === 'urren' &&
-                                request('jenis_dokumen') === 'Naskah Dinas'
-                            ),
-                    ])
-                    ->isActiveWhen(fn () => request('menu') === 'urren'),
+            // ->navigationItems([
+            //     // TITLE
+            //     NavigationItem::make('Subbagrenmin')->url('/subbagrenmin')->icon('heroicon-o-check-circle'),
+            //     // ---------------- Urren ----------------
+            //     NavigationItem::make('Persuratan')
+            //         ->url(url('/subbagrenmin/surats?menu=urren&jenis_dokumen='))
+            //         ->icon('heroicon-o-document-text')
+            //         ->group('Urren')
+            //         ->childItems([
+            //             NavigationItem::make('Naskah Dinas')
+            //                 ->url(url('/subbagrenmin/surats?menu=urren&jenis_dokumen=Naskah Dinas'))
+            //                 ->icon('heroicon-o-document-text')
+            //                 // ->group('Urmintu')
+            //                 ->isActiveWhen(fn () => 
+            //                     request('menu') === 'urren' &&
+            //                     request('jenis_dokumen') === 'Naskah Dinas'
+            //                 ),
+                        
+            //             NavigationItem::make('Minlidik & Minsidik')
+            //                 ->url(url('/subbagrenmin/surats?menu=urren&jenis_dokumen=Minlidik & Minsidik'))
+            //                 ->icon('heroicon-o-document-text')
+            //                 // ->group('Urmintu')
+            //                 ->isActiveWhen(fn () => 
+            //                     request('menu') === 'urren' &&
+            //                     request('jenis_dokumen') === 'Naskah Dinas'
+            //                 ),
+            //         ])
+            //         ->isActiveWhen(fn () => request('menu') === 'urren'),
                    
                 
                   
 
-                // ---------------- Urmintu ----------------
-                NavigationItem::make('Personel')
-                    // ->url('/subbagrenmin/pimpinans')
-                    ->url('/subbagrenmin/personel')
-                    ->icon('heroicon-o-users')
-                    ->group('Urmintu')
-                    ->isActiveWhen(fn() => request()->is('subbagrenmin/personel') || request()->is('subbagrenmin/pimpinans') || request()->is('subbagrenmin/staff')),
+            //     // ---------------- Urmintu ----------------
+            //     NavigationItem::make('Personel')
+            //         // ->url('/subbagrenmin/pimpinans')
+            //         ->url('/subbagrenmin/personel')
+            //         ->icon('heroicon-o-users')
+            //         ->group('Urmintu')
+            //         ->isActiveWhen(fn() => request()->is('subbagrenmin/personel') || request()->is('subbagrenmin/pimpinans') || request()->is('subbagrenmin/staff')),
 
-                // NavigationItem::make('Surat Masuk')
-                //     ->url('/subbagrenmin/surat-masuks')
-                //     ->icon('heroicon-o-document-arrow-down')
-                //     ->group('Urmintu')
-                //     ->isActiveWhen(fn() => request()->is('subbagrenmin/surat-masuks')),
+            //     // NavigationItem::make('Surat Masuk')
+            //     //     ->url('/subbagrenmin/surat-masuks')
+            //     //     ->icon('heroicon-o-document-arrow-down')
+            //     //     ->group('Urmintu')
+            //     //     ->isActiveWhen(fn() => request()->is('subbagrenmin/surat-masuks')),
 
-                NavigationItem::make('Persuratan')
-                    ->url(url('/subbagrenmin/surats?menu=urmintu&jenis_dokumen=Naskah Dinas'))
-                    ->icon('heroicon-o-document-text')
-                    ->group('Urmintu')
-                    ->childItems([
-                        NavigationItem::make('Naskah Dinas')
-                            ->url(url('/subbagrenmin/surats?menu=urmintu&jenis_dokumen=naskah_dinas'))
-                            ->icon('heroicon-o-document-text')
-                            // ->group('Urmintu')
-                            ->parentItem('Persuratan')
-                            ->isActiveWhen(fn () => request('menu') === 'urmintu'),
-                    ])
-                    ->isActiveWhen(fn () => request('menu') === 'urmintu'),
+            //     NavigationItem::make('Persuratan')
+            //         ->url(url('/subbagrenmin/surats?menu=urmintu&jenis_dokumen=Naskah Dinas'))
+            //         ->icon('heroicon-o-document-text')
+            //         ->group('Urmintu')
+            //         ->childItems([
+            //             NavigationItem::make('Naskah Dinas')
+            //                 ->url(url('/subbagrenmin/surats?menu=urmintu&jenis_dokumen=naskah_dinas'))
+            //                 ->icon('heroicon-o-document-text')
+            //                 // ->group('Urmintu')
+            //                 ->parentItem('Persuratan')
+            //                 ->isActiveWhen(fn () => request('menu') === 'urmintu'),
+            //         ])
+            //         ->isActiveWhen(fn () => request('menu') === 'urmintu'),
 
-                     // ---------------- Urkeu ----------------
-                NavigationItem::make('Anggaran')
-                    ->url('/subbagrenmin/anggaran')
-                    ->group('Urkeu'),
+            //          // ---------------- Urkeu ----------------
+            //     NavigationItem::make('Anggaran')
+            //         ->url('/subbagrenmin/anggaran')
+            //         ->group('Urkeu'),
             
-                NavigationItem::make('Persuratan')
-                    ->url(url('/subbagrenmin/surats?menu=urkeu&jenis_dokumen=Naskah Dinas'))
-                    ->icon('heroicon-o-document-text')
-                    ->group('Urkeu')
-                    ->childItems([
-                        NavigationItem::make('Naskah Dinas')
-                            ->url(url('/subbagrenmin/surats?menu=urkeu&jenis_dokumen=naskah_dinas'))
-                            ->icon('heroicon-o-document-text')
-                            // ->group('urkeu')
-                            ->parentItem('Persuratan')
-                            ->isActiveWhen(fn () => request('menu') === 'urkeu'),
-                    ])
-                    ->isActiveWhen(fn () => request('menu') === 'urkeu'),
+            //     NavigationItem::make('Persuratan')
+            //         ->url(url('/subbagrenmin/surats?menu=urkeu&jenis_dokumen=Naskah Dinas'))
+            //         ->icon('heroicon-o-document-text')
+            //         ->group('Urkeu')
+            //         ->childItems([
+            //             NavigationItem::make('Naskah Dinas')
+            //                 ->url(url('/subbagrenmin/surats?menu=urkeu&jenis_dokumen=naskah_dinas'))
+            //                 ->icon('heroicon-o-document-text')
+            //                 // ->group('urkeu')
+            //                 ->parentItem('Persuratan')
+            //                 ->isActiveWhen(fn () => request('menu') === 'urkeu'),
+            //         ])
+            //         ->isActiveWhen(fn () => request('menu') === 'urkeu'),
                 
-            ])
+            // ])
+            ->renderHook(
+                PanelsRenderHook::SIDEBAR_NAV_END,
+                function () {
+                    return view('filament.subbagrenmin.layouts.custom-sidebar');
+                }
+            )
+               
+            ->navigationItems([])      
             ->login()
             ->homeUrl('/subbagrenmin')
             ->discoverResources(in: app_path('Filament/Subbagrenmin/Resources'), for: 'App\\Filament\\Subbagrenmin\\Resources')
@@ -263,13 +264,11 @@ class SubbagrenminPanelProvider extends PanelProvider
                 Css::make('highcharts-custom', app()->environment('local') ? secure_asset('css/highcharts-custom.css') : asset('css/highcharts-custom.css')),
 
                 // Custom Style
-                Css::make(
-                    'filament-custom',
-                    app()->environment('local') ? secure_asset('css/custom.css') : asset('css/custom.css')
-                ),
+                Css::make('filament-custom',app()->environment('local') ? secure_asset('css/custom.css') : asset('css/custom.css'),),
+                Css::make('filament-sidebar', app()->environment('local') ? secure_asset('css/custom-sidebar.css') : asset('css/custom-sidebar.css')),
 
-                Css::make('custom-sidebar', asset('css/custom-sidebar.css')),
-                Js::make('custom-sidebar', asset('js/custom-sidebar.js')),
+                // Css::make('custom-sidebar', asset('css/custom-sidebar.css')),
+                // Js::make('custom-sidebar', asset('js/custom-sidebar.js')),
                 
             ])
             ->middleware([

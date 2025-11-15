@@ -13,7 +13,14 @@ class CreateSurat extends CreateRecord
 {
     protected static string $resource = SuratResource::class;
 
-    protected static ?string $title = 'Buat Surat';
+    // protected static ?string $title = 'Buat Surat';
+
+    public static function getLabel(): string
+    {
+        // session sebagai fallback untuk modal
+        $jenis = request()->query('jenis_dokumen') ?? session('surat_jenis_dokumen');
+        return $jenis ? urldecode($jenis) : 'Persuratan';
+    }
 
     protected function getRedirectUrl(): string
     {

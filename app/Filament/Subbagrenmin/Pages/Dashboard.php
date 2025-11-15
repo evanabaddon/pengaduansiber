@@ -9,6 +9,8 @@ class Dashboard extends BaseDashboard
 {
     protected static ?string $navigationIcon = 'heroicon-o-home';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public  function getTitle(): string
     {
         // Ambil segmen pertama setelah domain

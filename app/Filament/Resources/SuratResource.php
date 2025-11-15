@@ -14,21 +14,26 @@ use Filament\Forms\Components\Hidden;
 use Filament\Navigation\NavigationItem;
 use Illuminate\Support\Facades\Storage;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
 use App\Filament\Resources\SuratResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\SuratResource\RelationManagers;
-use HayderHatem\FilamentSubNavigation\Concerns\HasBadgeSubNavigation;
 
 class SuratResource extends Resource
 {    
+
     protected static ?string $model = Surat::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $label ="Persuratan";
-
+    public static function getLabel(): string
+    {
+        // session sebagai fallback untuk modal
+        $jenis = request()->query('jenis_dokumen') ?? session('surat_jenis_dokumen');
+        return $jenis ? urldecode($jenis) : 'Persuratan';
+    }
 
     public static function shouldRegisterNavigation(): bool
     {
@@ -61,8 +66,11 @@ class SuratResource extends Resource
                     ->dehydrated(),
 
 
-                Forms\Components\Section::make('Klasifikasi Surat')
+                Forms\Components\Section::make('')
                     ->schema([
+                        Forms\Components\TextInput::make('nama_dokumen')
+                            ->label('Nama Dokumen')
+                            ->required(),
                         // 🧭 LEVEL 1
                         // Forms\Components\Select::make('jenis_dokumen')
                         //     ->label('Jenis Dokumen')
@@ -172,9 +180,7 @@ class SuratResource extends Resource
 
 
 
-                        Forms\Components\TextInput::make('nama_dokumen')
-                            ->label('Nama Dokumen')
-                            ->required(),
+                        
                     ]),
 
                 Forms\Components\Section::make('Template')
@@ -212,7 +218,9 @@ class SuratResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('nama_dokumen')->searchable()->label('Nama Dokumen'),
                 Tables\Columns\TextColumn::make('kategori_surat')->label('Kategori'),
-                Tables\Columns\TextColumn::make('pejabat_penerbit')->label('Pejabat'),
+                Tables\Columns\TextColumn::make('pejabat_penerbit')->label('Pejabat Penerbit'),
+                Tables\Columns\TextColumn::make('created_at')->label('Tanggal Pembuatan')->dateTime(),
+                Tables\Columns\TextColumn::make('updated_at')->label('Tanggal Perubahan')->dateTime(),
             ])
             ->filters([
                 //
@@ -241,22 +249,15 @@ class SuratResource extends Resource
                 })
                 ->requiresConfirmation(false), // set true if you want confirmation
 
-                Tables\Actions\Action::make('delete')
+                Tables\Actions\DeleteAction::make()
                     ->label('Hapus')
-                    ->icon('heroicon-o-trash')
-                    ->color('danger')
-                    ->requiresConfirmation() // require confirmation for delete
                     ->modalHeading('Konfirmasi Hapus')
-                    ->action(function (Surat $record, array $data): void {
-                        // TODO: implement delete logic
-                        // Example options:
-                        $record->delete();
-                        Storage::delete($record->nama_dokumen);
-                        //
-                        // For safety the actual delete is disabled until you implement it:
-                        \Log::warning('TODO: delete action called for Surat id=' . $record->id);
-                        session()->flash('warning', 'Delete action not implemented yet (TODO).');
-                    })->requiresConfirmation(true),
+                    ->modalDescription('Apakah Anda yakin ingin menghapus dokumen ini? Tindakan ini tidak dapat dibatalkan.')
+                    ->successNotification(
+                        Notification::make()
+                            ->success()
+                            ->title('Dokumen berhasil dihapus')
+                    ),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -281,47 +282,6 @@ class SuratResource extends Resource
         ];
     }
 
-    // public static function getEloquentQuery(): Builder
-    // {
-    //     return parent::getEloquentQuery();
-    //         // ->when(request('panel'), fn($q, $panel) => $q->where('panel', $panel))
-    //         // ->when(request('menu'), fn($q, $menu) => $q->where('menu', $menu))
-    //         // ->when(request('submenu'), fn($q, $submenu) => $q->where('submenu', $submenu))
-    //         // ->when(request('type'), fn($q, $type) => $q->where('type', $type));
-    // }
-
-    // public static function getEloquentQuery(): Builder
-    // {
-    //     $query = parent::getEloquentQuery();
-
-    //     $typeMap = [
-    //         'surat_perintah' => 'Surat Perintah',
-    //         'surat_tugas' => 'Surat Tugas',
-    //         'surat_telegram' => 'Surat Telegram',
-    //         'nota_dinas' => 'Nota Dinas',
-    //         'surat' => 'Surat',
-    //         'surat_pengantar' => 'Surat Pengantar',
-    //         'surat_undangan' => 'Surat Undangan',
-    //     ];
-
-    //     $subtypeMap = [
-    //         'kapolda' => 'Kapolda',
-    //         'direktur' => 'Direktur',
-    //         'kasubbagrenmin' => 'Kasubbagrenmin',
-    //         'urkeu' => 'Urkeu',
-    //         'urmintu' => 'Urmintu',
-    //         'urren' => 'Urren',
-    //     ];
-
-    //     return $query
-    //         ->when(request('menu'), fn($q, $menu) => $q->where('satker', $menu))
-    //         ->when(request('type'), fn($q, $type) => 
-    //             $q->where('kategori_surat', $typeMap[$type] ?? $type)
-    //         )
-    //         ->when(request('subtype'), fn($q, $subtype) => 
-    //             $q->where('pejabat_penerbit', $subtypeMap[$subtype] ?? $subtype)
-    //         );
-    // }
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
@@ -345,12 +305,19 @@ class SuratResource extends Resource
             'urren' => 'Urren',
         ];
 
+        // DAPATKAN PARAMETER DARI SESSION JIKA REQUEST KOSONG (SAAT MODAL)
+        $menu = request('menu') ?? session('surat_menu');
+        $jenisDokumen = request('jenis_dokumen') ?? session('surat_jenis_dokumen');
+        $type = request('type') ?? session('surat_type');
+        $subtype = request('subtype') ?? session('surat_subtype');
+
         return $query
-            ->when(request('menu'), fn($q, $menu) => $q->where('satker', $menu))
-            ->when(request('type'), fn($q, $type) => 
+            ->when($menu, fn($q, $menu) => $q->where('satker', $menu))
+            ->when($jenisDokumen, fn($q) => $q->where('jenis_dokumen', urldecode($jenisDokumen)))
+            ->when($type, fn($q, $type) => 
                 $q->where('kategori_surat', $typeMap[$type] ?? $type)
             )
-            ->when(request('subtype'), function ($q, $subtype) use ($subtypeMap) {
+            ->when($subtype, function ($q, $subtype) use ($subtypeMap) {
                 // mapping ka* → Kaur
                 if (str_starts_with($subtype, 'ka') && !isset($subtypeMap[$subtype])) {
                     $mappedSubtype = 'Kaur';

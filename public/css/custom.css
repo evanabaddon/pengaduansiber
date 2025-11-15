@@ -2,13 +2,13 @@
 .fi-sidebar .fi-sidebar-group {
     border-radius: 8px;
     margin-bottom: 10px;
-    padding: 0; /* jangan kasih padding disini */
-    background: transparent !important; /* reset */
+    padding: 0;
+    background: transparent !important;
 }
 
 /* Bungkus grup sidebar */
 .fi-sidebar .fi-sidebar-group-button {
-    background-color: #1e2754 !important; /* sama kayak group bg */
+    background-color: #1e2754 !important;
     color: #ffffff !important;
     border-radius: 8px;
     padding: 6px;
@@ -24,24 +24,32 @@
     padding: 6px 10px;
     display: block;
 }
-.fi-sidebar-item-label  {
-    /* color: #ffffff !important; */
+
+/* PERBAIKAN: Warna hover untuk submenu di tema light */
+.fi-sidebar .fi-sidebar-item-button:hover {
+    background-color: #e5e7eb !important; /* gray-200 untuk light mode */
+    color: #1f2937 !important; /* gray-800 untuk text di light mode */
 }
 
-.fi-sidebar-item-icon {
-    /* color: #ffffff !important; */
+.dark .fi-sidebar .fi-sidebar-item-button:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important; /* dark:hover:bg-white/5 */
+    color: #e5e7eb !important; /* gray-200 untuk text di dark mode */
 }
 
-/* Hover efek item di dalam group */
-.fi-sidebar .fi-sidebar-item a:hover {
-    /* background-color: #33407a !important; */
-    color: #fff !important;
+/* Style untuk submenu items */
+.fi-sidebar .fi-sidebar-item-button {
+    transition: all 0.2s ease-in-out;
 }
 
-.fi-sidebar .fi-sidebar-item.fi-active a,
-.fi-sidebar .fi-sidebar-item[data-active="true"] a {
-    /* background-color: #27346f !important;  */
-    color: #ffffff !important;
-    font-weight: bold;
-    border-radius: 6px;
+/* Style untuk item yang disabled */
+.fi-sidebar .fi-sidebar-item-button:disabled,
+.fi-sidebar .fi-sidebar-item-button.cursor-not-allowed {
+    opacity: 0.5;
+    cursor: not-allowed !important;
+    background-color: transparent !important;
+}
+
+/* Hover efek untuk group collapse button */
+.fi-sidebar .fi-sidebar-group-collapse-button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
 }

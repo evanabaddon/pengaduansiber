@@ -46,7 +46,7 @@ class AnggaranResource extends Resource
         $panelId = Filament::getCurrentPanel()->getId();
 
         return in_array($panelId, [
-            'subbagrenmin',
+            // 'subbagrenmin',
             'sikorwas',
             'bagwassidik',
             'bagbinopsnal'
